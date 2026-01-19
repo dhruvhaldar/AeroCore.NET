@@ -10,29 +10,55 @@ namespace AeroCore.Shared.Helpers
         {
             if (string.IsNullOrWhiteSpace(line)) return null;
 
-            // Expected CSV format: Altitude,Velocity,Pitch,Roll
+            return Parse(line.AsSpan());
+        }
+
+        /// <summary>
+        /// Parses telemetry data using ReadOnlySpan to avoid string allocations.
+        /// </summary>
+        private static TelemetryPacket? Parse(ReadOnlySpan<char> span)
+        {
             try
             {
-                var parts = line.Split(',');
-                if (parts.Length >= 4)
+                // Parse Altitude
+                int idx = span.IndexOf(',');
+                if (idx == -1) return null;
+                double altitude = double.Parse(span.Slice(0, idx), CultureInfo.InvariantCulture);
+                span = span.Slice(idx + 1);
+
+                // Parse Velocity
+                idx = span.IndexOf(',');
+                if (idx == -1) return null;
+                double velocity = double.Parse(span.Slice(0, idx), CultureInfo.InvariantCulture);
+                span = span.Slice(idx + 1);
+
+                // Parse Pitch
+                idx = span.IndexOf(',');
+                if (idx == -1) return null;
+                double pitch = double.Parse(span.Slice(0, idx), CultureInfo.InvariantCulture);
+                span = span.Slice(idx + 1);
+
+                // Parse Roll
+                // Take until next comma or end of string.
+                // This handles cases with or without trailing extra fields.
+                idx = span.IndexOf(',');
+                ReadOnlySpan<char> rollSpan = (idx == -1) ? span : span.Slice(0, idx);
+                double roll = double.Parse(rollSpan, CultureInfo.InvariantCulture);
+
+                return new TelemetryPacket
                 {
-                    return new TelemetryPacket
-                    {
-                        Altitude = double.Parse(parts[0], CultureInfo.InvariantCulture),
-                        Velocity = double.Parse(parts[1], CultureInfo.InvariantCulture),
-                        Pitch = double.Parse(parts[2], CultureInfo.InvariantCulture),
-                        Roll = double.Parse(parts[3], CultureInfo.InvariantCulture),
-                        Timestamp = DateTime.UtcNow
-                    };
-                }
+                    Altitude = altitude,
+                    Velocity = velocity,
+                    Pitch = pitch,
+                    Roll = roll,
+                    Timestamp = DateTime.UtcNow
+                };
             }
             catch
             {
-                // In production code we might want to log this failure, but for a pure helper 
-                // returning null is often sufficient or we could let exception bubble up.
-                // Keeping it simple as per original design: swallow and return null.
+                // In case of parsing error (e.g. invalid double format), return null.
+                return null;
             }
-            return null;
         }
     }
 }
