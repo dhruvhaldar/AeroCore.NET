@@ -2,6 +2,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using AeroCore.Shared.Interfaces;
+using AeroCore.Shared.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -34,8 +35,7 @@ namespace AeroCore.GroundStation
                 await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
                 {
                     // Visualize the data
-                    // In a real app this might update a UI or push to a database
-                    Console.WriteLine($"[GCS] T+{packet.Timestamp:HH:mm:ss.fff} | ALT: {packet.Altitude,8:F2} | VEL: {packet.Velocity,6:F1} | PIT: {packet.Pitch,5:F2} | ROL: {packet.Roll,5:F2}");
+                    PrintTelemetry(packet);
                 }
             }
             catch (OperationCanceledException)
@@ -46,6 +46,45 @@ namespace AeroCore.GroundStation
             {
                 _logger.LogError(ex, "Ground Station Error");
             }
+        }
+
+        private void PrintTelemetry(TelemetryPacket packet)
+        {
+            // Timestamp
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write($"[GCS] T+{packet.Timestamp:HH:mm:ss.fff} | ");
+
+            // Altitude
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("ALT: ");
+            Console.ForegroundColor = packet.Altitude < 0 ? ConsoleColor.Red : ConsoleColor.White;
+            Console.Write($"{packet.Altitude,8:F2}");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" | ");
+
+            // Velocity
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("VEL: ");
+            Console.ForegroundColor = packet.Velocity > 100 ? ConsoleColor.Yellow : ConsoleColor.White;
+            Console.Write($"{packet.Velocity,6:F1}");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" | ");
+
+            // Pitch
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("PIT: ");
+            Console.ForegroundColor = Math.Abs(packet.Pitch) > 45 ? ConsoleColor.Red : ConsoleColor.White;
+            Console.Write($"{packet.Pitch,5:F2}");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" | ");
+
+            // Roll
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("ROL: ");
+            Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.White;
+            Console.WriteLine($"{packet.Roll,5:F2}");
+
+            Console.ResetColor();
         }
     }
 }
