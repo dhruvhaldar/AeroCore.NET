@@ -16,12 +16,16 @@ namespace AeroCore.Shared.Helpers
                 return string.Empty;
             }
 
-            // Replace CR and LF with underscores or escaped versions.
-            // Using a simple regex to replace control characters.
-            // \p{C} matches invisible control characters.
+            // Defense in Depth: Truncate long inputs to prevent DoS (disk exhaustion/memory)
+            const int MaxLogLength = 500;
+            if (input.Length > MaxLogLength)
+            {
+                input = input.Substring(0, MaxLogLength);
+            }
 
-            // For log injection, mainly newlines are the problem.
-            return Regex.Replace(input, @"[\r\n]+", "_");
+            // Replace all control characters (including newlines, tabs, bells, etc.) with underscore
+            // \p{C} matches invisible control characters.
+            return Regex.Replace(input, @"\p{C}+", "_");
         }
     }
 }
