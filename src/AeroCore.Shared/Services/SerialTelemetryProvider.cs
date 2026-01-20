@@ -112,7 +112,8 @@ namespace AeroCore.Shared.Services
                     }
                     else
                     {
-                        _logger.LogWarning($"Failed to parse telemetry line: '{line}'");
+                        // Sanitize input to prevent Log Injection
+                        _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(line)}'");
                     }
                 }
             }
