@@ -17,6 +17,19 @@ namespace AeroCore.FlightComputer.Services
         // Queue for thread-safe command dispatching
         private readonly ConcurrentQueue<ControlCommand> _commandQueue = new();
 
+        // Cached LoggerMessage delegates for high-frequency logging to avoid allocation
+        private static readonly Action<ILogger, double, double, double, Exception?> _logStatus =
+            LoggerMessage.Define<double, double, double>(
+                LogLevel.Information,
+                new EventId(1, nameof(AnalyzeAndReact)),
+                "[STATUS] Alt: {Altitude:F1}ft | Vel: {Velocity:F1}kts | Pitch: {Pitch:F2}");
+
+        private static readonly Action<ILogger, double, Exception?> _logCorrection =
+            LoggerMessage.Define<double>(
+                LogLevel.Warning,
+                new EventId(2, nameof(AnalyzeAndReact)),
+                "[CORRECTION] Pitch High: {Pitch:F2}. Adjusting Elevators.");
+
         public FlightControlUnit(
             ITelemetryProvider telemetry,
             ILogger<FlightControlUnit> logger)
@@ -64,7 +77,8 @@ namespace AeroCore.FlightComputer.Services
             // Simple PID-like logic (simulated)
             if (packet.Pitch > 0.5)
             {
-                _logger.LogWarning($"[CORRECTION] Pitch High: {packet.Pitch:F2}. Adjusting Elevators.");
+                // Use cached delegate to avoid string interpolation allocation
+                _logCorrection(_logger, packet.Pitch, null);
                 
                 var cmd = new ControlCommand 
                 { 
@@ -76,7 +90,8 @@ namespace AeroCore.FlightComputer.Services
             }
             else
             {
-                _logger.LogInformation($"[STATUS] Alt: {packet.Altitude:F1}ft | Vel: {packet.Velocity:F1}kts | Pitch: {packet.Pitch:F2}");
+                // Use cached delegate to avoid string interpolation allocation
+                _logStatus(_logger, packet.Altitude, packet.Velocity, packet.Pitch, null);
             }
         }
     }
