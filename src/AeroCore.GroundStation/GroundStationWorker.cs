@@ -59,6 +59,8 @@ namespace AeroCore.GroundStation
             Console.Write("ALT: ");
             Console.ForegroundColor = packet.Altitude < 0 ? ConsoleColor.Red : ConsoleColor.White;
             Console.Write($"{packet.Altitude,8:F2}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(" ft");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" | ");
 
@@ -67,6 +69,8 @@ namespace AeroCore.GroundStation
             Console.Write("VEL: ");
             Console.ForegroundColor = packet.Velocity > 100 ? ConsoleColor.Yellow : ConsoleColor.White;
             Console.Write($"{packet.Velocity,6:F1}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(" kts");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" | ");
 
@@ -75,6 +79,8 @@ namespace AeroCore.GroundStation
             Console.Write("PIT: ");
             Console.ForegroundColor = Math.Abs(packet.Pitch) > 45 ? ConsoleColor.Red : ConsoleColor.White;
             Console.Write($"{packet.Pitch,5:F2}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(" deg");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" | ");
 
@@ -82,7 +88,9 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("ROL: ");
             Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.White;
-            Console.WriteLine($"{packet.Roll,5:F2}");
+            Console.Write($"{packet.Roll,5:F2}");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.WriteLine(" deg");
 
             Console.ResetColor();
         }
