@@ -17,6 +17,16 @@ namespace AeroCore.FlightComputer.Services
         // Queue for thread-safe command dispatching
         private readonly ConcurrentQueue<ControlCommand> _commandQueue = new();
 
+        private static readonly Action<ILogger, double, Exception?> _logPitchCorrection = LoggerMessage.Define<double>(
+            LogLevel.Warning,
+            new EventId(1, "PitchCorrection"),
+            "[CORRECTION] Pitch High: {Pitch:F2}. Adjusting Elevators.");
+
+        private static readonly Action<ILogger, double, double, double, Exception?> _logStatus = LoggerMessage.Define<double, double, double>(
+            LogLevel.Information,
+            new EventId(2, "StatusUpdate"),
+            "[STATUS] Alt: {Altitude:F1}ft | Vel: {Velocity:F1}kts | Pitch: {Pitch:F2}");
+
         public FlightControlUnit(
             ITelemetryProvider telemetry,
             ILogger<FlightControlUnit> logger)
@@ -34,7 +44,7 @@ namespace AeroCore.FlightComputer.Services
         public async Task ProcessLoopAsync(CancellationToken ct)
         {
             _logger.LogInformation("FCU: Starting Main Control Loop...");
-            
+
             // Ensure provider is initialized
             await _telemetry.InitializeAsync(ct);
 
@@ -44,7 +54,7 @@ namespace AeroCore.FlightComputer.Services
                 await foreach (var packet in _telemetry.StreamTelemetryAsync(ct))
                 {
                     AnalyzeAndReact(packet);
-                    
+
                     if (ct.IsCancellationRequested) break;
                 }
             }
@@ -64,19 +74,19 @@ namespace AeroCore.FlightComputer.Services
             // Simple PID-like logic (simulated)
             if (packet.Pitch > 0.5)
             {
-                _logger.LogWarning($"[CORRECTION] Pitch High: {packet.Pitch:F2}. Adjusting Elevators.");
-                
-                var cmd = new ControlCommand 
-                { 
-                    ActuatorId = "ELEVATOR_DOWN", 
+                _logPitchCorrection(_logger, packet.Pitch, null);
+
+                var cmd = new ControlCommand
+                {
+                    ActuatorId = "ELEVATOR_DOWN",
                     Value = 0.15,
-                    Timestamp = DateTime.UtcNow 
+                    Timestamp = DateTime.UtcNow
                 };
                 _commandQueue.Enqueue(cmd);
             }
             else
             {
-                _logger.LogInformation($"[STATUS] Alt: {packet.Altitude:F1}ft | Vel: {packet.Velocity:F1}kts | Pitch: {packet.Pitch:F2}");
+                _logStatus(_logger, packet.Altitude, packet.Velocity, packet.Pitch, null);
             }
         }
     }

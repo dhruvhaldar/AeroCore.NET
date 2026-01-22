@@ -30,7 +30,7 @@ namespace AeroCore.FlightComputer
                     }
 
                     services.AddSingleton<IFlightComputer, FlightControlUnit>();
-                    
+
                     // Register the worker as a Hosted Service
                     services.AddHostedService<AerospaceWorker>();
                 })
