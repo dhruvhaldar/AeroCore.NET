@@ -5,3 +5,7 @@
 ## 2026-01-21 - Explicit Units Reduce Cognitive Load
 **Learning:** Adding explicit units (ft, kts, deg) to telemetry data eliminates ambiguity and prevents "mental mapping" errors for operators.
 **Action:** Always include units of measurement next to numerical values in data displays.
+
+## 2026-01-22 - System Initialization Feedback
+**Learning:** A clear "System Ready" state with visual confirmation (banner/status) reduces operator anxiety during startup.
+**Action:** Include a distinct initialization block in console apps that confirms configuration and readiness before streaming data.

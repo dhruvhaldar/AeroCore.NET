@@ -21,9 +21,36 @@ namespace AeroCore.GroundStation
 
         public override async Task StartAsync(CancellationToken cancellationToken)
         {
+            PrintBanner();
             _logger.LogInformation("Ground Station Starting...");
             await _telemetryProvider.InitializeAsync(cancellationToken);
             await base.StartAsync(cancellationToken);
+        }
+
+        private void PrintBanner()
+        {
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine(@"
+   __   ____  ____  __
+  / _\ (  __)(  _ \/  \
+ /    \ ) _)  )   (  O )
+ \_/\_/(____)(__\_)\__/
+ AeroCore Ground Station v1.0");
+            Console.WriteLine();
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(" [INFO] Provider: ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine(_telemetryProvider.GetType().Name);
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write(" [INFO] Status:   ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("INITIALIZED");
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" ----------------------------------------");
+            Console.ResetColor();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
