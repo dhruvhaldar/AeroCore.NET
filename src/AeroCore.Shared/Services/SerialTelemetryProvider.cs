@@ -84,10 +84,17 @@ namespace AeroCore.Shared.Services
                     {
                         try 
                         {
-                            return _serialPort.ReadLine();
+                            // Fix: Use BoundedStreamReader to prevent DoS via unbounded ReadLine
+                            return BoundedStreamReader.ReadSafeLine(_serialPort.BaseStream);
                         }
                         catch (TimeoutException)
                         {
+                            return null;
+                        }
+                        catch (InvalidOperationException ex)
+                        {
+                            // Log and discard if line is too long
+                            _logger.LogWarning(ex.Message);
                             return null;
                         }
                     }, ct);
