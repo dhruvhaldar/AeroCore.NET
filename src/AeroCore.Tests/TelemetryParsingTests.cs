@@ -16,7 +16,7 @@ namespace AeroCore.Tests
         // But we can test the ParsePacket logic if we expose it or use a "Testable" version.
         // Since ParsePacket is private, we can't test it directly easily.
         // However, we can test the "MockTelemetryProvider" to ensure it yields data.
-        
+
         [Fact]
         public async Task MockTelemetryProvider_ShouldYieldData()
         {
@@ -33,7 +33,7 @@ namespace AeroCore.Tests
                 {
                     count++;
                     Assert.InRange(packet.Altitude, 10000, 10100);
-                    if (count >= 3) break; 
+                    if (count >= 3) break;
                 }
             }
             catch (OperationCanceledException) { }
