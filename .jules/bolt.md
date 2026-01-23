@@ -5,3 +5,7 @@
 ## 2026-01-21 - Logging Allocations in Hot Paths
 **Learning:** Standard logging with string interpolation (e.g., `LogInformation($"...")`) allocates strings and boxes value types on every call. In high-frequency loops (like `ProcessLoopAsync`), this creates excessive GC pressure.
 **Action:** Use `LoggerMessage.Define` to create cached delegates for high-frequency log messages.
+
+## 2026-01-24 - Reference Type Allocations in Telemetry DTOs
+**Learning:** `TelemetryPacket` was a `record` (class), causing a heap allocation for every single data point processed. In high-frequency streams, this creates unnecessary GC pressure.
+**Action:** Define high-frequency DTOs as `readonly record struct` to use stack allocation and eliminate GC pressure.
