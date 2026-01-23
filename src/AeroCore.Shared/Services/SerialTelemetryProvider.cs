@@ -78,19 +78,11 @@ namespace AeroCore.Shared.Services
                 string? line = null;
                 try
                 {
-                    // Avoid blocking the thread pool with ReadLine by wrapping in Task.Run
-                    // This is still not ideal compared to pipelines or async read, but vastly better than blocking.
-                    line = await Task.Run(() => 
-                    {
-                        try 
-                        {
-                            return _serialPort.ReadLine();
-                        }
-                        catch (TimeoutException)
-                        {
-                            return null;
-                        }
-                    }, ct);
+                    // Use BoundedStreamReader to prevent DoS via memory exhaustion.
+                    // Reading directly from BaseStream allows async IO if supported,
+                    // and BoundedStreamReader ensures we don't read indefinitely.
+                    // Max length 1024 should be sufficient for telemetry packets.
+                    line = await BoundedStreamReader.ReadSafeLineAsync(_serialPort.BaseStream, 1024, ct);
                 }
                 catch (TaskCanceledException)
                 {
