@@ -26,8 +26,25 @@ namespace AeroCore.GroundStation
             await base.StartAsync(cancellationToken);
         }
 
+        private void ShowWelcomeBanner()
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("============================================================");
+            Console.WriteLine("              AEROCORE GROUND STATION v1.0");
+            Console.WriteLine("============================================================");
+            Console.ResetColor();
+            Console.WriteLine("  > System Status:    Ready");
+            Console.WriteLine("  > Telemetry Link:   Listening...");
+            Console.WriteLine();
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            // Give the host a moment to finish startup logs so the banner appears after them
+            await Task.Delay(100, stoppingToken);
+
+            ShowWelcomeBanner();
             _logger.LogInformation("Ground Station Listening for Telemetry...");
 
             try
