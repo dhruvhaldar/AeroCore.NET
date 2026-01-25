@@ -21,8 +21,8 @@ namespace AeroCore.Shared.Services
 
         public Task InitializeAsync(CancellationToken ct)
         {
-             _logger.LogInformation("Mock Telemetry Sensor Initialized.");
-             return Task.CompletedTask;
+            _logger.LogInformation("Mock Telemetry Sensor Initialized.");
+            return Task.CompletedTask;
         }
 
         public async IAsyncEnumerable<TelemetryPacket> StreamTelemetryAsync([System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)
@@ -30,7 +30,7 @@ namespace AeroCore.Shared.Services
             while (!ct.IsCancellationRequested)
             {
                 // Simulate sensor jitter and processing delay
-                await Task.Delay(500, ct); 
+                await Task.Delay(500, ct);
 
                 var data = new TelemetryPacket
                 {

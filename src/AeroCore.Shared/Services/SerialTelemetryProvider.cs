@@ -35,7 +35,7 @@ namespace AeroCore.Shared.Services
 
             _logger.LogInformation($"Initializing Serial Telemetry on {_portName} at {_baudRate} baud.");
 
-            try 
+            try
             {
                 // In a real scenario, we might retry or fail fast.
                 // For now we setup the object but don't open until streaming starts or now.
@@ -61,11 +61,11 @@ namespace AeroCore.Shared.Services
             {
                 if (!_serialPort.IsOpen)
                 {
-                     _logger.LogInformation("Opening serial port...");
-                     _serialPort.Open();
+                    _logger.LogInformation("Opening serial port...");
+                    _serialPort.Open();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Could not open serial port.");
                 yield break;
@@ -80,11 +80,12 @@ namespace AeroCore.Shared.Services
                 {
                     // Avoid blocking the thread pool with ReadLine by wrapping in Task.Run
                     // This is still not ideal compared to pipelines or async read, but vastly better than blocking.
-                    line = await Task.Run(() => 
+                    line = await Task.Run(() =>
                     {
-                        try 
+                        try
                         {
-                            return _serialPort.ReadLine();
+                            // Use BoundedStreamReader to prevent DoS via massive lines.
+                            return BoundedStreamReader.ReadSafeLine(() => _serialPort.ReadChar(), 1024);
                         }
                         catch (TimeoutException)
                         {
@@ -96,11 +97,16 @@ namespace AeroCore.Shared.Services
                 {
                     break;
                 }
+                catch (System.IO.InvalidDataException ex)
+                {
+                    _logger.LogWarning($"Telemetry line exceeded length limit: {ex.Message}");
+                    continue;
+                }
                 catch (Exception ex)
                 {
-                     _logger.LogError(ex, "Error reading from serial port.");
-                     await Task.Delay(1000, ct);
-                     continue;
+                    _logger.LogError(ex, "Error reading from serial port.");
+                    await Task.Delay(1000, ct);
+                    continue;
                 }
 
                 if (!string.IsNullOrWhiteSpace(line))
@@ -117,7 +123,7 @@ namespace AeroCore.Shared.Services
                     }
                 }
             }
-            
+
             if (_serialPort.IsOpen) _serialPort.Close();
         }
     }

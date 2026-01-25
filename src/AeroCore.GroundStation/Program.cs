@@ -20,14 +20,14 @@ namespace AeroCore.GroundStation
                     // We need to register ITelemetryProvider. 
                     // Since I haven't moved the providers to Shared yet, I will do it in the next step.
                     // For now, I'll assume they are available in Shared.Services.
-                    
+
                     if (useSerial)
                     {
-                         services.AddSingleton<ITelemetryProvider, AeroCore.Shared.Services.SerialTelemetryProvider>();
+                        services.AddSingleton<ITelemetryProvider, AeroCore.Shared.Services.SerialTelemetryProvider>();
                     }
                     else
                     {
-                         services.AddSingleton<ITelemetryProvider, AeroCore.Shared.Services.MockTelemetryProvider>();
+                        services.AddSingleton<ITelemetryProvider, AeroCore.Shared.Services.MockTelemetryProvider>();
                     }
 
                     services.AddHostedService<GroundStationWorker>();
