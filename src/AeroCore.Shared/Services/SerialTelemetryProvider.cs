@@ -100,6 +100,8 @@ namespace AeroCore.Shared.Services
                 catch (System.IO.InvalidDataException ex)
                 {
                     _logger.LogWarning($"Telemetry line exceeded length limit: {ex.Message}");
+                    // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
+                    await Task.Delay(100, ct);
                     continue;
                 }
                 catch (Exception ex)
@@ -120,6 +122,8 @@ namespace AeroCore.Shared.Services
                     {
                         // Sanitize input to prevent Log Injection
                         _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(line)}'");
+                        // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
+                        await Task.Delay(100, ct);
                     }
                 }
             }

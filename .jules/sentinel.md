@@ -12,3 +12,8 @@
 **Vulnerability:** Using `SerialPort.ReadLine()` without input length limits allows an attacker (or malfunctioning hardware) to cause a Denial of Service (DoS) via memory exhaustion by sending an endless stream of characters without a newline.
 **Learning:** Standard .NET `ReadLine()` methods on streams and ports are often unbounded. In high-reliability or security-critical contexts, always enforce explicit buffer limits when reading from I/O.
 **Prevention:** Use a bounded reader helper (e.g., `BoundedStreamReader`) that throws or stops reading when a configured maximum length is exceeded.
+
+## 2026-01-24 - DoS via Log Flooding in Serial Loops
+**Vulnerability:** Rapid failure in processing loops (e.g., invalid input from serial port) resulted in infinite logging loops, consuming CPU and disk space due to lack of throttling.
+**Learning:** High-frequency processing loops must defend against "spam" input. Sanitizing logs protects against injection but not against resource exhaustion from the volume of logs.
+**Prevention:** Implement rate limiting or a simple backoff delay (e.g., `Task.Delay`) in error handling paths within tight loops to throttle the response to invalid input.
