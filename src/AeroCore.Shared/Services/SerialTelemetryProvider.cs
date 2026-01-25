@@ -73,23 +73,27 @@ namespace AeroCore.Shared.Services
 
             _logger.LogInformation("Serial Telemetry Stream Started.");
 
+            // Optimization: Reuse delegates and buffers to reduce allocations in the hot loop
+            Func<int> readChar = () => _serialPort.ReadChar();
+            char[] buffer = new char[1024];
+
             while (!ct.IsCancellationRequested && _serialPort.IsOpen)
             {
-                string? line = null;
+                int charsRead = 0;
                 try
                 {
                     // Avoid blocking the thread pool with ReadLine by wrapping in Task.Run
                     // This is still not ideal compared to pipelines or async read, but vastly better than blocking.
-                    line = await Task.Run(() =>
+                    charsRead = await Task.Run(() =>
                     {
                         try
                         {
                             // Use BoundedStreamReader to prevent DoS via massive lines.
-                            return BoundedStreamReader.ReadSafeLine(() => _serialPort.ReadChar(), 1024);
+                            return BoundedStreamReader.ReadSafeLine(readChar, buffer);
                         }
                         catch (TimeoutException)
                         {
-                            return null;
+                            return -1;
                         }
                     }, ct);
                 }
@@ -109,22 +113,29 @@ namespace AeroCore.Shared.Services
                     continue;
                 }
 
-                if (!string.IsNullOrWhiteSpace(line))
+                if (charsRead > 0)
                 {
-                    var packet = TelemetryParser.ParseFromCsv(line);
+                    var packet = ParseBuffer(buffer, charsRead);
                     if (packet != null)
                     {
                         yield return packet.Value;
-                    }
-                    else
-                    {
-                        // Sanitize input to prevent Log Injection
-                        _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(line)}'");
                     }
                 }
             }
 
             if (_serialPort.IsOpen) _serialPort.Close();
+        }
+
+        private TelemetryPacket? ParseBuffer(char[] buffer, int length)
+        {
+            var span = new ReadOnlySpan<char>(buffer, 0, length);
+            var packet = TelemetryParser.ParseFromSpan(span);
+            if (packet == null)
+            {
+                // Sanitize input to prevent Log Injection
+                _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(span.ToString())}'");
+            }
+            return packet;
         }
     }
 }

@@ -10,13 +10,13 @@ namespace AeroCore.Shared.Helpers
         {
             if (string.IsNullOrWhiteSpace(line)) return null;
 
-            return Parse(line.AsSpan());
+            return ParseFromSpan(line.AsSpan());
         }
 
         /// <summary>
         /// Parses telemetry data using ReadOnlySpan to avoid string allocations.
         /// </summary>
-        private static TelemetryPacket? Parse(ReadOnlySpan<char> span)
+        public static TelemetryPacket? ParseFromSpan(ReadOnlySpan<char> span)
         {
             try
             {
