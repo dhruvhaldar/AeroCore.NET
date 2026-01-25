@@ -3,7 +3,8 @@ using System;
 namespace AeroCore.Shared.Models
 {
     // Represents a simplified 3-axis telemetry reading
-    public record TelemetryPacket
+    // Optimized as readonly record struct to avoid heap allocations
+    public readonly record struct TelemetryPacket
     {
         public double Altitude { get; init; }
         public double Velocity { get; init; }

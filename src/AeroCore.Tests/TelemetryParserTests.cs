@@ -13,10 +13,10 @@ namespace AeroCore.Tests
             var packet = TelemetryParser.ParseFromCsv(line);
 
             Assert.NotNull(packet);
-            Assert.Equal(1000.5, packet.Altitude);
-            Assert.Equal(250.2, packet.Velocity);
-            Assert.Equal(0.5, packet.Pitch);
-            Assert.Equal(-0.1, packet.Roll);
+            Assert.Equal(1000.5, packet.Value.Altitude);
+            Assert.Equal(250.2, packet.Value.Velocity);
+            Assert.Equal(0.5, packet.Value.Pitch);
+            Assert.Equal(-0.1, packet.Value.Roll);
         }
 
         [Fact]

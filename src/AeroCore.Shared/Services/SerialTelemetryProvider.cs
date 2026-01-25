@@ -114,7 +114,7 @@ namespace AeroCore.Shared.Services
                     var packet = TelemetryParser.ParseFromCsv(line);
                     if (packet != null)
                     {
-                        yield return packet;
+                        yield return packet.Value;
                     }
                     else
                     {
