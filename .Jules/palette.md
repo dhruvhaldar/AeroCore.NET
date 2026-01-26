@@ -9,3 +9,7 @@
 ## 2026-01-24 - Timing of Console Banners
 **Learning:** In .NET Generic Host applications, standard startup logs can bury custom UI banners.
 **Action:** Output the banner *after* the host has fully started (e.g., in `ExecuteAsync` with a small delay) to ensure it acts as a clear visual separator.
+
+## 2026-05-21 - Visual Analog Indicators in CLI
+**Learning:** Rapidly changing numeric data is hard to process. Adding simple ASCII visual indicators (like arrows `^`, `v`, `>`, `<`) helps operators instinctively grasp trends and orientation without reading digits.
+**Action:** Supplement dense numeric streams with visual symbols representing direction or magnitude.

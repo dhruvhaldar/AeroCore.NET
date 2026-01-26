@@ -98,8 +98,14 @@ namespace AeroCore.GroundStation
             Console.Write($"{packet.Pitch,5:F2}");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
+
+            // Pitch Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write(" | ");
+            Console.Write(" [");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(packet.Pitch > 1.0 ? "^" : (packet.Pitch < -1.0 ? "v" : "-"));
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("] | ");
 
             // Roll
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -107,7 +113,15 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.White;
             Console.Write($"{packet.Roll,5:F2}");
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.WriteLine(" deg");
+            Console.Write(" deg");
+
+            // Roll Visual
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" [");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write(packet.Roll > 1.0 ? ">" : (packet.Roll < -1.0 ? "<" : "-"));
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("]");
 
             Console.ResetColor();
         }
