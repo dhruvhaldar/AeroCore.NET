@@ -23,7 +23,6 @@ namespace AeroCore.GroundStation
         {
             _logger.LogInformation("Ground Station Starting...");
             await _telemetryProvider.InitializeAsync(cancellationToken);
-            ShowStartupBanner();
             await base.StartAsync(cancellationToken);
         }
 
@@ -103,8 +102,10 @@ namespace AeroCore.GroundStation
             // Pitch Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(packet.Pitch > 1.0 ? "^" : (packet.Pitch < -1.0 ? "v" : "-"));
+            var pitchAlert = Math.Abs(packet.Pitch) > 45;
+            var pitchSymbol = packet.Pitch > 1.0 ? "^" : (packet.Pitch < -1.0 ? "v" : "-");
+            Console.ForegroundColor = pitchSymbol == "-" ? ConsoleColor.DarkGray : (pitchAlert ? ConsoleColor.Red : ConsoleColor.Green);
+            Console.Write(pitchSymbol);
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] | ");
 
@@ -119,26 +120,14 @@ namespace AeroCore.GroundStation
             // Roll Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(packet.Roll > 1.0 ? ">" : (packet.Roll < -1.0 ? "<" : "-"));
+            var rollAlert = Math.Abs(packet.Roll) > 45;
+            var rollSymbol = packet.Roll > 1.0 ? ">" : (packet.Roll < -1.0 ? "<" : "-");
+            Console.ForegroundColor = rollSymbol == "-" ? ConsoleColor.DarkGray : (rollAlert ? ConsoleColor.Red : ConsoleColor.Green);
+            Console.Write(rollSymbol);
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("]");
 
             Console.ResetColor();
-        }
-
-        private void ShowStartupBanner()
-        {
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("========================================");
-            Console.WriteLine("      AEROCORE GROUND STATION v1.0      ");
-            Console.WriteLine("========================================");
-            Console.ResetColor();
-            Console.WriteLine($"   System Initialized: {DateTime.Now:HH:mm:ss}");
-            Console.WriteLine("   Status: ONLINE");
-            Console.WriteLine("----------------------------------------");
-            Console.WriteLine();
         }
     }
 }
