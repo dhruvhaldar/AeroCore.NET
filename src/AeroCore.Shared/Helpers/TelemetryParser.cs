@@ -16,7 +16,7 @@ namespace AeroCore.Shared.Helpers
         /// <summary>
         /// Parses telemetry data using ReadOnlySpan to avoid string allocations.
         /// </summary>
-        private static TelemetryPacket? Parse(ReadOnlySpan<char> span)
+        public static TelemetryPacket? Parse(ReadOnlySpan<char> span)
         {
             try
             {

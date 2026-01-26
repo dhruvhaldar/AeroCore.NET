@@ -52,5 +52,53 @@ namespace AeroCore.Shared.Helpers
                 }
             }
         }
+
+        /// <summary>
+        /// Reads a line of characters into a span buffer.
+        /// Throws InvalidDataException if the line length exceeds buffer length.
+        /// </summary>
+        /// <param name="readChar">Function that returns the next character as an integer, or -1 if EOF.</param>
+        /// <param name="buffer">The buffer to write characters into.</param>
+        /// <returns>The number of characters read. Returns -1 if EOF is reached and no characters were read.</returns>
+        public static int ReadSafeLine(Func<int> readChar, Span<char> buffer)
+        {
+            if (readChar == null) throw new ArgumentNullException(nameof(readChar));
+
+            int pos = 0;
+            while (true)
+            {
+                // Check limit before reading next char
+                if (pos >= buffer.Length)
+                {
+                    throw new InvalidDataException($"Input line exceeded maximum length of {buffer.Length} characters.");
+                }
+
+                int cVal = readChar();
+
+                if (cVal == -1)
+                {
+                    // EOF
+                    // If we have read some chars (pos > 0), return count.
+                    // If we haven't read any chars (pos == 0), return -1 to signal EOF.
+                    return pos > 0 ? pos : -1;
+                }
+
+                char c = (char)cVal;
+
+                if (c == '\n')
+                {
+                    return pos;
+                }
+                else if (c == '\r')
+                {
+                    // Ignore carriage return
+                    continue;
+                }
+                else
+                {
+                    buffer[pos++] = c;
+                }
+            }
+        }
     }
 }

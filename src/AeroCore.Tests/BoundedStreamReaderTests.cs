@@ -82,5 +82,67 @@ namespace AeroCore.Tests
                BoundedStreamReader.ReadSafeLine(reader, 5)
             );
         }
+
+        [Fact]
+        public void ReadSafeLine_Span_ReturnsCount_WhenShortEnough()
+        {
+            string input = "Hello World\n";
+            var queue = new Queue<int>();
+            foreach (char c in input) queue.Enqueue(c);
+
+            Func<int> reader = () => queue.Count > 0 ? queue.Dequeue() : -1;
+            char[] buffer = new char[100];
+
+            int result = BoundedStreamReader.ReadSafeLine(reader, buffer);
+
+            Assert.Equal(11, result); // "Hello World" length is 11
+            string readString = new string(buffer, 0, result);
+            Assert.Equal("Hello World", readString);
+        }
+
+        [Fact]
+        public void ReadSafeLine_Span_Throws_WhenTooLong()
+        {
+            // Input: "ABCDEFG\n" (8 chars)
+            // Buffer: 5
+            string input = "ABCDEFG\n";
+            var queue = new Queue<int>();
+            foreach (char c in input) queue.Enqueue(c);
+
+            Func<int> reader = () => queue.Count > 0 ? queue.Dequeue() : -1;
+            char[] buffer = new char[5];
+
+            Assert.Throws<InvalidDataException>(() =>
+                BoundedStreamReader.ReadSafeLine(reader, buffer)
+            );
+        }
+
+        [Fact]
+        public void ReadSafeLine_Span_HandlesEOF()
+        {
+            string input = "PartialLine"; // No newline
+            var queue = new Queue<int>();
+            foreach (char c in input) queue.Enqueue(c);
+
+            Func<int> reader = () => queue.Count > 0 ? queue.Dequeue() : -1;
+            char[] buffer = new char[100];
+
+            int result = BoundedStreamReader.ReadSafeLine(reader, buffer);
+
+            Assert.Equal(11, result);
+            Assert.Equal("PartialLine", new string(buffer, 0, result));
+        }
+
+        [Fact]
+        public void ReadSafeLine_Span_ReturnsMinusOne_OnImmediateEOF()
+        {
+            var queue = new Queue<int>();
+            // Empty queue
+            Func<int> reader = () => queue.Count > 0 ? queue.Dequeue() : -1;
+            char[] buffer = new char[100];
+
+            int result = BoundedStreamReader.ReadSafeLine(reader, buffer);
+            Assert.Equal(-1, result);
+        }
     }
 }

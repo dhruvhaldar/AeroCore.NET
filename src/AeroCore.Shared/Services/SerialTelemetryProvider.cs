@@ -73,23 +73,27 @@ namespace AeroCore.Shared.Services
 
             _logger.LogInformation("Serial Telemetry Stream Started.");
 
+            // Reuse buffer to avoid allocation per line
+            char[] buffer = new char[1024];
+
             while (!ct.IsCancellationRequested && _serialPort.IsOpen)
             {
-                string? line = null;
+                int charsRead = 0;
                 try
                 {
                     // Avoid blocking the thread pool with ReadLine by wrapping in Task.Run
                     // This is still not ideal compared to pipelines or async read, but vastly better than blocking.
-                    line = await Task.Run(() =>
+                    charsRead = await Task.Run(() =>
                     {
                         try
                         {
                             // Use BoundedStreamReader to prevent DoS via massive lines.
-                            return BoundedStreamReader.ReadSafeLine(() => _serialPort.ReadChar(), 1024);
+                            // Buffer is captured and safe to use because we await this task before next iteration.
+                            return BoundedStreamReader.ReadSafeLine(() => _serialPort.ReadChar(), buffer);
                         }
                         catch (TimeoutException)
                         {
-                            return null;
+                            return 0; // Treat timeout as no data read
                         }
                     }, ct);
                 }
@@ -111,9 +115,13 @@ namespace AeroCore.Shared.Services
                     continue;
                 }
 
-                if (!string.IsNullOrWhiteSpace(line))
+                // Check for valid data (charsRead > 0)
+                // If charsRead == -1, it means EOF. If charsRead == 0, it means Empty Line or Timeout.
+                // In both cases we skip.
+                if (charsRead > 0)
                 {
-                    var packet = TelemetryParser.ParseFromCsv(line);
+                    var packet = ParseBuffer(buffer, charsRead);
+
                     if (packet != null)
                     {
                         yield return packet.Value;
@@ -121,7 +129,9 @@ namespace AeroCore.Shared.Services
                     else
                     {
                         // Sanitize input to prevent Log Injection
-                        _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(line)}'");
+                        // Note: We need to create a string here for logging, but only on error path.
+                        string lineForLog = new string(buffer, 0, charsRead);
+                        _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(lineForLog)}'");
                         // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
                         await Task.Delay(100, ct);
                     }
@@ -129,6 +139,11 @@ namespace AeroCore.Shared.Services
             }
 
             if (_serialPort.IsOpen) _serialPort.Close();
+        }
+
+        private static TelemetryPacket? ParseBuffer(char[] buffer, int length)
+        {
+            return TelemetryParser.Parse(new ReadOnlySpan<char>(buffer, 0, length));
         }
     }
 }

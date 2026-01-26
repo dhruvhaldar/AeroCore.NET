@@ -9,3 +9,7 @@
 ## 2026-01-23 - Struct Conversion for DTOs
 **Learning:** Converting `TelemetryPacket` (hot path DTO) from `record` to `readonly record struct` eliminated heap allocations per packet but required updating consumers to handle `Nullable<TelemetryPacket>` (using `.Value`). Attempts to convert `ControlCommand` failed because default struct initialization (`default(T)`) bypasses property initializers, leaving non-nullable reference types (strings) as `null`.
 **Action:** Convert DTOs to `readonly record struct` ONLY if they are small, immutable, used in hot paths, and robust against zero-initialization (or contain no reference types).
+
+## 2026-01-26 - Span Usage in Async Methods
+**Learning:** Ref structs like `Span<T>` cannot be used inside `async` methods (CS9202), even if they don't cross `await` points. This limitation complicates zero-allocation parsing in async flows.
+**Action:** Extract any logic involving `Span<T>` or `ReadOnlySpan<T>` into a separate synchronous helper method (e.g., `ParseBuffer`) and call it from the async method.
