@@ -23,6 +23,7 @@ namespace AeroCore.GroundStation
         {
             _logger.LogInformation("Ground Station Starting...");
             await _telemetryProvider.InitializeAsync(cancellationToken);
+            ShowStartupBanner();
             await base.StartAsync(cancellationToken);
         }
 
@@ -124,6 +125,20 @@ namespace AeroCore.GroundStation
             Console.WriteLine("]");
 
             Console.ResetColor();
+        }
+
+        private void ShowStartupBanner()
+        {
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.WriteLine("========================================");
+            Console.WriteLine("      AEROCORE GROUND STATION v1.0      ");
+            Console.WriteLine("========================================");
+            Console.ResetColor();
+            Console.WriteLine($"   System Initialized: {DateTime.Now:HH:mm:ss}");
+            Console.WriteLine("   Status: ONLINE");
+            Console.WriteLine("----------------------------------------");
+            Console.WriteLine();
         }
     }
 }
