@@ -9,3 +9,7 @@
 ## 2026-01-23 - Struct Conversion for DTOs
 **Learning:** Converting `TelemetryPacket` (hot path DTO) from `record` to `readonly record struct` eliminated heap allocations per packet but required updating consumers to handle `Nullable<TelemetryPacket>` (using `.Value`). Attempts to convert `ControlCommand` failed because default struct initialization (`default(T)`) bypasses property initializers, leaving non-nullable reference types (strings) as `null`.
 **Action:** Convert DTOs to `readonly record struct` ONLY if they are small, immutable, used in hot paths, and robust against zero-initialization (or contain no reference types).
+
+## 2026-01-24 - Zero-Allocation Stream Reading
+**Learning:** `BoundedStreamReader.ReadSafeLine` returned a `string`, causing allocation for every telemetry line. `Span<char>` could not be used directly in the `async` `StreamTelemetryAsync` method due to CS9202 (ref structs in async state machines).
+**Action:** Implemented `ReadSafeLine` overload accepting a `Span<char>` buffer. Extracted the span parsing logic into a synchronous helper method `ParseBuffer` to bypass the async restriction.
