@@ -23,7 +23,6 @@ namespace AeroCore.GroundStation
         {
             _logger.LogInformation("Ground Station Starting...");
             await _telemetryProvider.InitializeAsync(cancellationToken);
-            ShowStartupBanner();
             await base.StartAsync(cancellationToken);
         }
 
@@ -35,6 +34,7 @@ namespace AeroCore.GroundStation
             Console.WriteLine("              AEROCORE GROUND STATION v1.0");
             Console.WriteLine("============================================================");
             Console.ResetColor();
+            Console.WriteLine($"  > System Init:      {DateTime.Now:HH:mm:ss}");
             Console.WriteLine("  > System Status:    Ready");
             Console.WriteLine("  > Telemetry Link:   Listening...");
             Console.WriteLine();
@@ -64,6 +64,32 @@ namespace AeroCore.GroundStation
             {
                 _logger.LogError(ex, "Ground Station Error");
             }
+        }
+
+        private string GetAnalogGauge(double value, double range, int width = 11)
+        {
+            var buffer = new char[width];
+            int center = width / 2;
+            double normalized = Math.Clamp(value / range, -1, 1);
+            int fill = (int)Math.Round(Math.Abs(normalized) * center);
+
+            for (int i = 0; i < width; i++) buffer[i] = ' ';
+            buffer[center] = '|';
+
+            if (fill > 0)
+            {
+                if (normalized > 0)
+                {
+                    for (int i = 1; i <= fill; i++) buffer[center + i] = '=';
+                    buffer[center + fill] = '>';
+                }
+                else
+                {
+                    for (int i = 1; i <= fill; i++) buffer[center - i] = '=';
+                    buffer[center - fill] = '<';
+                }
+            }
+            return new string(buffer);
         }
 
         private void PrintTelemetry(TelemetryPacket packet)
@@ -104,7 +130,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(packet.Pitch > 1.0 ? "^" : (packet.Pitch < -1.0 ? "v" : "-"));
+            Console.Write(GetAnalogGauge(packet.Pitch, 45.0));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] | ");
 
@@ -120,25 +146,12 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(packet.Roll > 1.0 ? ">" : (packet.Roll < -1.0 ? "<" : "-"));
+            Console.Write(GetAnalogGauge(packet.Roll, 45.0));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("]");
 
             Console.ResetColor();
         }
 
-        private void ShowStartupBanner()
-        {
-            Console.WriteLine();
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("========================================");
-            Console.WriteLine("      AEROCORE GROUND STATION v1.0      ");
-            Console.WriteLine("========================================");
-            Console.ResetColor();
-            Console.WriteLine($"   System Initialized: {DateTime.Now:HH:mm:ss}");
-            Console.WriteLine("   Status: ONLINE");
-            Console.WriteLine("----------------------------------------");
-            Console.WriteLine();
-        }
     }
 }
