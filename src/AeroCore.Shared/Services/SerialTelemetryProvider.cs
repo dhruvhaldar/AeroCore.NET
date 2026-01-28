@@ -73,23 +73,25 @@ namespace AeroCore.Shared.Services
 
             _logger.LogInformation("Serial Telemetry Stream Started.");
 
+            char[] buffer = new char[1024];
+
             while (!ct.IsCancellationRequested && _serialPort.IsOpen)
             {
-                string? line = null;
+                int charsRead = 0;
                 try
                 {
                     // Avoid blocking the thread pool with ReadLine by wrapping in Task.Run
                     // This is still not ideal compared to pipelines or async read, but vastly better than blocking.
-                    line = await Task.Run(() =>
+                    charsRead = await Task.Run(() =>
                     {
                         try
                         {
                             // Use BoundedStreamReader to prevent DoS via massive lines.
-                            return BoundedStreamReader.ReadSafeLine(() => _serialPort.ReadChar(), 1024);
+                            return BoundedStreamReader.ReadSafeLine(() => _serialPort.ReadChar(), buffer);
                         }
                         catch (TimeoutException)
                         {
-                            return null;
+                            return -1;
                         }
                     }, ct);
                 }
@@ -111,9 +113,9 @@ namespace AeroCore.Shared.Services
                     continue;
                 }
 
-                if (!string.IsNullOrWhiteSpace(line))
+                if (charsRead > 0)
                 {
-                    var packet = TelemetryParser.ParseFromCsv(line);
+                    var packet = ParseBuffer(buffer, charsRead);
                     if (packet != null)
                     {
                         yield return packet.Value;
@@ -121,6 +123,7 @@ namespace AeroCore.Shared.Services
                     else
                     {
                         // Sanitize input to prevent Log Injection
+                        var line = new string(buffer, 0, charsRead);
                         _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(line)}'");
                         // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
                         await Task.Delay(100, ct);
@@ -129,6 +132,11 @@ namespace AeroCore.Shared.Services
             }
 
             if (_serialPort.IsOpen) _serialPort.Close();
+        }
+
+        private static TelemetryPacket? ParseBuffer(char[] buffer, int length)
+        {
+            return TelemetryParser.Parse(new ReadOnlySpan<char>(buffer, 0, length));
         }
     }
 }
