@@ -122,14 +122,14 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("PIT: ");
             Console.ForegroundColor = Math.Abs(packet.Pitch) > 45 ? ConsoleColor.Red : ConsoleColor.White;
-            Console.Write($"{packet.Pitch,5:F2}");
+            Console.Write($"{packet.Pitch,7:F2}");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
             // Pitch Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = Math.Abs(packet.Pitch) > 45 ? ConsoleColor.Red : ConsoleColor.Green;
             Console.Write(GetAnalogGauge(packet.Pitch, 45.0));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] | ");
@@ -138,14 +138,14 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("ROL: ");
             Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.White;
-            Console.Write($"{packet.Roll,5:F2}");
+            Console.Write($"{packet.Roll,7:F2}");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
             // Roll Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.Green;
             Console.Write(GetAnalogGauge(packet.Roll, 45.0));
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("]");
