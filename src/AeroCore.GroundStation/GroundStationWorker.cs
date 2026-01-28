@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using AeroCore.Shared.Helpers;
 using AeroCore.Shared.Interfaces;
 using AeroCore.Shared.Models;
 using Microsoft.Extensions.Hosting;
@@ -66,32 +67,6 @@ namespace AeroCore.GroundStation
             }
         }
 
-        private string GetAnalogGauge(double value, double range, int width = 11)
-        {
-            var buffer = new char[width];
-            int center = width / 2;
-            double normalized = Math.Clamp(value / range, -1, 1);
-            int fill = (int)Math.Round(Math.Abs(normalized) * center);
-
-            for (int i = 0; i < width; i++) buffer[i] = ' ';
-            buffer[center] = '|';
-
-            if (fill > 0)
-            {
-                if (normalized > 0)
-                {
-                    for (int i = 1; i <= fill; i++) buffer[center + i] = '=';
-                    buffer[center + fill] = '>';
-                }
-                else
-                {
-                    for (int i = 1; i <= fill; i++) buffer[center - i] = '=';
-                    buffer[center - fill] = '<';
-                }
-            }
-            return new string(buffer);
-        }
-
         private void PrintTelemetry(TelemetryPacket packet)
         {
             // Timestamp
@@ -130,7 +105,11 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(GetAnalogGauge(packet.Pitch, 45.0));
+
+            Span<char> gaugeBuffer = stackalloc char[11];
+            GaugeVisualizer.Fill(gaugeBuffer, packet.Pitch, 45.0);
+            Console.Out.Write(gaugeBuffer);
+
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] | ");
 
@@ -146,7 +125,10 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write(GetAnalogGauge(packet.Roll, 45.0));
+
+            GaugeVisualizer.Fill(gaugeBuffer, packet.Roll, 45.0);
+            Console.Out.Write(gaugeBuffer);
+
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("]");
 
