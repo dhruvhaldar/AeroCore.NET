@@ -22,3 +22,8 @@
 **Vulnerability:** DTOs (Data Transfer Objects) defined as `record` types often lack internal validation, relying on consumers to verify data integrity, which leads to "Shotgun Parsing" and potential state corruption.
 **Learning:** `record` types with auto-properties (`{ get; init; }`) bypass constructor validation when using object initializers.
 **Prevention:** Use explicit backing fields with validation logic in the `init` accessor to enforce invariants during object creation and mutation (via `with` expressions).
+
+## 2026-01-28 - Control System Instability via Non-Finite Numbers
+**Vulnerability:** Telemetry parsers using `double.Parse` accepted `NaN` and `Infinity`, which propagated to control loops (PID), potentially causing undefined behavior or crashes.
+**Learning:** `double.Parse` and `double.TryParse` allow `NaN` and `Infinity` by default. In control systems or financial apps, these values are often as dangerous as injection attacks.
+**Prevention:** Explicitly validate numeric inputs with `double.IsFinite()` after parsing to ensure they represent real-world values.
