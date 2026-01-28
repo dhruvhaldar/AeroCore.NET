@@ -45,6 +45,13 @@ namespace AeroCore.Shared.Helpers
                 ReadOnlySpan<char> rollSpan = (idx == -1) ? span : span.Slice(0, idx);
                 double roll = double.Parse(rollSpan, CultureInfo.InvariantCulture);
 
+                // Security: Prevent NaN/Infinity from propagating to control logic
+                if (!double.IsFinite(altitude) || !double.IsFinite(velocity) ||
+                    !double.IsFinite(pitch) || !double.IsFinite(roll))
+                {
+                    return null;
+                }
+
                 return new TelemetryPacket
                 {
                     Altitude = altitude,
