@@ -13,3 +13,7 @@
 ## 2026-01-24 - Zero-Allocation Stream Reading
 **Learning:** `BoundedStreamReader.ReadSafeLine` returned a `string`, causing allocation for every telemetry line. `Span<char>` could not be used directly in the `async` `StreamTelemetryAsync` method due to CS9202 (ref structs in async state machines).
 **Action:** Implemented `ReadSafeLine` overload accepting a `Span<char>` buffer. Extracted the span parsing logic into a synchronous helper method `ParseBuffer` to bypass the async restriction.
+
+## 2026-01-26 - Console Output Allocations
+**Learning:** Console.Write with string interpolation allocates strings for every call. In high-frequency UI loops (like Ground Station), this creates significant GC pressure.
+**Action:** Use `stackalloc char[]`, `TryFormat`, and `Console.Out.Write(ReadOnlySpan<char>)` for zero-allocation console output.
