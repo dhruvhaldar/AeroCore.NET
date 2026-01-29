@@ -13,6 +13,7 @@ namespace AeroCore.GroundStation
     {
         private readonly ITelemetryProvider _telemetryProvider;
         private readonly ILogger<GroundStationWorker> _logger;
+        private double? _lastAltitude;
 
         public GroundStationWorker(ITelemetryProvider telemetryProvider, ILogger<GroundStationWorker> logger)
         {
@@ -79,7 +80,33 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = packet.Altitude < 0 ? ConsoleColor.Red : ConsoleColor.White;
             Console.Write($"{packet.Altitude,8:F2}");
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(" ft");
+            Console.Write(" ft ");
+
+            if (_lastAltitude.HasValue)
+            {
+                double delta = packet.Altitude - _lastAltitude.Value;
+                if (delta > 0.1)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("^");
+                }
+                else if (delta < -0.1)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("v");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("-");
+                }
+            }
+            else
+            {
+                Console.Write(" ");
+            }
+            _lastAltitude = packet.Altitude;
+
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" | ");
 
