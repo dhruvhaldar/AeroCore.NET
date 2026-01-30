@@ -18,16 +18,18 @@ namespace AeroCore.Shared.Helpers
             if (readChar == null) throw new ArgumentNullException(nameof(readChar));
 
             StringBuilder sb = new StringBuilder();
+            int totalReads = 0;
 
             while (true)
             {
                 // Check limit before reading next char to be safe
-                if (sb.Length >= maxLength)
+                if (totalReads >= maxLength)
                 {
                     throw new InvalidDataException($"Input line exceeded maximum length of {maxLength} characters.");
                 }
 
                 int cVal = readChar();
+                if (cVal != -1) totalReads++;
 
                 if (cVal == -1)
                 {
@@ -65,17 +67,19 @@ namespace AeroCore.Shared.Helpers
             if (readChar == null) throw new ArgumentNullException(nameof(readChar));
 
             int pos = 0;
+            int totalReads = 0;
             int maxLength = buffer.Length;
 
             while (true)
             {
                 // Check limit before reading next char to be safe
-                if (pos >= maxLength)
+                if (totalReads >= maxLength)
                 {
                     throw new InvalidDataException($"Input line exceeded maximum length of {maxLength} characters.");
                 }
 
                 int cVal = readChar();
+                if (cVal != -1) totalReads++;
 
                 if (cVal == -1)
                 {
