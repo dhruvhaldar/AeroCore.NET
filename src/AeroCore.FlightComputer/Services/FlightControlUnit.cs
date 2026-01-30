@@ -27,6 +27,11 @@ namespace AeroCore.FlightComputer.Services
             new EventId(2, "StatusUpdate"),
             "[STATUS] Alt: {Altitude:F1}ft | Vel: {Velocity:F1}kts | Pitch: {Pitch:F2}");
 
+        private static readonly Action<ILogger, string, double, Exception?> _logCommandExecution = LoggerMessage.Define<string, double>(
+            LogLevel.Information,
+            new EventId(3, "CommandExec"),
+            "[EXEC] Executing Command: {ActuatorId} = {Value:F2}");
+
         public FlightControlUnit(
             ITelemetryProvider telemetry,
             ILogger<FlightControlUnit> logger)
@@ -48,6 +53,9 @@ namespace AeroCore.FlightComputer.Services
             // Ensure provider is initialized
             await _telemetry.InitializeAsync(ct);
 
+            // Start the command processor
+            var commandTask = Task.Run(() => ProcessCommandsAsync(ct), ct);
+
             try
             {
                 // Consuming the async stream from the provider
@@ -67,6 +75,30 @@ namespace AeroCore.FlightComputer.Services
                 _logger.LogCritical(ex, "FCU: CRITICAL FAILURE");
                 // In real aerospace, this would trigger a hardware watchdog reset
             }
+            finally
+            {
+                // Ensure we wait for the processor to stop if we exit the loop
+                try { await commandTask; } catch (OperationCanceledException) { }
+            }
+        }
+
+        private async Task ProcessCommandsAsync(CancellationToken ct)
+        {
+            _logger.LogInformation("FCU: Command Processor Started.");
+            while (!ct.IsCancellationRequested)
+            {
+                if (_commandQueue.TryDequeue(out var cmd))
+                {
+                    // Simulate execution time
+                    _logCommandExecution(_logger, cmd.ActuatorId, cmd.Value, null);
+                }
+                else
+                {
+                    // Prevent CPU spin
+                    await Task.Delay(50, ct);
+                }
+            }
+            _logger.LogInformation("FCU: Command Processor Stopped.");
         }
 
         private void AnalyzeAndReact(TelemetryPacket packet)

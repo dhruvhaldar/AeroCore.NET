@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AeroCore.Shared\AeroCore.Shared.csproj" />
+    <ProjectReference Include="..\AeroCore.FlightComputer\AeroCore.FlightComputer.csproj" />
   </ItemGroup>
 
 </Project>

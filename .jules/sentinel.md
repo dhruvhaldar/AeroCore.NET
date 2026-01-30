@@ -32,3 +32,8 @@
 **Vulnerability:** A `BoundedStreamReader` implementation correctly checked buffer limits but contained a logic flaw where ignored characters (like `\r`) triggered a `continue` statement without incrementing a read counter. This allowed an attacker to send an infinite stream of ignored characters, causing an infinite CPU loop without triggering length limits.
 **Learning:** Resource limits (like `maxLength`) must apply to the *input consumed* (bytes read from the stream), not just the *output produced* (buffer size). Input validation loops must ensure progress or termination on every iteration.
 **Prevention:** Track total characters read from the stream and enforce limits on this total count, ensuring that even "ignored" characters contribute to the resource quota.
+
+## 2026-05-25 - Denial of Service via Unbounded Command Queue
+**Vulnerability:** The Flight Control Unit enqueued commands into a `ConcurrentQueue` without a consumer, leading to infinite memory growth (DoS) during high-activity states.
+**Learning:** Producer-Consumer patterns must always have an active consumer or a bounded queue size. Disconnected or "fire-and-forget" producers are memory leaks in disguise.
+**Prevention:** Implement active consumers for all queues or enforce `BoundedCapacity` and drop/reject policies when the queue is full.
