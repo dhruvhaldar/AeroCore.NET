@@ -123,8 +123,7 @@ namespace AeroCore.Shared.Services
                     else
                     {
                         // Sanitize input to prevent Log Injection
-                        var line = new string(buffer, 0, charsRead);
-                        _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(line)}'");
+                        _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(new ReadOnlySpan<char>(buffer, 0, charsRead))}'");
                         // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
                         await Task.Delay(100, ct);
                     }
