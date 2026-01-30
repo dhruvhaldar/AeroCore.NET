@@ -71,13 +71,25 @@ namespace AeroCore.GroundStation
         {
             // Timestamp
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write($"[GCS] T+{packet.Timestamp:HH:mm:ss.fff} | ");
+            Console.Write("[GCS] T+");
+
+            Span<char> tsBuffer = stackalloc char[20];
+            if (packet.Timestamp.TryFormat(tsBuffer, out int tsWritten, "HH:mm:ss.fff"))
+            {
+                Console.Out.Write(tsBuffer.Slice(0, tsWritten));
+            }
+            else
+            {
+                Console.Write(packet.Timestamp.ToString("HH:mm:ss.fff"));
+            }
+
+            Console.Write(" | ");
 
             // Altitude
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("ALT: ");
             Console.ForegroundColor = packet.Altitude < 0 ? ConsoleColor.Red : ConsoleColor.White;
-            Console.Write($"{packet.Altitude,8:F2}");
+            WriteFormatted(packet.Altitude, 8, "F2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" ft");
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -87,7 +99,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("VEL: ");
             Console.ForegroundColor = packet.Velocity > 100 ? ConsoleColor.Yellow : ConsoleColor.White;
-            Console.Write($"{packet.Velocity,6:F1}");
+            WriteFormatted(packet.Velocity, 6, "F1");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" kts");
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -97,7 +109,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("PIT: ");
             Console.ForegroundColor = Math.Abs(packet.Pitch) > 45 ? ConsoleColor.Red : ConsoleColor.White;
-            Console.Write($"{packet.Pitch,5:F2}");
+            WriteFormatted(packet.Pitch, 5, "F2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
@@ -117,7 +129,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("ROL: ");
             Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.White;
-            Console.Write($"{packet.Roll,5:F2}");
+            WriteFormatted(packet.Roll, 5, "F2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
@@ -135,5 +147,26 @@ namespace AeroCore.GroundStation
             Console.ResetColor();
         }
 
+        private void WriteFormatted(double value, int width, ReadOnlySpan<char> format)
+        {
+            Span<char> buffer = stackalloc char[32];
+            // Use default provider (CurrentCulture) to match Console.Write behavior
+            if (value.TryFormat(buffer, out int charsWritten, format, provider: null))
+            {
+                int padding = width - charsWritten;
+                if (padding > 0)
+                {
+                    Span<char> spaces = stackalloc char[padding];
+                    spaces.Fill(' ');
+                    Console.Out.Write(spaces);
+                }
+                Console.Out.Write(buffer.Slice(0, charsWritten));
+            }
+            else
+            {
+                // Fallback
+                Console.Write(value.ToString(format.ToString()));
+            }
+        }
     }
 }
