@@ -17,3 +17,7 @@
 ## 2026-05-22 - Analog Gauges Provide Magnitude
 **Learning:** Simple arrows (`^`/`v`) only show direction. ASCII bar gauges (`[<==|  ]`) provide richer context by showing relative intensity, allowing operators to judge "how much" at a glance.
 **Action:** Prefer analog bar gauges over simple directional indicators when screen width permits.
+
+## 2026-05-24 - Velocity Trend Indicators
+**Learning:** For critical flight parameters like Velocity, knowing the *rate of change* (acceleration/deceleration) is as important as the value itself. Simple directional arrows (`^`/`v`) provide this instant context.
+**Action:** Implement trend indicators for all dynamic telemetry values where directionality matters.
