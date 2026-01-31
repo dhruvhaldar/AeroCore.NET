@@ -37,3 +37,8 @@
 **Vulnerability:** The Flight Control Unit enqueued commands into a `ConcurrentQueue` without a consumer, leading to infinite memory growth (DoS) during high-activity states.
 **Learning:** Producer-Consumer patterns must always have an active consumer or a bounded queue size. Disconnected or "fire-and-forget" producers are memory leaks in disguise.
 **Prevention:** Implement active consumers for all queues or enforce `BoundedCapacity` and drop/reject policies when the queue is full.
+
+## 2026-07-15 - DoS Prevention with Bounded Channels
+**Vulnerability:** Unbounded `ConcurrentQueue` allows memory exhaustion if producers outpace consumers.
+**Learning:** `System.Threading.Channels` provides built-in bounding and backpressure/dropping policies (`DropOldest`) which are superior to manual `ConcurrentQueue` management for high-frequency control loops.
+**Prevention:** Replace `ConcurrentQueue` with `Channel.CreateBounded` in Producer-Consumer scenarios.
