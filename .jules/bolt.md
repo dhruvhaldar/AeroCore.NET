@@ -17,3 +17,7 @@
 ## 2026-01-26 - Console Output Allocations
 **Learning:** Console.Write with string interpolation allocates strings for every call. In high-frequency UI loops (like Ground Station), this creates significant GC pressure.
 **Action:** Use `stackalloc char[]`, `TryFormat`, and `Console.Out.Write(ReadOnlySpan<char>)` for zero-allocation console output.
+
+## 2026-01-28 - Efficient Producer-Consumer with Channels
+**Learning:** Using `ConcurrentQueue` with a polling loop (`Task.Delay`) adds unnecessary latency and CPU overhead. In real-time flight control, processing delays are critical.
+**Action:** Replace `ConcurrentQueue` + polling with `System.Threading.Channels` (Bounded) for event-driven, zero-latency consumption and built-in backpressure handling (DropOldest).
