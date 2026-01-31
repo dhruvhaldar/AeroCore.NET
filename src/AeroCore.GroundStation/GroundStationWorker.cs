@@ -14,6 +14,7 @@ namespace AeroCore.GroundStation
         private readonly ITelemetryProvider _telemetryProvider;
         private readonly ILogger<GroundStationWorker> _logger;
         private double? _lastAltitude;
+        private double? _lastVelocity;
 
         public GroundStationWorker(ITelemetryProvider telemetryProvider, ILogger<GroundStationWorker> logger)
         {
@@ -128,7 +129,33 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = packet.Velocity > 100 ? ConsoleColor.Yellow : ConsoleColor.White;
             WriteFormatted(packet.Velocity, 6, "F1");
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(" kts");
+            Console.Write(" kts ");
+
+            if (_lastVelocity.HasValue)
+            {
+                double delta = packet.Velocity - _lastVelocity.Value;
+                if (delta > 0.1)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("^");
+                }
+                else if (delta < -0.1)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("v");
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Write("-");
+                }
+            }
+            else
+            {
+                Console.Write(" ");
+            }
+            _lastVelocity = packet.Velocity;
+
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" | ");
 
