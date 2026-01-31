@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using AeroCore.Shared.Interfaces;
 using AeroCore.Shared.Models;
@@ -15,7 +15,8 @@ namespace AeroCore.FlightComputer.Services
         private readonly ILogger<FlightControlUnit> _logger;
 
         // Queue for thread-safe command dispatching
-        private readonly ConcurrentQueue<ControlCommand> _commandQueue = new();
+        private readonly Channel<ControlCommand> _commandQueue = Channel.CreateBounded<ControlCommand>(
+            new BoundedChannelOptions(50) { FullMode = BoundedChannelFullMode.DropOldest });
 
         private static readonly Action<ILogger, double, Exception?> _logPitchCorrection = LoggerMessage.Define<double>(
             LogLevel.Warning,
@@ -85,18 +86,17 @@ namespace AeroCore.FlightComputer.Services
         private async Task ProcessCommandsAsync(CancellationToken ct)
         {
             _logger.LogInformation("FCU: Command Processor Started.");
-            while (!ct.IsCancellationRequested)
+            try
             {
-                if (_commandQueue.TryDequeue(out var cmd))
+                await foreach (var cmd in _commandQueue.Reader.ReadAllAsync(ct))
                 {
                     // Simulate execution time
                     _logCommandExecution(_logger, cmd.ActuatorId, cmd.Value, null);
                 }
-                else
-                {
-                    // Prevent CPU spin
-                    await Task.Delay(50, ct);
-                }
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected on shutdown
             }
             _logger.LogInformation("FCU: Command Processor Stopped.");
         }
@@ -114,7 +114,7 @@ namespace AeroCore.FlightComputer.Services
                     Value = 0.15,
                     Timestamp = DateTime.UtcNow
                 };
-                _commandQueue.Enqueue(cmd);
+                _commandQueue.Writer.TryWrite(cmd);
             }
             else
             {
