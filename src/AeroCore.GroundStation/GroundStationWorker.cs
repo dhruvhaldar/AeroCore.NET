@@ -41,6 +41,15 @@ namespace AeroCore.GroundStation
             Console.WriteLine("  > System Status:    Ready");
             Console.WriteLine("  > Telemetry Link:   Listening...");
             Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("  [LEGEND]");
+            Console.WriteLine("   ALT: Altitude (ft)        | VEL: Velocity (kts)");
+            Console.WriteLine("   PIT/ROL: Pitch/Roll (deg) | Gauge: +/- 45 deg");
+            Console.WriteLine("   Trends: ^ Climb/Accel     | v Descend/Decel");
+            Console.WriteLine("   Alerts: RED = Critical Value");
+            Console.ResetColor();
+            Console.WriteLine("============================================================");
+            Console.WriteLine();
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
