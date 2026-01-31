@@ -1,5 +1,5 @@
 using System;
-using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace AeroCore.Shared.Helpers
 {
@@ -12,23 +12,68 @@ namespace AeroCore.Shared.Helpers
         /// that could be used for log injection / forging.
         /// Truncates input to 500 characters to prevent log flooding.
         /// </summary>
-        public static string SanitizeForLog(string input)
+        public static string SanitizeForLog(ReadOnlySpan<char> input)
         {
-            if (string.IsNullOrEmpty(input))
+            if (input.IsEmpty)
             {
                 return string.Empty;
             }
 
-            // Truncate to prevent DoS via massive logs
-            string processed = input;
-            if (processed.Length > MaxLogLength)
+            const string Suffix = "...[TRUNCATED]";
+
+            // Stackalloc buffer for zero-allocation processing (before final string creation)
+            // Size: MaxLogLength + Suffix length. ~1KB on stack.
+            Span<char> buffer = stackalloc char[MaxLogLength + Suffix.Length];
+            int bufferPos = 0;
+
+            bool truncated = false;
+            int lengthToProcess = input.Length;
+            if (lengthToProcess > MaxLogLength)
             {
-                processed = processed.Substring(0, MaxLogLength) + "...[TRUNCATED]";
+                lengthToProcess = MaxLogLength;
+                truncated = true;
             }
 
-            // Replace control characters (Cc) and format characters (Cf) with underscores.
-            // We avoid \p{C} because it includes Surrogates (Cs), which would break Emojis.
-            return Regex.Replace(processed, @"[\p{Cc}\p{Cf}]+", "_");
+            for (int i = 0; i < lengthToProcess; i++)
+            {
+                char c = input[i];
+                var category = char.GetUnicodeCategory(c);
+
+                // Replace control characters (Cc) and format characters (Cf) with underscores.
+                // We avoid \p{C} because it includes Surrogates (Cs), which would break Emojis.
+                if (category == UnicodeCategory.Control || category == UnicodeCategory.Format)
+                {
+                    buffer[bufferPos++] = '_';
+
+                    // Collapse consecutive control/format characters
+                    while (i + 1 < lengthToProcess)
+                    {
+                        char nextC = input[i + 1];
+                        var nextCategory = char.GetUnicodeCategory(nextC);
+                        if (nextCategory == UnicodeCategory.Control || nextCategory == UnicodeCategory.Format)
+                        {
+                            i++;
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    buffer[bufferPos++] = c;
+                }
+            }
+
+            if (truncated)
+            {
+                ReadOnlySpan<char> suffixSpan = Suffix.AsSpan();
+                suffixSpan.CopyTo(buffer.Slice(bufferPos));
+                bufferPos += suffixSpan.Length;
+            }
+
+            return buffer.Slice(0, bufferPos).ToString();
         }
     }
 }
