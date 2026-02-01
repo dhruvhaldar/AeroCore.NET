@@ -17,3 +17,7 @@
 ## 2026-01-26 - Console Output Allocations
 **Learning:** Console.Write with string interpolation allocates strings for every call. In high-frequency UI loops (like Ground Station), this creates significant GC pressure.
 **Action:** Use `stackalloc char[]`, `TryFormat`, and `Console.Out.Write(ReadOnlySpan<char>)` for zero-allocation console output.
+
+## 2026-01-27 - Async Producer-Consumer Latency
+**Learning:** Polling a `ConcurrentQueue` with `Task.Delay` in a consumer loop introduces unnecessary latency (up to the delay duration) and wastes CPU cycles when idle. Unbounded queues also pose a DoS risk if production exceeds consumption.
+**Action:** Use `System.Threading.Channels` with bounded capacity and `await foreach` for efficient, low-latency, and safe async producer-consumer patterns.
