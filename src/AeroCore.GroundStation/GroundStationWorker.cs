@@ -40,6 +40,10 @@ namespace AeroCore.GroundStation
             Console.WriteLine($"  > System Init:      {DateTime.Now:HH:mm:ss}");
             Console.WriteLine("  > System Status:    Ready");
             Console.WriteLine("  > Telemetry Link:   Listening...");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("  > Legend:           ALT=Altitude, VEL=Velocity, PIT=Pitch, ROL=Roll");
+            Console.WriteLine("  > Indicators:       [Cyan]=Label, [Green]=Stable, [Red]=Alert/Trend");
+            Console.ResetColor();
             Console.WriteLine();
         }
 

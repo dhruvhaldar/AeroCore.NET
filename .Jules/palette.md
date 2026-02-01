@@ -21,3 +21,7 @@
 ## 2026-05-24 - Velocity Trend Indicators
 **Learning:** For critical flight parameters like Velocity, knowing the *rate of change* (acceleration/deceleration) is as important as the value itself. Simple directional arrows (`^`/`v`) provide this instant context.
 **Action:** Implement trend indicators for all dynamic telemetry values where directionality matters.
+
+## 2026-05-25 - Legends for Abbreviated Data
+**Learning:** Operators often struggle to recall the meaning of 3-letter abbreviations (e.g., PIT, ROL) during high-stress monitoring. Providing an always-visible legend in the application header reduces cognitive load and improves accessibility for new users.
+**Action:** Always include a 'Legend' section in the startup banner of CLI tools that use abbreviated headers or headers with color-coded meanings.
