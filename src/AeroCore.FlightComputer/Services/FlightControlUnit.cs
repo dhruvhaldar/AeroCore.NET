@@ -1,6 +1,6 @@
 using System;
-using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using AeroCore.Shared.Interfaces;
 using AeroCore.Shared.Models;
@@ -14,8 +14,8 @@ namespace AeroCore.FlightComputer.Services
         private readonly ITelemetryProvider _telemetry;
         private readonly ILogger<FlightControlUnit> _logger;
 
-        // Queue for thread-safe command dispatching
-        private readonly ConcurrentQueue<ControlCommand> _commandQueue = new();
+        // Channel for thread-safe command dispatching (Bounded to prevent DoS)
+        private readonly Channel<ControlCommand> _commandChannel;
 
         private static readonly Action<ILogger, double, Exception?> _logPitchCorrection = LoggerMessage.Define<double>(
             LogLevel.Warning,
@@ -38,6 +38,11 @@ namespace AeroCore.FlightComputer.Services
         {
             _telemetry = telemetry;
             _logger = logger;
+            // Bounded channel with DropOldest prevents memory exhaustion (DoS) if producer > consumer
+            _commandChannel = Channel.CreateBounded<ControlCommand>(new BoundedChannelOptions(100)
+            {
+                FullMode = BoundedChannelFullMode.DropOldest
+            });
         }
 
         public Task InitializeAsync(CancellationToken ct)
@@ -85,19 +90,15 @@ namespace AeroCore.FlightComputer.Services
         private async Task ProcessCommandsAsync(CancellationToken ct)
         {
             _logger.LogInformation("FCU: Command Processor Started.");
-            while (!ct.IsCancellationRequested)
+            try
             {
-                if (_commandQueue.TryDequeue(out var cmd))
+                await foreach (var cmd in _commandChannel.Reader.ReadAllAsync(ct))
                 {
                     // Simulate execution time
                     _logCommandExecution(_logger, cmd.ActuatorId, cmd.Value, null);
                 }
-                else
-                {
-                    // Prevent CPU spin
-                    await Task.Delay(50, ct);
-                }
             }
+            catch (OperationCanceledException) { } // Graceful shutdown
             _logger.LogInformation("FCU: Command Processor Stopped.");
         }
 
@@ -114,7 +115,7 @@ namespace AeroCore.FlightComputer.Services
                     Value = 0.15,
                     Timestamp = DateTime.UtcNow
                 };
-                _commandQueue.Enqueue(cmd);
+                _commandChannel.Writer.TryWrite(cmd);
             }
             else
             {
