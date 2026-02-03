@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using System.IO;
+using System.IO.Ports;
 
 namespace AeroCore.Shared.Helpers
 {
@@ -86,6 +87,53 @@ namespace AeroCore.Shared.Helpers
                     // EOF
                     return pos > 0 ? pos : -1;
                 }
+
+                char c = (char)cVal;
+
+                if (c == '\n')
+                {
+                    return pos;
+                }
+                else if (c == '\r')
+                {
+                    // Ignore carriage return, assuming standard CRLF or LF line endings
+                    continue;
+                }
+                else
+                {
+                    buffer[pos++] = c;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reads a line of characters into the provided buffer directly from a SerialPort.
+        /// Optimized to avoid delegate allocation and invocation overhead.
+        /// Throws InvalidDataException if the line length exceeds the buffer length.
+        /// </summary>
+        /// <param name="port">The SerialPort to read from.</param>
+        /// <param name="buffer">Buffer to write characters into.</param>
+        /// <returns>The number of characters read.</returns>
+        public static int ReadSafeLine(SerialPort port, Span<char> buffer)
+        {
+            if (port == null) throw new ArgumentNullException(nameof(port));
+
+            int pos = 0;
+            int totalReads = 0;
+            int maxLength = buffer.Length;
+
+            while (true)
+            {
+                // Check limit before reading next char to be safe
+                if (totalReads >= maxLength)
+                {
+                    throw new InvalidDataException($"Input line exceeded maximum length of {maxLength} characters.");
+                }
+
+                // SerialPort.ReadChar is blocking and throws TimeoutException on timeout.
+                // It does not return -1.
+                int cVal = port.ReadChar();
+                totalReads++;
 
                 char c = (char)cVal;
 

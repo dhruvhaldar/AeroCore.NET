@@ -87,7 +87,7 @@ namespace AeroCore.Shared.Services
                         try
                         {
                             // Use BoundedStreamReader to prevent DoS via massive lines.
-                            return BoundedStreamReader.ReadSafeLine(() => _serialPort.ReadChar(), buffer);
+                            return BoundedStreamReader.ReadSafeLine(_serialPort, buffer);
                         }
                         catch (TimeoutException)
                         {
