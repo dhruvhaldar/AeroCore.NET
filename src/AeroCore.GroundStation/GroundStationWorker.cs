@@ -181,7 +181,7 @@ namespace AeroCore.GroundStation
             // Pitch Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = Math.Abs(packet.Pitch) > 45 ? ConsoleColor.Red : ConsoleColor.Green;
 
             Span<char> gaugeBuffer = stackalloc char[11];
             GaugeVisualizer.Fill(gaugeBuffer, packet.Pitch, 45.0);
@@ -201,7 +201,7 @@ namespace AeroCore.GroundStation
             // Roll Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.Green;
 
             GaugeVisualizer.Fill(gaugeBuffer, packet.Roll, 45.0);
             Console.Out.Write(gaugeBuffer);

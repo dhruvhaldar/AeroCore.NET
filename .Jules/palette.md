@@ -25,3 +25,7 @@
 ## 2026-05-25 - Self-Documenting Interfaces
 **Learning:** Even simple console apps benefit immensely from a "Legend" or "Help" section on startup. It democratizes access to the tool for non-experts.
 **Action:** Include a static Legend block in startup banners for all user-facing CLI tools.
+
+## 2026-05-26 - Consistent Critical State Coloring
+**Learning:** When displaying data both numerically and visually (e.g., gauges), ensure both representations react to critical thresholds (e.g., turning Red). Inconsistency (Red text vs Green gauge) confuses the operator about the severity.
+**Action:** Sync color logic between text and visual indicators for the same metric.
