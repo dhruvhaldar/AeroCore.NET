@@ -33,7 +33,7 @@ namespace AeroCore.Shared.Services
             _portName = _config.GetValue<string>("Serial:PortName") ?? defaultPort;
             _baudRate = _config.GetValue<int>("Serial:BaudRate", 9600);
 
-            _logger.LogInformation($"Initializing Serial Telemetry on {_portName} at {_baudRate} baud.");
+            _logger.LogInformation($"Initializing Serial Telemetry on {SecurityHelper.SanitizeForLog(_portName.AsSpan())} at {_baudRate} baud.");
 
             try
             {

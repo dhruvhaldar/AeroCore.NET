@@ -37,3 +37,8 @@
 **Vulnerability:** The Flight Control Unit enqueued commands into a `ConcurrentQueue` without a consumer, leading to infinite memory growth (DoS) during high-activity states.
 **Learning:** Producer-Consumer patterns must always have an active consumer or a bounded queue size. Disconnected or "fire-and-forget" producers are memory leaks in disguise.
 **Prevention:** Implement active consumers for all queues or enforce `BoundedCapacity` and drop/reject policies when the queue is full.
+
+## 2026-06-10 - Log Injection via Configuration Injection
+**Vulnerability:** The Serial Telemetry Provider logged the configured port name directly without sanitization, allowing an attacker with control over the environment (e.g., via `Serial__PortName` environment variable) to inject malicious log entries.
+**Learning:** Configuration values (like environment variables, appsettings) are external inputs and must be treated as untrusted, especially when logging them at startup.
+**Prevention:** Always sanitize configuration values before logging them, using the same sanitization routines applied to user input.
