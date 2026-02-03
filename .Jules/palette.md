@@ -21,3 +21,7 @@
 ## 2026-05-24 - Velocity Trend Indicators
 **Learning:** For critical flight parameters like Velocity, knowing the *rate of change* (acceleration/deceleration) is as important as the value itself. Simple directional arrows (`^`/`v`) provide this instant context.
 **Action:** Implement trend indicators for all dynamic telemetry values where directionality matters.
+
+## 2026-05-25 - Self-Documenting Interfaces
+**Learning:** Even simple console apps benefit immensely from a "Legend" or "Help" section on startup. It democratizes access to the tool for non-experts.
+**Action:** Include a static Legend block in startup banners for all user-facing CLI tools.
