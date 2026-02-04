@@ -181,12 +181,7 @@ namespace AeroCore.GroundStation
             // Pitch Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            Console.ForegroundColor = Math.Abs(packet.Pitch) > 45 ? ConsoleColor.Red : ConsoleColor.Green;
-
-            Span<char> gaugeBuffer = stackalloc char[11];
-            GaugeVisualizer.Fill(gaugeBuffer, packet.Pitch, 45.0);
-            Console.Out.Write(gaugeBuffer);
-
+            PrintGauge(packet.Pitch, 45.0);
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] | ");
 
@@ -201,15 +196,38 @@ namespace AeroCore.GroundStation
             // Roll Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.Green;
-
-            GaugeVisualizer.Fill(gaugeBuffer, packet.Roll, 45.0);
-            Console.Out.Write(gaugeBuffer);
-
+            PrintGauge(packet.Roll, 45.0);
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("]");
 
             Console.ResetColor();
+        }
+
+        private void PrintGauge(double value, double range)
+        {
+            var barColor = Math.Abs(value) > range ? ConsoleColor.Red : ConsoleColor.Green;
+            Span<char> buffer = stackalloc char[11];
+            GaugeVisualizer.Fill(buffer, value, range);
+
+            int center = buffer.Length / 2;
+
+            // Print Left
+            if (center > 0)
+            {
+                Console.ForegroundColor = barColor;
+                Console.Out.Write(buffer.Slice(0, center));
+            }
+
+            // Print Center (Anchor)
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Out.Write(buffer.Slice(center, 1));
+
+            // Print Right
+            if (center + 1 < buffer.Length)
+            {
+                Console.ForegroundColor = barColor;
+                Console.Out.Write(buffer.Slice(center + 1));
+            }
         }
 
         private void WriteFormatted(double value, int width, ReadOnlySpan<char> format)
