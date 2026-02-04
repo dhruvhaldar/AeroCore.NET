@@ -29,11 +29,11 @@ namespace AeroCore.Tests
         [Fact]
         public void ParseFromCsv_ExcessiveValues_ShouldBeRejected()
         {
-             // Test massive numbers
-             string line = "1e309,1e309,1e309,1e309"; // larger than double.MaxValue -> Infinity
-             var packet = TelemetryParser.ParseFromCsv(line);
+            // Test massive numbers
+            string line = "1e309,1e309,1e309,1e309"; // larger than double.MaxValue -> Infinity
+            var packet = TelemetryParser.ParseFromCsv(line);
 
-             Assert.Null(packet);
+            Assert.Null(packet);
         }
     }
 }

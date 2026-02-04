@@ -75,7 +75,7 @@ namespace AeroCore.Tests
         [Fact]
         public void ControlCommand_RecordWith_ValidatesNewValue()
         {
-             var command = new ControlCommand
+            var command = new ControlCommand
             {
                 ActuatorId = "RUDDER",
                 Value = 0.5
