@@ -87,5 +87,29 @@ namespace AeroCore.Tests
                 var badCommand = command with { Value = 1.5 };
             });
         }
+
+        [Fact]
+        public void ControlCommand_ControlCharactersInActuatorId_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new ControlCommand
+                {
+                    ActuatorId = "RUDDER\n"
+                };
+            });
+        }
+
+        [Fact]
+        public void ControlCommand_InvalidCharactersInActuatorId_ThrowsArgumentException()
+        {
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new ControlCommand
+                {
+                    ActuatorId = "RUDDER$123"
+                };
+            });
+        }
     }
 }
