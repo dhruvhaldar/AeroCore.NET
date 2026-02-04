@@ -15,6 +15,15 @@ namespace AeroCore.Shared.Models
                 {
                     throw new ArgumentException("ActuatorId cannot be null or whitespace.", nameof(ActuatorId));
                 }
+
+                foreach (char c in value)
+                {
+                    if (!char.IsLetterOrDigit(c) && c != '_' && c != '-')
+                    {
+                        throw new ArgumentException($"ActuatorId contains invalid character '{c}'. Only alphanumeric, underscore, and hyphen are allowed.", nameof(ActuatorId));
+                    }
+                }
+
                 _actuatorId = value;
             }
         }
