@@ -17,3 +17,7 @@
 ## 2026-01-26 - Console Output Allocations
 **Learning:** Console.Write with string interpolation allocates strings for every call. In high-frequency UI loops (like Ground Station), this creates significant GC pressure.
 **Action:** Use `stackalloc char[]`, `TryFormat`, and `Console.Out.Write(ReadOnlySpan<char>)` for zero-allocation console output.
+
+## 2026-01-27 - Serial Telemetry Delegate Overhead
+**Learning:** Usage of `BoundedStreamReader.ReadSafeLine` with a lambda `() => _serialPort.ReadChar()` inside the high-frequency telemetry loop created a new delegate and closure allocation (or at least invocation overhead) for every single character read.
+**Action:** Implemented a specialized `ReadSafeLine(SerialPort, Span<char>)` overload to bypass the delegate and call `SerialPort.ReadChar()` directly.
