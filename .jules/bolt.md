@@ -21,3 +21,7 @@
 ## 2026-01-27 - Serial Telemetry Delegate Overhead
 **Learning:** Usage of `BoundedStreamReader.ReadSafeLine` with a lambda `() => _serialPort.ReadChar()` inside the high-frequency telemetry loop created a new delegate and closure allocation (or at least invocation overhead) for every single character read.
 **Action:** Implemented a specialized `ReadSafeLine(SerialPort, Span<char>)` overload to bypass the delegate and call `SerialPort.ReadChar()` directly.
+
+## 2026-01-29 - Async Serial I/O Buffering
+**Learning:** Using `Task.Run(() => SerialPort.ReadLine())` or `SerialPort.ReadChar()` in a loop creates excessive thread pool pressure (1 task per line) and syscall overhead. `SerialPort.BaseStream.ReadAsync` with a large byte buffer eliminates this overhead but requires manual line parsing.
+**Action:** For high-frequency serial I/O, use `BaseStream.ReadAsync` with a persistent `byte[]` buffer and manual parsing logic, ensuring DoS protection (line length limits) is reimplemented manually.
