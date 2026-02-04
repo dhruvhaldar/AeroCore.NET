@@ -73,59 +73,85 @@ namespace AeroCore.Shared.Services
 
             _logger.LogInformation("Serial Telemetry Stream Started.");
 
-            char[] buffer = new char[1024];
+            byte[] rawBuffer = new byte[4096];
+            char[] lineBuffer = new char[1024];
+            int linePos = 0;
+            int totalLineChars = 0; // Tracks total chars including ignored ones for DoS protection
+
+            // Use BaseStream to read async chunks directly, avoiding Task.Run overhead and single-byte reads.
+            System.IO.Stream stream = _serialPort.BaseStream;
 
             while (!ct.IsCancellationRequested && _serialPort.IsOpen)
             {
-                int charsRead = 0;
+                int bytesRead = 0;
                 try
                 {
-                    // Avoid blocking the thread pool with ReadLine by wrapping in Task.Run
-                    // This is still not ideal compared to pipelines or async read, but vastly better than blocking.
-                    charsRead = await Task.Run(() =>
+                    // Read a chunk of bytes asynchronously
+                    bytesRead = await stream.ReadAsync(rawBuffer, 0, rawBuffer.Length, ct);
+                    if (bytesRead == 0)
                     {
-                        try
-                        {
-                            // Use BoundedStreamReader to prevent DoS via massive lines.
-                            return BoundedStreamReader.ReadSafeLine(_serialPort, buffer);
-                        }
-                        catch (TimeoutException)
-                        {
-                            return -1;
-                        }
-                    }, ct);
+                        // EOF - Should not happen on open serial port usually, but handle it
+                        await Task.Delay(10, ct); // Prevent tight loop if stream is weird
+                        continue;
+                    }
                 }
                 catch (TaskCanceledException)
                 {
                     break;
                 }
-                catch (System.IO.InvalidDataException ex)
-                {
-                    _logger.LogWarning($"Telemetry line exceeded length limit: {ex.Message}");
-                    // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
-                    await Task.Delay(100, ct);
-                    continue;
-                }
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Error reading from serial port.");
                     await Task.Delay(1000, ct);
+                    linePos = 0;
+                    totalLineChars = 0;
                     continue;
                 }
 
-                if (charsRead > 0)
+                for (int i = 0; i < bytesRead; i++)
                 {
-                    var packet = ParseBuffer(buffer, charsRead);
-                    if (packet != null)
+                    // Simple ASCII decoding.
+                    char c = (char)rawBuffer[i];
+                    totalLineChars++;
+
+                    // DoS Protection: Check line length limit
+                    if (totalLineChars > lineBuffer.Length)
                     {
-                        yield return packet.Value;
+                        _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                        linePos = 0;
+                        totalLineChars = 0;
+                        // Delay to prevent flooding
+                        await Task.Delay(100, ct);
+                        continue;
+                    }
+
+                    if (c == '\n')
+                    {
+                        if (linePos > 0)
+                        {
+                            var packet = ParseBuffer(lineBuffer, linePos);
+                            if (packet != null)
+                            {
+                                yield return packet.Value;
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(new ReadOnlySpan<char>(lineBuffer, 0, linePos))}'");
+                                // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
+                                await Task.Delay(100, ct);
+                            }
+                        }
+                        linePos = 0;
+                        totalLineChars = 0;
+                    }
+                    else if (c == '\r')
+                    {
+                        // Ignore CR but count towards totalLineChars (already done)
+                        continue;
                     }
                     else
                     {
-                        // Sanitize input to prevent Log Injection
-                        _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(new ReadOnlySpan<char>(buffer, 0, charsRead))}'");
-                        // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
-                        await Task.Delay(100, ct);
+                        lineBuffer[linePos++] = c;
                     }
                 }
             }
