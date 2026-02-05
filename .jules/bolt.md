@@ -25,3 +25,7 @@
 ## 2026-01-29 - Async Serial I/O Buffering
 **Learning:** Using `Task.Run(() => SerialPort.ReadLine())` or `SerialPort.ReadChar()` in a loop creates excessive thread pool pressure (1 task per line) and syscall overhead. `SerialPort.BaseStream.ReadAsync` with a large byte buffer eliminates this overhead but requires manual line parsing.
 **Action:** For high-frequency serial I/O, use `BaseStream.ReadAsync` with a persistent `byte[]` buffer and manual parsing logic, ensuring DoS protection (line length limits) is reimplemented manually.
+
+## 2026-01-30 - Record Validation Bypass with `with` Expression
+**Learning:** Creating `ControlCommand` records in a loop (e.g., `new ControlCommand { ... }`) triggers expensive validation logic (loops, char checks) in the `init` accessor for every instance, even for constant values.
+**Action:** Use a `static readonly` template instance for common commands and the `with` expression (e.g., `_template with { Timestamp = ... }`) to create copies. This uses the copy constructor, copying the validated backing fields directly and bypassing the `init` property validation.
