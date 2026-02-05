@@ -49,7 +49,7 @@ namespace AeroCore.GroundStation
             Console.WriteLine();
             Console.WriteLine("   <====|====> : Visual Attitude Indicator");
             Console.WriteLine("   ^ / v       : Rising / Falling Trend");
-            Console.WriteLine("   Green/Red   : Stable / Critical State");
+            Console.WriteLine("   Green/Yel/Red : Stable / Warning / Critical");
             Console.ResetColor();
             Console.WriteLine();
         }
@@ -173,7 +173,10 @@ namespace AeroCore.GroundStation
             // Pitch
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("PIT: ");
-            Console.ForegroundColor = Math.Abs(packet.Pitch) > 45 ? ConsoleColor.Red : ConsoleColor.White;
+            double absPitch = Math.Abs(packet.Pitch);
+            if (absPitch > 45) Console.ForegroundColor = ConsoleColor.Red;
+            else if (absPitch > 35) Console.ForegroundColor = ConsoleColor.Yellow;
+            else Console.ForegroundColor = ConsoleColor.White;
             WriteFormatted(packet.Pitch, 5, "F2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
@@ -188,7 +191,10 @@ namespace AeroCore.GroundStation
             // Roll
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("ROL: ");
-            Console.ForegroundColor = Math.Abs(packet.Roll) > 45 ? ConsoleColor.Red : ConsoleColor.White;
+            double absRoll = Math.Abs(packet.Roll);
+            if (absRoll > 45) Console.ForegroundColor = ConsoleColor.Red;
+            else if (absRoll > 35) Console.ForegroundColor = ConsoleColor.Yellow;
+            else Console.ForegroundColor = ConsoleColor.White;
             WriteFormatted(packet.Roll, 5, "F2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
@@ -205,7 +211,12 @@ namespace AeroCore.GroundStation
 
         private void PrintGauge(double value, double range)
         {
-            var barColor = Math.Abs(value) > range ? ConsoleColor.Red : ConsoleColor.Green;
+            var absValue = Math.Abs(value);
+            ConsoleColor barColor;
+            if (absValue > range) barColor = ConsoleColor.Red;
+            else if (absValue > range * 0.8) barColor = ConsoleColor.Yellow;
+            else barColor = ConsoleColor.Green;
+
             Span<char> buffer = stackalloc char[11];
             GaugeVisualizer.Fill(buffer, value, range);
 
