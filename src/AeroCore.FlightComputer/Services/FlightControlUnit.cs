@@ -32,6 +32,14 @@ namespace AeroCore.FlightComputer.Services
             new EventId(3, "CommandExec"),
             "[EXEC] Executing Command: {ActuatorId} = {Value:F2}");
 
+        // Pre-validated command template to avoid validation overhead in hot path
+        private static readonly ControlCommand _elevatorDownCmd = new ControlCommand
+        {
+            ActuatorId = "ELEVATOR_DOWN",
+            Value = 0.15,
+            Timestamp = default // Will be overwritten by 'with'
+        };
+
         public FlightControlUnit(
             ITelemetryProvider telemetry,
             ILogger<FlightControlUnit> logger)
@@ -113,12 +121,10 @@ namespace AeroCore.FlightComputer.Services
             {
                 _logPitchCorrection(_logger, packet.Pitch, null);
 
-                var cmd = new ControlCommand
-                {
-                    ActuatorId = "ELEVATOR_DOWN",
-                    Value = 0.15,
-                    Timestamp = DateTime.UtcNow
-                };
+                // Use 'with' to create a copy with new timestamp.
+                // This bypasses the expensive 'init' validation logic for ActuatorId and Value
+                // because it copies the backing fields directly.
+                var cmd = _elevatorDownCmd with { Timestamp = DateTime.UtcNow };
 
                 // Non-blocking write, drops oldest if full
                 _commandChannel.Writer.TryWrite(cmd);
