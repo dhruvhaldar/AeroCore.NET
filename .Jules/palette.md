@@ -29,3 +29,7 @@
 ## 2026-05-26 - Consistent Critical State Coloring
 **Learning:** When displaying data both numerically and visually (e.g., gauges), ensure both representations react to critical thresholds (e.g., turning Red). Inconsistency (Red text vs Green gauge) confuses the operator about the severity.
 **Action:** Sync color logic between text and visual indicators for the same metric.
+
+## 2026-05-27 - Tri-State Warning Indicators
+**Learning:** Binary states (Safe/Critical) are insufficient for monitoring. Warning states (Yellow) bridge the gap, reducing cognitive shock and allowing proactive operator response.
+**Action:** Implement tri-state (Safe/Warning/Critical) logic for all gauge-based indicators where values approach limits.
