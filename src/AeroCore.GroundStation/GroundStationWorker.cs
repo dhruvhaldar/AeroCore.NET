@@ -44,8 +44,29 @@ namespace AeroCore.GroundStation
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("  [LEGEND]");
-            Console.WriteLine("   ALT: Altitude (ft)   VEL: Velocity (kts)");
-            Console.WriteLine("   PIT: Pitch (deg)     ROL: Roll (deg)");
+
+            Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("ALT");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(": Altitude (ft)   ");
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("VEL");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(": Velocity (kts)");
+
+            Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("PIT");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(": Pitch (deg)     ");
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("ROL");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(": Roll (deg)");
+
             Console.WriteLine();
             Console.WriteLine("   <====|====> : Visual Attitude Indicator");
             Console.WriteLine("   ^ / v       : Rising / Falling Trend");
