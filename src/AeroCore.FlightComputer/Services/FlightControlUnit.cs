@@ -17,6 +17,10 @@ namespace AeroCore.FlightComputer.Services
         // Channel for thread-safe, bounded command dispatching (DoS prevention)
         private readonly Channel<ControlCommand> _commandChannel;
 
+        // Rate limiters for logging to prevent DoS via log flooding
+        private DateTime _lastStatusLog = DateTime.MinValue;
+        private DateTime _lastCorrectionLog = DateTime.MinValue;
+
         private static readonly Action<ILogger, double, Exception?> _logPitchCorrection = LoggerMessage.Define<double>(
             LogLevel.Warning,
             new EventId(1, "PitchCorrection"),
@@ -103,7 +107,8 @@ namespace AeroCore.FlightComputer.Services
             {
                 await foreach (var cmd in _commandChannel.Reader.ReadAllAsync(ct))
                 {
-                    // Simulate execution time
+                    // Simulate execution time (actuator delay) and prevent log flooding
+                    await Task.Delay(50, ct);
                     _logCommandExecution(_logger, cmd.ActuatorId, cmd.Value, null);
                 }
             }
@@ -119,7 +124,13 @@ namespace AeroCore.FlightComputer.Services
             // Simple PID-like logic (simulated)
             if (packet.Pitch > 0.5)
             {
-                _logPitchCorrection(_logger, packet.Pitch, null);
+                // Rate limit correction logs to prevent flooding (max 10/sec)
+                var now = DateTime.UtcNow;
+                if ((now - _lastCorrectionLog).TotalMilliseconds > 100)
+                {
+                    _logPitchCorrection(_logger, packet.Pitch, null);
+                    _lastCorrectionLog = now;
+                }
 
                 // Use 'with' to create a copy with new timestamp.
                 // This bypasses the expensive 'init' validation logic for ActuatorId and Value
@@ -131,7 +142,13 @@ namespace AeroCore.FlightComputer.Services
             }
             else
             {
-                _logStatus(_logger, packet.Altitude, packet.Velocity, packet.Pitch, null);
+                // Rate limit status logs (max 1/sec)
+                var now = DateTime.UtcNow;
+                if ((now - _lastStatusLog).TotalSeconds > 1)
+                {
+                    _logStatus(_logger, packet.Altitude, packet.Velocity, packet.Pitch, null);
+                    _lastStatusLog = now;
+                }
             }
         }
     }
