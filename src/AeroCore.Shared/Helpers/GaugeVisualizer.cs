@@ -21,6 +21,14 @@ namespace AeroCore.Shared.Helpers
             // Initialize with spaces
             buffer.Fill(' ');
 
+            // Set scale markers (at ~50% of each side)
+            int quarter = center / 2;
+            if (quarter > 0)
+            {
+                if (center - quarter >= 0) buffer[center - quarter] = '.';
+                if (center + quarter < width) buffer[center + quarter] = '.';
+            }
+
             // Set center marker
             if (center < width)
             {

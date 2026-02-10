@@ -12,8 +12,8 @@ namespace AeroCore.Tests
             Span<char> buffer = stackalloc char[11];
             GaugeVisualizer.Fill(buffer, 0, 100);
 
-            // Expected: "     |     "
-            Assert.Equal("     |     ", buffer.ToString());
+            // Expected: "   . | .   " (with scale markers)
+            Assert.Equal("   . | .   ", buffer.ToString());
         }
 
         [Fact]
@@ -22,8 +22,8 @@ namespace AeroCore.Tests
             Span<char> buffer = stackalloc char[11];
             GaugeVisualizer.Fill(buffer, 100, 100);
 
-            // Expected: "     |====>"
-            Assert.Equal("     |====>", buffer.ToString());
+            // Expected: "   . |====>" (right marker overwritten)
+            Assert.Equal("   . |====>", buffer.ToString());
         }
 
         [Fact]
@@ -32,8 +32,8 @@ namespace AeroCore.Tests
             Span<char> buffer = stackalloc char[11];
             GaugeVisualizer.Fill(buffer, -100, 100);
 
-            // Expected: "<====|     "
-            Assert.Equal("<====|     ", buffer.ToString());
+            // Expected: "<====| .   " (left marker overwritten)
+            Assert.Equal("<====| .   ", buffer.ToString());
         }
 
         [Fact]
@@ -44,9 +44,9 @@ namespace AeroCore.Tests
 
             // 0.5 * 5 = 2.5 -> Round to Even -> 2
             // fill = 2.
-            // i=1: '=', i=2: '='. buffer[center+2] = '>' (Overwrites)
-            // Result: "     |=>   "
-            Assert.Equal("     |=>   ", buffer.ToString());
+            // i=1: '=', i=2: '='. buffer[center+2] = '>' (Overwrites right marker at index 7)
+            // Result: "   . |=>   "
+            Assert.Equal("   . |=>   ", buffer.ToString());
         }
 
         [Fact]
@@ -73,10 +73,10 @@ namespace AeroCore.Tests
             // So it won't write '>', but it might write '='.
             // i=1: center+1=3. buffer[3]='='.
             // i=2: center+2=4. Out of bounds.
-            // Result: "  |="
+            // Result: " .|=" (Left marker at index 1 is visible)
             GaugeVisualizer.Fill(buffer, 100, 100);
 
-            Assert.Equal("  |=", buffer.ToString());
+            Assert.Equal(" .|=", buffer.ToString());
         }
     }
 }
