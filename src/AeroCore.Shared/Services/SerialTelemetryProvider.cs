@@ -73,90 +73,175 @@ namespace AeroCore.Shared.Services
 
             _logger.LogInformation("Serial Telemetry Stream Started.");
 
-            byte[] rawBuffer = new byte[4096];
-            char[] lineBuffer = new char[1024];
-            int linePos = 0;
-            int totalLineChars = 0; // Tracks total chars including ignored ones for DoS protection
-
             // Use BaseStream to read async chunks directly, avoiding Task.Run overhead and single-byte reads.
             System.IO.Stream stream = _serialPort.BaseStream;
 
-            while (!ct.IsCancellationRequested && _serialPort.IsOpen)
+            await foreach (var packet in ProcessStreamAsync(stream, ct, () => _serialPort.IsOpen))
+            {
+                yield return packet;
+            }
+
+            if (_serialPort.IsOpen) _serialPort.Close();
+        }
+
+        /// <summary>
+        /// Processes a telemetry stream and yields parsed packets.
+        /// Public for testing purposes.
+        /// </summary>
+        public async IAsyncEnumerable<TelemetryPacket> ProcessStreamAsync(
+            System.IO.Stream stream,
+            [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct,
+            Func<bool>? isConnected = null)
+        {
+            byte[] rawBuffer = new byte[4096];
+            char[] lineBuffer = new char[1024];
+            int linePos = 0;
+            // Reused list to avoid allocation per read
+            List<TelemetryPacket> packets = new List<TelemetryPacket>();
+
+            while (!ct.IsCancellationRequested && (isConnected?.Invoke() ?? true))
             {
                 int bytesRead = 0;
                 try
                 {
-                    // Read a chunk of bytes asynchronously
                     bytesRead = await stream.ReadAsync(rawBuffer, 0, rawBuffer.Length, ct);
                     if (bytesRead == 0)
                     {
-                        // EOF - Should not happen on open serial port usually, but handle it
-                        await Task.Delay(10, ct); // Prevent tight loop if stream is weird
+                        await Task.Delay(10, ct);
                         continue;
                     }
                 }
                 catch (TaskCanceledException)
                 {
-                    break;
+                    yield break;
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error reading from serial port.");
+                    _logger.LogError(ex, "Error reading from stream.");
                     await Task.Delay(1000, ct);
                     linePos = 0;
-                    totalLineChars = 0;
                     continue;
                 }
 
-                for (int i = 0; i < bytesRead; i++)
-                {
-                    // Simple ASCII decoding.
-                    char c = (char)rawBuffer[i];
-                    totalLineChars++;
+                // Optimization: Use Span-based processing in a separate method to avoid "ref struct in async" error.
+                // We process the buffer in chunks. If a delay is required (due to error/overflow),
+                // we pause and then resume processing the rest of the buffer.
+                int bufferOffset = 0;
 
-                    // DoS Protection: Check line length limit
-                    if (totalLineChars > lineBuffer.Length)
+                while (bufferOffset < bytesRead)
+                {
+                    int consumed = 0;
+                    bool requiresDelay = false;
+                    packets.Clear();
+
+                    ProcessChunk(
+                        rawBuffer.AsSpan(bufferOffset, bytesRead - bufferOffset),
+                        lineBuffer,
+                        ref linePos,
+                        packets,
+                        out consumed,
+                        out requiresDelay);
+
+                    bufferOffset += consumed;
+
+                    foreach (var packet in packets)
                     {
-                        _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
-                        linePos = 0;
-                        totalLineChars = 0;
-                        // Delay to prevent flooding
-                        await Task.Delay(100, ct);
-                        continue;
+                        yield return packet;
                     }
 
-                    if (c == '\n')
+                    if (requiresDelay)
                     {
+                        await Task.Delay(100, ct);
+                    }
+                }
+            }
+        }
+
+        private void ProcessChunk(
+            ReadOnlySpan<byte> bufferSpan,
+            char[] lineBuffer,
+            ref int linePos,
+            List<TelemetryPacket> packets,
+            out int consumedBytes,
+            out bool requiresDelay)
+        {
+            consumedBytes = 0;
+            requiresDelay = false;
+
+            while (!bufferSpan.IsEmpty)
+            {
+                // Find first occurrence of either \r or \n
+                int idx = bufferSpan.IndexOfAny((byte)'\r', (byte)'\n');
+
+                if (idx == -1)
+                {
+                    // No newline or CR found in the remaining buffer.
+                    // Copy everything to lineBuffer if it fits.
+                    int lengthToCopy = bufferSpan.Length;
+
+                    if (linePos + lengthToCopy > lineBuffer.Length)
+                    {
+                        // DoS Protection: Line too long.
+                        _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                        linePos = 0;
+                        requiresDelay = true;
+                        consumedBytes += bufferSpan.Length; // Consume/Drop the rest
+                        return;
+                    }
+
+                    System.Text.Encoding.Latin1.GetChars(bufferSpan, lineBuffer.AsSpan(linePos));
+                    linePos += lengthToCopy;
+                    consumedBytes += bufferSpan.Length;
+                    break; // Need more data
+                }
+                else
+                {
+                    // Found a delimiter at idx.
+                    int lengthToCopy = idx;
+
+                    if (linePos + lengthToCopy > lineBuffer.Length)
+                    {
+                        // DoS Protection
+                        _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                        linePos = 0;
+                        requiresDelay = true;
+                        consumedBytes += idx + 1; // Consume up to and including delimiter
+                        return; // Return to allow delay
+                    }
+
+                    // Copy valid part
+                    System.Text.Encoding.Latin1.GetChars(bufferSpan.Slice(0, lengthToCopy), lineBuffer.AsSpan(linePos));
+                    linePos += lengthToCopy;
+
+                    byte delimiter = bufferSpan[idx];
+
+                    // Advance buffer past the delimiter
+                    bufferSpan = bufferSpan.Slice(idx + 1);
+                    consumedBytes += idx + 1;
+
+                    if (delimiter == (byte)'\n')
+                    {
+                        // End of line. Process it.
                         if (linePos > 0)
                         {
                             var packet = ParseBuffer(lineBuffer, linePos);
                             if (packet != null)
                             {
-                                yield return packet.Value;
+                                packets.Add(packet.Value);
                             }
                             else
                             {
                                 _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(new ReadOnlySpan<char>(lineBuffer, 0, linePos))}'");
-                                // DoS Prevention: Delay to prevent log flooding from rapid invalid inputs
-                                await Task.Delay(100, ct);
+                                requiresDelay = true;
+                                linePos = 0;
+                                return; // Return to allow delay
                             }
                         }
                         linePos = 0;
-                        totalLineChars = 0;
                     }
-                    else if (c == '\r')
-                    {
-                        // Ignore CR but count towards totalLineChars (already done)
-                        continue;
-                    }
-                    else
-                    {
-                        lineBuffer[linePos++] = c;
-                    }
+                    // If delimiter is \r, we just skipped it, loop continues.
                 }
             }
-
-            if (_serialPort.IsOpen) _serialPort.Close();
         }
 
         private static TelemetryPacket? ParseBuffer(char[] buffer, int length)
