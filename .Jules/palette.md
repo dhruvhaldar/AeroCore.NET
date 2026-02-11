@@ -33,3 +33,7 @@
 ## 2026-05-27 - Tri-State Warning Indicators
 **Learning:** Binary states (Safe/Critical) are insufficient for monitoring. Warning states (Yellow) bridge the gap, reducing cognitive shock and allowing proactive operator response.
 **Action:** Implement tri-state (Safe/Warning/Critical) logic for all gauge-based indicators where values approach limits.
+
+## 2026-05-28 - Show, Don't Just Tell (In Legends)
+**Learning:** Text-based legends describing color codes ("Green/Yel/Red") are abstract. Using the actual colors in the legend itself instantly trains the user's eye and reduces cognitive load.
+**Action:** When explaining visual indicators in a CLI, render the explanation using the same visual style (colors, symbols) as the data it describes.

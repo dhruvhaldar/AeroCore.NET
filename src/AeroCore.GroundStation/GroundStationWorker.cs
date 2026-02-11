@@ -68,9 +68,41 @@ namespace AeroCore.GroundStation
             Console.WriteLine(": Roll (deg)");
 
             Console.WriteLine();
-            Console.WriteLine("   <====|====> : Visual Attitude Indicator");
-            Console.WriteLine("   ^ / v       : Rising / Falling Trend");
-            Console.WriteLine("   Green/Yel/Red : Stable / Warning / Critical");
+
+            Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("<====");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("|");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("====>");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" : Visual Attitude Indicator");
+
+            Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("^");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" / ");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("v");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("       : Rising / Falling Trend");
+
+            Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("Green");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("/");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write("Yel");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("/");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("Red");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" : Stable / Warning / Critical");
+
             Console.ResetColor();
             Console.WriteLine();
         }
