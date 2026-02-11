@@ -296,18 +296,34 @@ namespace AeroCore.GroundStation
 
         private void WriteFormatted(double value, int width, ReadOnlySpan<char> format)
         {
-            Span<char> buffer = stackalloc char[32];
+            // Allocate a buffer large enough for typical numbers + padding.
+            // 32 chars is usually enough for double string representation.
+            Span<char> valueBuffer = stackalloc char[32];
+
             // Use default provider (CurrentCulture) to match Console.Write behavior
-            if (value.TryFormat(buffer, out int charsWritten, format, provider: null))
+            if (value.TryFormat(valueBuffer, out int charsWritten, format, provider: null))
             {
                 int padding = width - charsWritten;
+
                 if (padding > 0)
                 {
+                    // Optimization: Combine padding and value into a single buffer to reduce Console syscalls by 50%.
+                    // Allocation on stack is cheap; Console I/O is expensive.
+                    Span<char> combinedBuffer = stackalloc char[64];
+                    if (padding + charsWritten <= combinedBuffer.Length)
+                    {
+                        combinedBuffer.Slice(0, padding).Fill(' ');
+                        valueBuffer.Slice(0, charsWritten).CopyTo(combinedBuffer.Slice(padding));
+                        Console.Out.Write(combinedBuffer.Slice(0, padding + charsWritten));
+                        return;
+                    }
+
+                    // Fallback to split writes if buffer is too small (unlikely)
                     Span<char> spaces = stackalloc char[padding];
                     spaces.Fill(' ');
                     Console.Out.Write(spaces);
                 }
-                Console.Out.Write(buffer.Slice(0, charsWritten));
+                Console.Out.Write(valueBuffer.Slice(0, charsWritten));
             }
             else
             {

@@ -29,3 +29,7 @@
 ## 2026-01-30 - Record Validation Bypass with `with` Expression
 **Learning:** Creating `ControlCommand` records in a loop (e.g., `new ControlCommand { ... }`) triggers expensive validation logic (loops, char checks) in the `init` accessor for every instance, even for constant values.
 **Action:** Use a `static readonly` template instance for common commands and the `with` expression (e.g., `_template with { Timestamp = ... }`) to create copies. This uses the copy constructor, copying the validated backing fields directly and bypassing the `init` property validation.
+
+## 2026-02-02 - Console System Call Overhead
+**Learning:** Even when using zero-allocation `Console.Out.Write(Span)`, multiple calls for a single logical field (e.g., padding + value) double the system call overhead and lock contention. In high-frequency loops (like real-time telemetry display), this adds up.
+**Action:** Combine logically related output segments (like padding and value) into a single `stackalloc` buffer to perform one `Console.Out.Write` call instead of multiple.
