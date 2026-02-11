@@ -96,6 +96,7 @@ namespace AeroCore.Shared.Services
             byte[] rawBuffer = new byte[4096];
             char[] lineBuffer = new char[1024];
             int linePos = 0;
+            int totalLineBytes = 0;
             // Reused list to avoid allocation per read
             List<TelemetryPacket> packets = new List<TelemetryPacket>();
 
@@ -138,6 +139,7 @@ namespace AeroCore.Shared.Services
                         rawBuffer.AsSpan(bufferOffset, bytesRead - bufferOffset),
                         lineBuffer,
                         ref linePos,
+                        ref totalLineBytes,
                         packets,
                         out consumed,
                         out requiresDelay);
@@ -161,6 +163,7 @@ namespace AeroCore.Shared.Services
             ReadOnlySpan<byte> bufferSpan,
             char[] lineBuffer,
             ref int linePos,
+            ref int totalLineBytes,
             List<TelemetryPacket> packets,
             out int consumedBytes,
             out bool requiresDelay)
@@ -179,11 +182,12 @@ namespace AeroCore.Shared.Services
                     // Copy everything to lineBuffer if it fits.
                     int lengthToCopy = bufferSpan.Length;
 
-                    if (linePos + lengthToCopy > lineBuffer.Length)
+                    // DoS Protection: Check total bytes consumed for this line, not just output buffer length.
+                    if (totalLineBytes + lengthToCopy > lineBuffer.Length)
                     {
-                        // DoS Protection: Line too long.
                         _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
                         linePos = 0;
+                        totalLineBytes = 0;
                         requiresDelay = true;
                         consumedBytes += bufferSpan.Length; // Consume/Drop the rest
                         return;
@@ -191,6 +195,7 @@ namespace AeroCore.Shared.Services
 
                     System.Text.Encoding.Latin1.GetChars(bufferSpan, lineBuffer.AsSpan(linePos));
                     linePos += lengthToCopy;
+                    totalLineBytes += lengthToCopy;
                     consumedBytes += bufferSpan.Length;
                     break; // Need more data
                 }
@@ -199,11 +204,13 @@ namespace AeroCore.Shared.Services
                     // Found a delimiter at idx.
                     int lengthToCopy = idx;
 
-                    if (linePos + lengthToCopy > lineBuffer.Length)
+                    // DoS Protection: Check total bytes consumed for this line (including this chunk and delimiter).
+                    // idx + 1 includes the delimiter.
+                    if (totalLineBytes + idx + 1 > lineBuffer.Length)
                     {
-                        // DoS Protection
                         _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
                         linePos = 0;
+                        totalLineBytes = 0;
                         requiresDelay = true;
                         consumedBytes += idx + 1; // Consume up to and including delimiter
                         return; // Return to allow delay
@@ -218,6 +225,7 @@ namespace AeroCore.Shared.Services
                     // Advance buffer past the delimiter
                     bufferSpan = bufferSpan.Slice(idx + 1);
                     consumedBytes += idx + 1;
+                    totalLineBytes += idx + 1;
 
                     if (delimiter == (byte)'\n')
                     {
@@ -234,10 +242,12 @@ namespace AeroCore.Shared.Services
                                 _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(new ReadOnlySpan<char>(lineBuffer, 0, linePos))}'");
                                 requiresDelay = true;
                                 linePos = 0;
+                                totalLineBytes = 0;
                                 return; // Return to allow delay
                             }
                         }
                         linePos = 0;
+                        totalLineBytes = 0;
                     }
                     // If delimiter is \r, we just skipped it, loop continues.
                 }
