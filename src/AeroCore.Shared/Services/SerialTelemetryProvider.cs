@@ -248,7 +248,8 @@ namespace AeroCore.Shared.Services
                             }
                             else
                             {
-                                _logger.LogWarning($"Failed to parse telemetry line: '{SecurityHelper.SanitizeForLog(new ReadOnlySpan<char>(lineBuffer, 0, linePos))}'");
+                                // Security: Do not log raw content to prevent sensitive data leakage and DoS.
+                                _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", linePos);
                                 requiresDelay = true;
                                 linePos = 0;
                                 totalLineBytes = 0;
