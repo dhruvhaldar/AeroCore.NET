@@ -227,6 +227,15 @@ namespace AeroCore.Shared.Services
                     consumedBytes += idx + 1;
                     totalLineBytes += idx + 1;
 
+                    // Optimization: Handle CRLF as a single delimiter to avoid extra loop iteration
+                    if (delimiter == (byte)'\r' && !bufferSpan.IsEmpty && bufferSpan[0] == (byte)'\n')
+                    {
+                        bufferSpan = bufferSpan.Slice(1);
+                        consumedBytes++;
+                        totalLineBytes++;
+                        delimiter = (byte)'\n';
+                    }
+
                     if (delimiter == (byte)'\n')
                     {
                         // End of line. Process it.
