@@ -37,3 +37,7 @@
 ## 2026-05-28 - Show, Don't Just Tell (In Legends)
 **Learning:** Text-based legends describing color codes ("Green/Yel/Red") are abstract. Using the actual colors in the legend itself instantly trains the user's eye and reduces cognitive load.
 **Action:** When explaining visual indicators in a CLI, render the explanation using the same visual style (colors, symbols) as the data it describes.
+
+## 2026-05-30 - Actionable Hints in Console Apps
+**Learning:** Console applications often trap users who don't know the standard exit commands (like Ctrl+C). Explicitly stating "Press Ctrl+C to exit" reduces anxiety and friction for new users.
+**Action:** Always include an exit instruction in the startup banner or footer of long-running console processes.
