@@ -33,3 +33,7 @@
 ## 2026-02-02 - Console System Call Overhead
 **Learning:** Even when using zero-allocation `Console.Out.Write(Span)`, multiple calls for a single logical field (e.g., padding + value) double the system call overhead and lock contention. In high-frequency loops (like real-time telemetry display), this adds up.
 **Action:** Combine logically related output segments (like padding and value) into a single `stackalloc` buffer to perform one `Console.Out.Write` call instead of multiple.
+
+## 2026-05-22 - Optimizing Telemetry Ingestion Loop
+**Learning:** In high-frequency serial streams with CRLF line endings, treating `\r` and `\n` as separate delimiters causes two loop iterations per line, doubling the overhead of `IndexOfAny` and `GetChars`.
+**Action:** Detect `\r\n` sequence and consume both in a single pass to halve the loop overhead for standard telemetry streams.
