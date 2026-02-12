@@ -38,8 +38,21 @@ namespace AeroCore.GroundStation
             Console.WriteLine("============================================================");
             Console.ResetColor();
             Console.WriteLine($"  > System Init:      {DateTime.Now:HH:mm:ss}");
-            Console.WriteLine("  > System Status:    Ready");
-            Console.WriteLine("  > Telemetry Link:   Listening...");
+
+            Console.Write("  > System Status:    ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("Ready");
+            Console.ResetColor();
+
+            Console.Write("  > Telemetry Link:   ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("Listening...");
+            Console.ResetColor();
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("  (Press Ctrl+C to exit)");
+            Console.ResetColor();
+
             Console.WriteLine();
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
