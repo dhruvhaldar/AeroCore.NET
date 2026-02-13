@@ -11,10 +11,11 @@ namespace AeroCore.Shared.Helpers
         /// <param name="buffer">The buffer to fill. Length determines gauge width.</param>
         /// <param name="value">The current value to visualize.</param>
         /// <param name="range">The full scale range (e.g. 45.0 for +/- 45 degrees).</param>
-        public static void Fill(Span<char> buffer, double value, double range)
+        /// <returns>The number of characters filled from the center (magnitude).</returns>
+        public static int Fill(Span<char> buffer, double value, double range)
         {
             int width = buffer.Length;
-            if (width == 0) return;
+            if (width == 0) return 0;
 
             int center = width / 2;
 
@@ -59,6 +60,8 @@ namespace AeroCore.Shared.Helpers
                     if (center - fill >= 0) buffer[center - fill] = '<';
                 }
             }
+
+            return fill;
         }
     }
 }
