@@ -284,15 +284,30 @@ namespace AeroCore.GroundStation
             else barColor = ConsoleColor.Green;
 
             Span<char> buffer = stackalloc char[11];
-            GaugeVisualizer.Fill(buffer, value, range);
+            int fill = GaugeVisualizer.Fill(buffer, value, range);
 
             int center = buffer.Length / 2;
 
             // Print Left
             if (center > 0)
             {
-                Console.ForegroundColor = barColor;
-                Console.Out.Write(buffer.Slice(0, center));
+                var leftPart = buffer.Slice(0, center);
+                if (value < 0 && fill > 0)
+                {
+                    int barStart = Math.Max(0, center - fill);
+                    if (barStart > 0)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Out.Write(leftPart.Slice(0, barStart));
+                    }
+                    Console.ForegroundColor = barColor;
+                    Console.Out.Write(leftPart.Slice(barStart));
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Out.Write(leftPart);
+                }
             }
 
             // Print Center (Anchor)
@@ -302,8 +317,24 @@ namespace AeroCore.GroundStation
             // Print Right
             if (center + 1 < buffer.Length)
             {
-                Console.ForegroundColor = barColor;
-                Console.Out.Write(buffer.Slice(center + 1));
+                var rightPart = buffer.Slice(center + 1);
+                if (value > 0 && fill > 0)
+                {
+                    int barEnd = Math.Min(fill, rightPart.Length);
+                    Console.ForegroundColor = barColor;
+                    Console.Out.Write(rightPart.Slice(0, barEnd));
+
+                    if (barEnd < rightPart.Length)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Out.Write(rightPart.Slice(barEnd));
+                    }
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Out.Write(rightPart);
+                }
             }
         }
 
