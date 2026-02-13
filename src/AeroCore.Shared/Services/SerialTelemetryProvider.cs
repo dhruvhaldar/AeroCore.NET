@@ -97,6 +97,7 @@ namespace AeroCore.Shared.Services
             char[] lineBuffer = new char[1024];
             int linePos = 0;
             int totalLineBytes = 0;
+            bool isDiscarding = false;
             // Reused list to avoid allocation per read
             List<TelemetryPacket> packets = new List<TelemetryPacket>();
 
@@ -141,6 +142,7 @@ namespace AeroCore.Shared.Services
                         ref linePos,
                         ref totalLineBytes,
                         packets,
+                        ref isDiscarding,
                         out consumed,
                         out requiresDelay);
 
@@ -165,6 +167,7 @@ namespace AeroCore.Shared.Services
             ref int linePos,
             ref int totalLineBytes,
             List<TelemetryPacket> packets,
+            ref bool isDiscarding,
             out int consumedBytes,
             out bool requiresDelay)
         {
@@ -176,6 +179,42 @@ namespace AeroCore.Shared.Services
                 // Find first occurrence of either \r or \n
                 int idx = bufferSpan.IndexOfAny((byte)'\r', (byte)'\n');
 
+                if (isDiscarding)
+                {
+                    if (idx == -1)
+                    {
+                        // Still inside a discarded line, consume everything and continue
+                        consumedBytes += bufferSpan.Length;
+                        // Return to fetch next chunk, as we consumed everything available
+                        return;
+                    }
+                    else
+                    {
+                        // Found the end of the discarded line at idx.
+                        // Consume up to and including delimiter.
+                        consumedBytes += idx + 1;
+
+                        // Advance past delimiter
+                        byte delimiter = bufferSpan[idx];
+                        bufferSpan = bufferSpan.Slice(idx + 1);
+
+                        // Handle potential CRLF split even when discarding
+                        if (delimiter == (byte)'\r' && !bufferSpan.IsEmpty && bufferSpan[0] == (byte)'\n')
+                        {
+                            bufferSpan = bufferSpan.Slice(1);
+                            consumedBytes++;
+                        }
+
+                        // Reset discarding state and prepare for next line
+                        isDiscarding = false;
+                        linePos = 0;
+                        totalLineBytes = 0;
+
+                        // Continue loop to process any remaining data in buffer as new line
+                        continue;
+                    }
+                }
+
                 if (idx == -1)
                 {
                     // No newline or CR found in the remaining buffer.
@@ -186,6 +225,10 @@ namespace AeroCore.Shared.Services
                     if (totalLineBytes + lengthToCopy > lineBuffer.Length)
                     {
                         _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+
+                        // Enter discarding state to ignore the rest of this overly long line
+                        isDiscarding = true;
+
                         linePos = 0;
                         totalLineBytes = 0;
                         requiresDelay = true;
@@ -209,6 +252,10 @@ namespace AeroCore.Shared.Services
                     if (totalLineBytes + idx + 1 > lineBuffer.Length)
                     {
                         _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+
+                        // We found the end of the line, so we discard only this line.
+                        // We do NOT set isDiscarding=true because we are done with the long line.
+
                         linePos = 0;
                         totalLineBytes = 0;
                         requiresDelay = true;
