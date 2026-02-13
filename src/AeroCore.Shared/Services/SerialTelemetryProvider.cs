@@ -263,11 +263,36 @@ namespace AeroCore.Shared.Services
                         return; // Return to allow delay
                     }
 
+                    byte delimiter = bufferSpan[idx];
+
+                    // Optimization: Parse directly from bufferSpan if we haven't buffered anything yet (complete line in this chunk).
+                    // This avoids copying to lineBuffer and converting to chars.
+                    if (linePos == 0)
+                    {
+                        var packet = TelemetryParser.Parse(bufferSpan.Slice(0, idx));
+                        if (packet != null)
+                        {
+                            packets.Add(packet.Value);
+
+                            // Advance past delimiter
+                            bufferSpan = bufferSpan.Slice(idx + 1);
+                            consumedBytes += idx + 1;
+                            totalLineBytes = 0; // Reset as we processed a line
+
+                            // Handle CRLF
+                            if (delimiter == (byte)'\r' && !bufferSpan.IsEmpty && bufferSpan[0] == (byte)'\n')
+                            {
+                                bufferSpan = bufferSpan.Slice(1);
+                                consumedBytes++;
+                            }
+
+                            continue; // Continue to next line
+                        }
+                    }
+
                     // Copy valid part
                     System.Text.Encoding.Latin1.GetChars(bufferSpan.Slice(0, lengthToCopy), lineBuffer.AsSpan(linePos));
                     linePos += lengthToCopy;
-
-                    byte delimiter = bufferSpan[idx];
 
                     // Advance buffer past the delimiter
                     bufferSpan = bufferSpan.Slice(idx + 1);
