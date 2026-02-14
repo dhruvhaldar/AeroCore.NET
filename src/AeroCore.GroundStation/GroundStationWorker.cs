@@ -270,7 +270,29 @@ namespace AeroCore.GroundStation
             Console.Write(" [");
             PrintGauge(packet.Roll, 45.0);
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("]");
+            Console.Write("]");
+
+            // Status Indicator
+            Console.Write(" | ");
+
+            bool isCrit = packet.Altitude < 0 || Math.Abs(packet.Pitch) > 45 || Math.Abs(packet.Roll) > 45;
+            bool isWarn = !isCrit && (packet.Velocity > 100 || Math.Abs(packet.Pitch) > 35 || Math.Abs(packet.Roll) > 35);
+
+            if (isCrit)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[CRIT]");
+            }
+            else if (isWarn)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("[WARN]");
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("[ OK ]");
+            }
 
             Console.ResetColor();
         }
