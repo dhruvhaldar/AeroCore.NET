@@ -41,3 +41,7 @@
 ## 2026-05-30 - Actionable Hints in Console Apps
 **Learning:** Console applications often trap users who don't know the standard exit commands (like Ctrl+C). Explicitly stating "Press Ctrl+C to exit" reduces anxiety and friction for new users.
 **Action:** Always include an exit instruction in the startup banner or footer of long-running console processes.
+
+## 2026-06-03 - Status Summaries for Rapid Scanning
+**Learning:** Dense telemetry streams with color coding are good, but require scanning multiple values to determine system health. A single, explicit "Status" column (`[OK]`, `[WARN]`, `[CRIT]`) allows operators to instantly filter noise and focus only on problematic frames.
+**Action:** Aggregate complex state into a high-level summary indicator at the end of log lines or data rows.
