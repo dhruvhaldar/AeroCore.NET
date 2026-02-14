@@ -37,6 +37,13 @@ namespace AeroCore.Shared.Services
 
             try
             {
+                // Security: Validate port name to prevent path traversal and command injection risks.
+                if (!SecurityHelper.IsValidSerialPortName(_portName))
+                {
+                    // We throw here to be caught by the block below, ensuring we don't proceed with invalid config.
+                    throw new ArgumentException($"Invalid serial port name format: {_portName}");
+                }
+
                 // In a real scenario, we might retry or fail fast.
                 // For now we setup the object but don't open until streaming starts or now.
                 // It's safer to open when needed or keep open.
