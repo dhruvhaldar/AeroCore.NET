@@ -1,10 +1,40 @@
 using Xunit;
+using System.Runtime.InteropServices;
 using AeroCore.Shared.Helpers;
 
 namespace AeroCore.Tests
 {
     public class SecurityHelperTests
     {
+        [Fact]
+        public void IsValidSerialPortName_ValidatesCorrectly()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.True(SecurityHelper.IsValidSerialPortName("COM1"));
+                Assert.True(SecurityHelper.IsValidSerialPortName("COM10"));
+                Assert.True(SecurityHelper.IsValidSerialPortName(@"\\.\COM12"));
+
+                Assert.False(SecurityHelper.IsValidSerialPortName("LPT1"));
+                Assert.False(SecurityHelper.IsValidSerialPortName("/dev/ttyUSB0"));
+            }
+            else
+            {
+                Assert.True(SecurityHelper.IsValidSerialPortName("/dev/ttyUSB0"));
+                Assert.True(SecurityHelper.IsValidSerialPortName("/dev/pts/1"));
+
+                Assert.False(SecurityHelper.IsValidSerialPortName("COM1"));
+            }
+
+            // Common Invalid
+            Assert.False(SecurityHelper.IsValidSerialPortName(null!));
+            Assert.False(SecurityHelper.IsValidSerialPortName(""));
+            Assert.False(SecurityHelper.IsValidSerialPortName("  "));
+            Assert.False(SecurityHelper.IsValidSerialPortName("../etc/passwd"));
+            Assert.False(SecurityHelper.IsValidSerialPortName("/dev/../etc/passwd")); // Path traversal inside valid prefix
+            Assert.False(SecurityHelper.IsValidSerialPortName("COM1; rm -rf /")); // Injection
+        }
+
         [Fact]
         public void SanitizeForLog_RemovesNewlines()
         {

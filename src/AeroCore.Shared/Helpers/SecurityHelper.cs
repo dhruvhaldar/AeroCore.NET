@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace AeroCore.Shared.Helpers
 {
@@ -12,6 +13,42 @@ namespace AeroCore.Shared.Helpers
         /// that could be used for log injection / forging.
         /// Truncates input to 500 characters to prevent log flooding.
         /// </summary>
+        public static bool IsValidSerialPortName(string portName)
+        {
+            if (string.IsNullOrWhiteSpace(portName)) return false;
+
+            // Check for path traversal attempts
+            if (portName.Contains("..")) return false;
+
+            // Check for control characters
+            foreach (char c in portName)
+            {
+                if (char.IsControl(c)) return false;
+            }
+
+            // Strict allowlist for characters: A-Z, a-z, 0-9, ., _, -, /, \
+            // This prevents injection characters like ';', '&', '|', '>', '<', ' '
+            foreach (char c in portName)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '.' && c != '_' && c != '-' && c != '/' && c != '\\')
+                {
+                    return false;
+                }
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Simple check: Starts with COM
+                return portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase) ||
+                       portName.StartsWith(@"\\.\COM", StringComparison.OrdinalIgnoreCase);
+            }
+            else
+            {
+                // Linux/Mac: Must start with /dev/
+                return portName.StartsWith("/dev/");
+            }
+        }
+
         public static string SanitizeForLog(ReadOnlySpan<char> input)
         {
             if (input.IsEmpty)

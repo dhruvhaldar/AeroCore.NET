@@ -48,5 +48,35 @@ namespace AeroCore.Tests
                 Times.Once,
                 "The port name should be sanitized in the logs to prevent log injection.");
         }
+
+        [Fact]
+        public async Task InitializeAsync_RejectsInvalidPortName()
+        {
+            // Arrange
+            var mockLogger = new Mock<ILogger<SerialTelemetryProvider>>();
+            var inMemorySettings = new Dictionary<string, string?>
+            {
+                {"Serial:PortName", "../etc/passwd"},
+                {"Serial:BaudRate", "9600"}
+            };
+            IConfiguration config = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+            var provider = new SerialTelemetryProvider(mockLogger.Object, config);
+
+            // Act
+            await provider.InitializeAsync(CancellationToken.None);
+
+            // Assert
+            // Verify LogError was called with the ArgumentException
+            mockLogger.Verify(
+                x => x.Log(
+                    LogLevel.Error,
+                    It.IsAny<EventId>(),
+                    It.IsAny<It.IsAnyType>(),
+                    It.Is<Exception>(e => e is ArgumentException && e.Message.Contains("Invalid serial port name")),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+                Times.Once);
+        }
     }
 }
