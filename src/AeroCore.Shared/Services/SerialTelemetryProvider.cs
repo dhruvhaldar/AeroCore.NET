@@ -94,7 +94,7 @@ namespace AeroCore.Shared.Services
             Func<bool>? isConnected = null)
         {
             byte[] rawBuffer = new byte[4096];
-            char[] lineBuffer = new char[1024];
+            byte[] lineBuffer = new byte[1024];
             int linePos = 0;
             int totalLineBytes = 0;
             bool isDiscarding = false;
@@ -163,7 +163,7 @@ namespace AeroCore.Shared.Services
 
         private void ProcessChunk(
             ReadOnlySpan<byte> bufferSpan,
-            char[] lineBuffer,
+            byte[] lineBuffer,
             ref int linePos,
             ref int totalLineBytes,
             List<TelemetryPacket> packets,
@@ -236,7 +236,7 @@ namespace AeroCore.Shared.Services
                         return;
                     }
 
-                    System.Text.Encoding.Latin1.GetChars(bufferSpan, lineBuffer.AsSpan(linePos));
+                    bufferSpan.CopyTo(lineBuffer.AsSpan(linePos));
                     linePos += lengthToCopy;
                     totalLineBytes += lengthToCopy;
                     consumedBytes += bufferSpan.Length;
@@ -291,7 +291,7 @@ namespace AeroCore.Shared.Services
                     }
 
                     // Copy valid part
-                    System.Text.Encoding.Latin1.GetChars(bufferSpan.Slice(0, lengthToCopy), lineBuffer.AsSpan(linePos));
+                    bufferSpan.Slice(0, lengthToCopy).CopyTo(lineBuffer.AsSpan(linePos));
                     linePos += lengthToCopy;
 
                     // Advance buffer past the delimiter
@@ -336,9 +336,9 @@ namespace AeroCore.Shared.Services
             }
         }
 
-        private static TelemetryPacket? ParseBuffer(char[] buffer, int length)
+        private static TelemetryPacket? ParseBuffer(byte[] buffer, int length)
         {
-            return TelemetryParser.Parse(new ReadOnlySpan<char>(buffer, 0, length));
+            return TelemetryParser.Parse(new ReadOnlySpan<byte>(buffer, 0, length));
         }
     }
 }
