@@ -51,5 +51,14 @@ namespace AeroCore.Shared.Models
         }
 
         public DateTime Timestamp { get; init; }
+
+        internal TelemetryPacket(double altitude, double velocity, double pitch, double roll, DateTime timestamp)
+        {
+            _altitude = altitude;
+            _velocity = velocity;
+            _pitch = pitch;
+            _roll = roll;
+            Timestamp = timestamp;
+        }
     }
 }

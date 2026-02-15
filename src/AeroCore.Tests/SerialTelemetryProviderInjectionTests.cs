@@ -46,8 +46,8 @@ namespace AeroCore.Tests
             // Override synchronous Read as well just in case, though ProcessStreamAsync uses ReadAsync
             public override int Read(byte[] buffer, int offset, int count)
             {
-                 int toRead = Math.Min(count, _chunkSize);
-                 return base.Read(buffer, offset, toRead);
+                int toRead = Math.Min(count, _chunkSize);
+                return base.Read(buffer, offset, toRead);
             }
         }
 
