@@ -55,14 +55,9 @@ namespace AeroCore.Shared.Helpers
                 return null;
             }
 
-            return new TelemetryPacket
-            {
-                Altitude = altitude,
-                Velocity = velocity,
-                Pitch = pitch,
-                Roll = roll,
-                Timestamp = DateTime.UtcNow
-            };
+            // Optimization: Use internal constructor to avoid redundant double.IsFinite checks in property setters.
+            // We've already validated the values above.
+            return new TelemetryPacket(altitude, velocity, pitch, roll, DateTime.UtcNow);
         }
 
         private static ReadOnlySpan<byte> Trim(ReadOnlySpan<byte> span)
@@ -128,14 +123,9 @@ namespace AeroCore.Shared.Helpers
                 return null;
             }
 
-            return new TelemetryPacket
-            {
-                Altitude = altitude,
-                Velocity = velocity,
-                Pitch = pitch,
-                Roll = roll,
-                Timestamp = DateTime.UtcNow
-            };
+            // Optimization: Use internal constructor to avoid redundant double.IsFinite checks in property setters.
+            // We've already validated the values above.
+            return new TelemetryPacket(altitude, velocity, pitch, roll, DateTime.UtcNow);
         }
     }
 }
