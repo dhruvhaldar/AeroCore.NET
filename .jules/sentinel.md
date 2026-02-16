@@ -42,3 +42,8 @@
 **Vulnerability:** The Serial Telemetry Provider logged the configured port name directly without sanitization, allowing an attacker with control over the environment (e.g., via `Serial__PortName` environment variable) to inject malicious log entries.
 **Learning:** Configuration values (like environment variables, appsettings) are external inputs and must be treated as untrusted, especially when logging them at startup.
 **Prevention:** Always sanitize configuration values before logging them, using the same sanitization routines applied to user input.
+
+## 2026-06-15 - Arbitrary File Read via Loose Serial Port Validation
+**Vulnerability:** The `IsValidSerialPortName` validation allowed arbitrary file paths (e.g., `/dev/mem`, `Common/foo.txt`) because it only checked for forbidden characters and loose prefixes, enabling attackers to read sensitive files if they could control the configuration.
+**Learning:** `SerialPort` APIs on both Windows and Linux treat file paths as valid ports. Validating only "safe characters" is insufficient; strict allowlisting of platform-specific device namespaces (like `/dev/tty` or `COM`) is required.
+**Prevention:** Implement strict prefix allowlisting for serial ports (e.g., `/dev/tty`, `/dev/cu`, `COM` followed by digits) and reject all other paths, even if they contain "safe" characters.

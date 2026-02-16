@@ -38,15 +38,38 @@ namespace AeroCore.Shared.Helpers
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // Simple check: Starts with COM
-                return portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase) ||
-                       portName.StartsWith(@"\\.\COM", StringComparison.OrdinalIgnoreCase);
+                // Strict check: Must start with COM or \\.\COM followed immediately by digits.
+                // This prevents opening files like "Common/foo.txt" or "Command.log".
+                if (portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase))
+                {
+                    return IsDigitsOnly(portName.AsSpan(3));
+                }
+                if (portName.StartsWith(@"\\.\COM", StringComparison.OrdinalIgnoreCase))
+                {
+                    return IsDigitsOnly(portName.AsSpan(7));
+                }
+                return false;
             }
             else
             {
-                // Linux/Mac: Must start with /dev/
-                return portName.StartsWith("/dev/");
+                // Linux/Mac: Strict allowlist of prefixes to prevent arbitrary file read (e.g. /dev/mem, /dev/sda).
+                // Allowed: /dev/tty*, /dev/cu*, /dev/serial*, /dev/pts*, /dev/rfcomm*
+                return portName.StartsWith("/dev/tty") ||
+                       portName.StartsWith("/dev/cu.") ||
+                       portName.StartsWith("/dev/serial/") ||
+                       portName.StartsWith("/dev/pts/") ||
+                       portName.StartsWith("/dev/rfcomm");
             }
+        }
+
+        private static bool IsDigitsOnly(ReadOnlySpan<char> span)
+        {
+            if (span.IsEmpty) return false;
+            foreach (char c in span)
+            {
+                if (!char.IsDigit(c)) return false;
+            }
+            return true;
         }
 
         public static string SanitizeForLog(ReadOnlySpan<char> input)
