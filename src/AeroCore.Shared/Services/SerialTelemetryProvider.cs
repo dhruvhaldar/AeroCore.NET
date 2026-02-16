@@ -295,6 +295,41 @@ namespace AeroCore.Shared.Services
 
                             continue; // Continue to next line
                         }
+                        else
+                        {
+                            // Optimization: If parsing failed and we have a complete line (ending in \n or \r\n),
+                            // we can handle the failure immediately without copying to lineBuffer and re-parsing.
+                            bool isTargetDelimiter = (delimiter == (byte)'\n');
+                            if (!isTargetDelimiter && delimiter == (byte)'\r')
+                            {
+                                // Check if followed by \n (CRLF) in the current buffer
+                                if (idx + 1 < bufferSpan.Length && bufferSpan[idx + 1] == (byte)'\n')
+                                {
+                                    isTargetDelimiter = true;
+                                }
+                            }
+
+                            if (isTargetDelimiter)
+                            {
+                                // Consume the invalid line and delimiter
+                                bufferSpan = bufferSpan.Slice(idx + 1);
+                                consumedBytes += idx + 1;
+                                totalLineBytes = 0;
+
+                                // Handle CRLF
+                                if (delimiter == (byte)'\r' && !bufferSpan.IsEmpty && bufferSpan[0] == (byte)'\n')
+                                {
+                                    bufferSpan = bufferSpan.Slice(1);
+                                    consumedBytes++;
+                                }
+
+                                // Security: Do not log raw content to prevent sensitive data leakage and DoS.
+                                _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", idx);
+                                requiresDelay = true;
+                                linePos = 0;
+                                return; // Return to allow delay
+                            }
+                        }
                     }
 
                     // Copy valid part
