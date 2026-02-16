@@ -275,18 +275,39 @@ namespace AeroCore.GroundStation
             // Status Indicator
             Console.Write(" | ");
 
-            bool isCrit = packet.Altitude < 0 || Math.Abs(packet.Pitch) > 45 || Math.Abs(packet.Roll) > 45;
-            bool isWarn = !isCrit && (packet.Velocity > 100 || Math.Abs(packet.Pitch) > 35 || Math.Abs(packet.Roll) > 35);
+            bool critAlt = packet.Altitude < 0;
+            bool critPit = Math.Abs(packet.Pitch) > 45;
+            bool critRol = Math.Abs(packet.Roll) > 45;
+            bool isCrit = critAlt || critPit || critRol;
+
+            bool warnVel = packet.Velocity > 100;
+            bool warnPit = !critPit && Math.Abs(packet.Pitch) > 35;
+            bool warnRol = !critRol && Math.Abs(packet.Roll) > 35;
+            bool isWarn = warnVel || warnPit || warnRol;
 
             if (isCrit)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("[CRIT]");
+                Console.Write("[CRIT]");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write(" (");
+                bool first = true;
+                if (critAlt) { Console.Write("ALT"); first = false; }
+                if (critPit) { if (!first) Console.Write(","); Console.Write("PIT"); first = false; }
+                if (critRol) { if (!first) Console.Write(","); Console.Write("ROL"); }
+                Console.WriteLine(")");
             }
             else if (isWarn)
             {
                 Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("[WARN]");
+                Console.Write("[WARN]");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write(" (");
+                bool first = true;
+                if (warnVel) { Console.Write("VEL"); first = false; }
+                if (warnPit) { if (!first) Console.Write(","); Console.Write("PIT"); first = false; }
+                if (warnRol) { if (!first) Console.Write(","); Console.Write("ROL"); }
+                Console.WriteLine(")");
             }
             else
             {

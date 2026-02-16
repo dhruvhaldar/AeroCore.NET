@@ -45,3 +45,7 @@
 ## 2026-06-03 - Status Summaries for Rapid Scanning
 **Learning:** Dense telemetry streams with color coding are good, but require scanning multiple values to determine system health. A single, explicit "Status" column (`[OK]`, `[WARN]`, `[CRIT]`) allows operators to instantly filter noise and focus only on problematic frames.
 **Action:** Aggregate complex state into a high-level summary indicator at the end of log lines or data rows.
+
+## 2026-06-03 - Contextualize Warning Indicators
+**Learning:** A generic "[WARN]" or "[CRIT]" indicator alerts the user but forces them to scan dense data to find the cause. Explicitly listing the contributing factors (e.g., `[WARN] (VEL)`) reduces cognitive load and reaction time.
+**Action:** Always append the specific source or reason to high-level status indicators when multiple factors could be the cause.
