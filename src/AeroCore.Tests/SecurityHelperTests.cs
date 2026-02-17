@@ -79,5 +79,20 @@ namespace AeroCore.Tests
 
             Assert.Equal("Hello 🛡️ World 🚀", sanitized);
         }
+
+        [Fact]
+        public void SanitizeForLog_RemovesUnicodeNewlines()
+        {
+            // U+2028 (Line Separator) and U+2029 (Paragraph Separator)
+            // can be used for log forging if not sanitized.
+            string input = "User Login\u2028[INFO] Admin Access Granted\u2029User Logout";
+            string sanitized = SecurityHelper.SanitizeForLog(input);
+
+            Assert.DoesNotContain("\u2028", sanitized);
+            Assert.DoesNotContain("\u2029", sanitized);
+
+            // Should be replaced by underscores
+            Assert.Contains("_", sanitized);
+        }
     }
 }

@@ -100,8 +100,12 @@ namespace AeroCore.Shared.Helpers
                 var category = char.GetUnicodeCategory(c);
 
                 // Replace control characters (Cc) and format characters (Cf) with underscores.
+                // We also strip LineSeparator (Zl) and ParagraphSeparator (Zp) to prevent Log Forging.
                 // We avoid \p{C} because it includes Surrogates (Cs), which would break Emojis.
-                if (category == UnicodeCategory.Control || category == UnicodeCategory.Format)
+                if (category == UnicodeCategory.Control ||
+                    category == UnicodeCategory.Format ||
+                    category == UnicodeCategory.LineSeparator ||
+                    category == UnicodeCategory.ParagraphSeparator)
                 {
                     buffer[bufferPos++] = '_';
 
@@ -110,7 +114,10 @@ namespace AeroCore.Shared.Helpers
                     {
                         char nextC = input[i + 1];
                         var nextCategory = char.GetUnicodeCategory(nextC);
-                        if (nextCategory == UnicodeCategory.Control || nextCategory == UnicodeCategory.Format)
+                        if (nextCategory == UnicodeCategory.Control ||
+                            nextCategory == UnicodeCategory.Format ||
+                            nextCategory == UnicodeCategory.LineSeparator ||
+                            nextCategory == UnicodeCategory.ParagraphSeparator)
                         {
                             i++;
                         }
