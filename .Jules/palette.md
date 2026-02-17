@@ -49,3 +49,7 @@
 ## 2026-06-03 - Contextualize Warning Indicators
 **Learning:** A generic "[WARN]" or "[CRIT]" indicator alerts the user but forces them to scan dense data to find the cause. Explicitly listing the contributing factors (e.g., `[WARN] (VEL)`) reduces cognitive load and reaction time.
 **Action:** Always append the specific source or reason to high-level status indicators when multiple factors could be the cause.
+
+## 2026-06-15 - Activity Spinners for Stream Liveness
+**Learning:** In high-frequency data streams, static timestamps can be hard to parse quickly to confirm liveness. A simple rotating character (spinner) provides instant, subconscious confirmation that the data link is active.
+**Action:** Add an ASCII spinner to the start of telemetry log lines.
