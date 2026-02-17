@@ -7,6 +7,8 @@ namespace AeroCore.Shared.Helpers
 {
     public static class TelemetryParser
     {
+        private static readonly byte[] _trimChars = new byte[] { 32, 9, 13, 10 };
+
         public static TelemetryPacket? ParseFromCsv(string line)
         {
             if (string.IsNullOrWhiteSpace(line)) return null;
@@ -62,27 +64,9 @@ namespace AeroCore.Shared.Helpers
 
         private static ReadOnlySpan<byte> Trim(ReadOnlySpan<byte> span)
         {
-            int start = 0;
-            while (start < span.Length && IsWhiteSpace(span[start]))
-            {
-                start++;
-            }
-
-            int end = span.Length - 1;
-            while (end >= start && IsWhiteSpace(span[end]))
-            {
-                end--;
-            }
-
-            if (start > end) return ReadOnlySpan<byte>.Empty;
-            return span.Slice(start, end - start + 1);
-        }
-
-        private static bool IsWhiteSpace(byte b)
-        {
-            // Check for space (32) and tab (9).
-            // CR (13) and LF (10) are usually handled by line splitting, but we include them just in case.
-            return b == 32 || b == 9 || b == 13 || b == 10;
+            // Use built-in vectorized Trim which is significantly faster than manual loop.
+            // Trims space (32), tab (9), CR (13), and LF (10).
+            return span.Trim(_trimChars);
         }
 
         /// <summary>
