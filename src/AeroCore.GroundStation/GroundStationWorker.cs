@@ -15,6 +15,8 @@ namespace AeroCore.GroundStation
         private readonly ILogger<GroundStationWorker> _logger;
         private double? _lastAltitude;
         private double? _lastVelocity;
+        private int _spinnerIndex = 0;
+        private static readonly char[] _spinnerChars = { '|', '/', '-', '\\' };
 
         public GroundStationWorker(ITelemetryProvider telemetryProvider, ILogger<GroundStationWorker> logger)
         {
@@ -46,7 +48,8 @@ namespace AeroCore.GroundStation
 
             Console.Write("  > Telemetry Link:   ");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("Listening...");
+            var providerName = _telemetryProvider.GetType().Name.Replace("TelemetryProvider", "");
+            Console.WriteLine($"Listening ({providerName})...");
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -148,6 +151,12 @@ namespace AeroCore.GroundStation
 
         private void PrintTelemetry(TelemetryPacket packet)
         {
+            // Spinner
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write($"[{_spinnerChars[_spinnerIndex]}] ");
+            _spinnerIndex = (_spinnerIndex + 1) % _spinnerChars.Length;
+            Console.ResetColor();
+
             // Timestamp
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[GCS] T+");
@@ -250,7 +259,7 @@ namespace AeroCore.GroundStation
             // Pitch Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            PrintGauge(packet.Pitch, 45.0);
+            PrintGauge(packet.Pitch, 45.0, 35.0);
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] | ");
 
@@ -268,7 +277,7 @@ namespace AeroCore.GroundStation
             // Roll Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" [");
-            PrintGauge(packet.Roll, 45.0);
+            PrintGauge(packet.Roll, 45.0, 35.0);
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("]");
 
@@ -318,12 +327,12 @@ namespace AeroCore.GroundStation
             Console.ResetColor();
         }
 
-        private void PrintGauge(double value, double range)
+        private void PrintGauge(double value, double range, double warnThreshold)
         {
             var absValue = Math.Abs(value);
             ConsoleColor barColor;
             if (absValue > range) barColor = ConsoleColor.Red;
-            else if (absValue > range * 0.8) barColor = ConsoleColor.Yellow;
+            else if (absValue > warnThreshold) barColor = ConsoleColor.Yellow;
             else barColor = ConsoleColor.Green;
 
             Span<char> buffer = stackalloc char[11];
