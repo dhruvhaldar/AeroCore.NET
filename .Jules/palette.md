@@ -53,3 +53,7 @@
 ## 2026-06-15 - Activity Spinners for Stream Liveness
 **Learning:** In high-frequency data streams, static timestamps can be hard to parse quickly to confirm liveness. A simple rotating character (spinner) provides instant, subconscious confirmation that the data link is active.
 **Action:** Add an ASCII spinner to the start of telemetry log lines.
+
+## 2026-06-18 - Honest Legends
+**Learning:** A legend that misrepresents the application's visual language (e.g., wrong colors or shapes) creates confusion and distrust. Ensuring the legend is a pixel-perfect (or character-perfect) representation of the live data builds user confidence.
+**Action:** When creating a legend, use the exact same characters and colors as the actual data visualization, including structural elements like brackets.

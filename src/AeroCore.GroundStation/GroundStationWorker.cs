@@ -86,13 +86,16 @@ namespace AeroCore.GroundStation
             Console.WriteLine();
 
             Console.Write("   ");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("<====");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("[");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("<==+=");
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("|");
-            Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("====>");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("==+=>");
             Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("]");
             Console.WriteLine(" : Visual Attitude Indicator");
 
             Console.Write("   ");
