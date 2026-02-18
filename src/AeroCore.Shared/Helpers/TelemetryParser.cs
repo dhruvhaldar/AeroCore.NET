@@ -22,33 +22,43 @@ namespace AeroCore.Shared.Helpers
         /// </summary>
         public static TelemetryPacket? Parse(ReadOnlySpan<byte> span)
         {
-            // Parse Altitude
-            int idx = span.IndexOf((byte)',');
-            if (idx == -1) return null;
+            // Optimization: Parse sequentially to avoid multiple scans (IndexOf + Trim + Parse).
+            // We use Utf8Parser.TryParse which returns bytesConsumed, allowing us to advance the span.
+            // We only need to trim leading whitespace between fields.
 
-            // Utf8Parser does not handle whitespace by default, so we trim.
-            if (!Utf8Parser.TryParse(Trim(span.Slice(0, idx)), out double altitude, out _)) return null;
-            span = span.Slice(idx + 1);
+            // Parse Altitude
+            span = span.TrimStart(_trimChars);
+            if (!Utf8Parser.TryParse(span, out double altitude, out int bytesConsumed)) return null;
+            span = span.Slice(bytesConsumed);
+
+            // Expect comma
+            span = span.TrimStart(_trimChars);
+            if (span.IsEmpty || span[0] != (byte)',') return null;
+            span = span.Slice(1);
 
             // Parse Velocity
-            idx = span.IndexOf((byte)',');
-            if (idx == -1) return null;
+            span = span.TrimStart(_trimChars);
+            if (!Utf8Parser.TryParse(span, out double velocity, out bytesConsumed)) return null;
+            span = span.Slice(bytesConsumed);
 
-            if (!Utf8Parser.TryParse(Trim(span.Slice(0, idx)), out double velocity, out _)) return null;
-            span = span.Slice(idx + 1);
+            // Expect comma
+            span = span.TrimStart(_trimChars);
+            if (span.IsEmpty || span[0] != (byte)',') return null;
+            span = span.Slice(1);
 
             // Parse Pitch
-            idx = span.IndexOf((byte)',');
-            if (idx == -1) return null;
+            span = span.TrimStart(_trimChars);
+            if (!Utf8Parser.TryParse(span, out double pitch, out bytesConsumed)) return null;
+            span = span.Slice(bytesConsumed);
 
-            if (!Utf8Parser.TryParse(Trim(span.Slice(0, idx)), out double pitch, out _)) return null;
-            span = span.Slice(idx + 1);
+            // Expect comma
+            span = span.TrimStart(_trimChars);
+            if (span.IsEmpty || span[0] != (byte)',') return null;
+            span = span.Slice(1);
 
             // Parse Roll
-            idx = span.IndexOf((byte)',');
-            ReadOnlySpan<byte> rollSpan = (idx == -1) ? span : span.Slice(0, idx);
-
-            if (!Utf8Parser.TryParse(Trim(rollSpan), out double roll, out _)) return null;
+            span = span.TrimStart(_trimChars);
+            if (!Utf8Parser.TryParse(span, out double roll, out _)) return null;
 
             // Security: Prevent NaN/Infinity from propagating to control logic
             if (!double.IsFinite(altitude) || !double.IsFinite(velocity) ||
@@ -60,13 +70,6 @@ namespace AeroCore.Shared.Helpers
             // Optimization: Use internal constructor to avoid redundant double.IsFinite checks in property setters.
             // We've already validated the values above.
             return new TelemetryPacket(altitude, velocity, pitch, roll, DateTime.UtcNow);
-        }
-
-        private static ReadOnlySpan<byte> Trim(ReadOnlySpan<byte> span)
-        {
-            // Use built-in vectorized Trim which is significantly faster than manual loop.
-            // Trims space (32), tab (9), CR (13), and LF (10).
-            return span.Trim(_trimChars);
         }
 
         /// <summary>
