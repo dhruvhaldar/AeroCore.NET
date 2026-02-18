@@ -111,5 +111,20 @@ namespace AeroCore.Tests
                 };
             });
         }
+
+        [Fact]
+        public void ControlCommand_ActuatorIdTooLong_ThrowsArgumentException()
+        {
+            // Create an ID that is 51 characters long
+            string longId = new string('A', 51);
+
+            Assert.Throws<ArgumentException>(() =>
+            {
+                new ControlCommand
+                {
+                    ActuatorId = longId
+                };
+            });
+        }
     }
 }

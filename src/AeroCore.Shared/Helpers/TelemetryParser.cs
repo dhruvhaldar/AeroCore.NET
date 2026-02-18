@@ -7,11 +7,13 @@ namespace AeroCore.Shared.Helpers
 {
     public static class TelemetryParser
     {
+        private const int MaxLineLength = 1024;
         private static readonly byte[] _trimChars = new byte[] { 32, 9, 13, 10 };
 
         public static TelemetryPacket? ParseFromCsv(string line)
         {
             if (string.IsNullOrWhiteSpace(line)) return null;
+            if (line.Length > MaxLineLength) return null;
 
             return Parse(line.AsSpan());
         }
@@ -22,6 +24,8 @@ namespace AeroCore.Shared.Helpers
         /// </summary>
         public static TelemetryPacket? Parse(ReadOnlySpan<byte> span)
         {
+            if (span.Length > MaxLineLength) return null;
+
             // Parse Altitude
             int idx = span.IndexOf((byte)',');
             if (idx == -1) return null;
@@ -75,6 +79,8 @@ namespace AeroCore.Shared.Helpers
         /// </summary>
         public static TelemetryPacket? Parse(ReadOnlySpan<char> span)
         {
+            if (span.Length > MaxLineLength) return null;
+
             // Parse Altitude
             int idx = span.IndexOf(',');
             if (idx == -1) return null;

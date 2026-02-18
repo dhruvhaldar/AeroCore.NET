@@ -82,5 +82,25 @@ namespace AeroCore.Tests
 
             Assert.Null(packet);
         }
+
+        [Fact]
+        public void ParseFromCsv_LineTooLong_ReturnsNull()
+        {
+            // Max is 1024
+            string longLine = new string('1', 1025);
+            var packet = TelemetryParser.ParseFromCsv(longLine);
+
+            Assert.Null(packet);
+        }
+
+        [Fact]
+        public void Parse_SpanTooLong_ReturnsNull()
+        {
+            // Max is 1024
+            byte[] longBytes = new byte[1025];
+            var packet = TelemetryParser.Parse(longBytes.AsSpan());
+
+            Assert.Null(packet);
+        }
     }
 }

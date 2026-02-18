@@ -5,6 +5,7 @@ namespace AeroCore.Shared.Models
     // Represents a command sent to actuators
     public record ControlCommand
     {
+        private const int MaxIdLength = 50;
         private string _actuatorId = "UNKNOWN";
         public string ActuatorId
         {
@@ -14,6 +15,11 @@ namespace AeroCore.Shared.Models
                 if (string.IsNullOrWhiteSpace(value))
                 {
                     throw new ArgumentException("ActuatorId cannot be null or whitespace.", nameof(ActuatorId));
+                }
+
+                if (value.Length > MaxIdLength)
+                {
+                    throw new ArgumentException($"ActuatorId cannot exceed {MaxIdLength} characters.", nameof(ActuatorId));
                 }
 
                 foreach (char c in value)

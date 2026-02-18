@@ -47,3 +47,8 @@
 **Vulnerability:** The `IsValidSerialPortName` validation allowed arbitrary file paths (e.g., `/dev/mem`, `Common/foo.txt`) because it only checked for forbidden characters and loose prefixes, enabling attackers to read sensitive files if they could control the configuration.
 **Learning:** `SerialPort` APIs on both Windows and Linux treat file paths as valid ports. Validating only "safe characters" is insufficient; strict allowlisting of platform-specific device namespaces (like `/dev/tty` or `COM`) is required.
 **Prevention:** Implement strict prefix allowlisting for serial ports (e.g., `/dev/tty`, `/dev/cu`, `COM` followed by digits) and reject all other paths, even if they contain "safe" characters.
+
+## 2026-07-28 - Denial of Service via Unbounded Parsing of Public APIs
+**Vulnerability:** Public helper methods like `TelemetryParser.ParseFromCsv` accepted arbitrarily large strings, exposing the application to Denial of Service (DoS) via memory exhaustion or CPU consumption if called with untrusted input, even if current internal usage was safe.
+**Learning:** Security controls (like length limits) implemented only at the "edge" (e.g., in a specific `SerialTelemetryProvider`) leave shared library components vulnerable to misuse or future attack vectors. Defense in Depth requires validation at the component boundary.
+**Prevention:** Enforce explicit input length limits within shared utility methods (`TelemetryParser`, `ControlCommand`) to ensure they fail safely regardless of the caller.
