@@ -352,16 +352,14 @@ namespace AeroCore.GroundStation
                     int barStart = Math.Max(0, center - fill);
                     if (barStart > 0)
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        Console.Out.Write(leftPart.Slice(0, barStart));
+                        PrintSegmentWithMarkers(leftPart.Slice(0, barStart));
                     }
                     Console.ForegroundColor = barColor;
                     Console.Out.Write(leftPart.Slice(barStart));
                 }
                 else
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Out.Write(leftPart);
+                    PrintSegmentWithMarkers(leftPart);
                 }
             }
 
@@ -381,14 +379,30 @@ namespace AeroCore.GroundStation
 
                     if (barEnd < rightPart.Length)
                     {
-                        Console.ForegroundColor = ConsoleColor.DarkGray;
-                        Console.Out.Write(rightPart.Slice(barEnd));
+                        PrintSegmentWithMarkers(rightPart.Slice(barEnd));
                     }
                 }
                 else
                 {
+                    PrintSegmentWithMarkers(rightPart);
+                }
+            }
+        }
+
+        private void PrintSegmentWithMarkers(ReadOnlySpan<char> segment)
+        {
+            for (int i = 0; i < segment.Length; i++)
+            {
+                char c = segment[i];
+                if (c == '+')
+                {
+                    Console.ForegroundColor = ConsoleColor.Gray;
+                    Console.Out.Write(c);
+                }
+                else
+                {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Out.Write(rightPart);
+                    Console.Out.Write(c);
                 }
             }
         }

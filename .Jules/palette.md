@@ -57,3 +57,7 @@
 ## 2026-06-18 - Honest Legends
 **Learning:** A legend that misrepresents the application's visual language (e.g., wrong colors or shapes) creates confusion and distrust. Ensuring the legend is a pixel-perfect (or character-perfect) representation of the live data builds user confidence.
 **Action:** When creating a legend, use the exact same characters and colors as the actual data visualization, including structural elements like brackets.
+
+## 2026-02-19 - Contrast for Scale Markers
+**Learning:** Scale markers in ASCII gauges are only useful if they are visible. When printed in the same color as the empty background (DarkGray), they disappear, losing their value as reference points.
+**Action:** Always render significant markers (like scale ticks or center lines) in a distinct, higher-contrast color than the empty background fill.
