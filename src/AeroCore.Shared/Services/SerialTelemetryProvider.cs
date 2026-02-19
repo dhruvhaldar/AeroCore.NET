@@ -41,7 +41,9 @@ namespace AeroCore.Shared.Services
                 if (!SecurityHelper.IsValidSerialPortName(_portName))
                 {
                     // We throw here to be caught by the block below, ensuring we don't proceed with invalid config.
-                    throw new ArgumentException($"Invalid serial port name format: {_portName}");
+                    // Security: Sanitize the invalid input before logging it in the exception to prevent Log Injection.
+                    string safePortName = SecurityHelper.SanitizeForLog(_portName.AsSpan());
+                    throw new ArgumentException($"Invalid serial port name format: {safePortName}");
                 }
 
                 // In a real scenario, we might retry or fail fast.
