@@ -22,6 +22,10 @@ namespace AeroCore.Shared.Helpers
         // Note: span.TrimStart(SearchValues) is not available in .NET 8 for ReadOnlySpan<byte>.
         private static ReadOnlySpan<byte> TrimWhitespace(ReadOnlySpan<byte> span)
         {
+            // Optimization: Fast path for no whitespace.
+            // If the first byte is > 32 (Space), it's not a whitespace char we care about (Space, Tab, CR, LF).
+            if (!span.IsEmpty && span[0] > 32) return span;
+
             int idx = span.IndexOfAnyExcept(_trimSearchValues);
             if (idx == -1) return ReadOnlySpan<byte>.Empty;
             return span.Slice(idx);

@@ -37,3 +37,7 @@
 ## 2026-05-22 - Optimizing Telemetry Ingestion Loop
 **Learning:** In high-frequency serial streams with CRLF line endings, treating `\r` and `\n` as separate delimiters causes two loop iterations per line, doubling the overhead of `IndexOfAny` and `GetChars`.
 **Action:** Detect `\r\n` sequence and consume both in a single pass to halve the loop overhead for standard telemetry streams.
+
+## 2026-05-23 - Avoiding SIMD Overhead for Clean Data
+**Learning:** `IndexOfAnyExcept` (SIMD) is extremely fast but still has initialization/call overhead. In high-frequency parsing of clean CSV data (no whitespace), calling it repeatedly (e.g. 8 times per packet) is slower than a simple scalar check `if (span[0] > 32)`.
+**Action:** Add a fast-path check for the common case (clean data) before invoking SIMD search helpers to avoid unnecessary overhead in hot loops.
