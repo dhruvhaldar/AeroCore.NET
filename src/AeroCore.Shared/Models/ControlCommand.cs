@@ -16,6 +16,12 @@ namespace AeroCore.Shared.Models
                     throw new ArgumentException("ActuatorId cannot be null or whitespace.", nameof(ActuatorId));
                 }
 
+                // Security: Prevent DoS via memory exhaustion or log flooding
+                if (value.Length > 50)
+                {
+                    throw new ArgumentException("ActuatorId cannot exceed 50 characters.", nameof(ActuatorId));
+                }
+
                 foreach (char c in value)
                 {
                     if (!char.IsLetterOrDigit(c) && c != '_' && c != '-')
