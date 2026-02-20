@@ -61,3 +61,7 @@
 ## 2026-02-19 - Contrast for Scale Markers
 **Learning:** Scale markers in ASCII gauges are only useful if they are visible. When printed in the same color as the empty background (DarkGray), they disappear, losing their value as reference points.
 **Action:** Always render significant markers (like scale ticks or center lines) in a distinct, higher-contrast color than the empty background fill.
+
+## 2026-06-20 - Consistency in Visual Indicators
+**Learning:** When a legend shows a specific visual style (e.g., preserving scale markers `+` inside a gauge bar), the actual implementation must match it. Inconsistency erodes trust and makes the legend confusing.
+**Action:** Verify that dynamic visual elements (like gauges) render exactly as depicted in static legends or help text, including edge cases like full bars.

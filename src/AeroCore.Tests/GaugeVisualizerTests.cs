@@ -23,7 +23,7 @@ namespace AeroCore.Tests
             int fill = GaugeVisualizer.Fill(buffer, 100, 100);
 
             Assert.Equal(5, fill);
-            Assert.Equal("   + |====>", buffer.ToString());
+            Assert.Equal("   + |=+==>", buffer.ToString());
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace AeroCore.Tests
             int fill = GaugeVisualizer.Fill(buffer, -100, 100);
 
             Assert.Equal(5, fill);
-            Assert.Equal("<====| +   ", buffer.ToString());
+            Assert.Equal("<==+=| +   ", buffer.ToString());
         }
 
         [Fact]

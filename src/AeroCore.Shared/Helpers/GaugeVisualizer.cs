@@ -46,7 +46,11 @@ namespace AeroCore.Shared.Helpers
                     // Positive direction (Right)
                     for (int i = 1; i <= fill; i++)
                     {
-                        if (center + i < width) buffer[center + i] = '=';
+                        if (center + i < width)
+                        {
+                            if (buffer[center + i] != '+' || i == 1)
+                                buffer[center + i] = '=';
+                        }
                     }
                     if (center + fill < width) buffer[center + fill] = '>';
                 }
@@ -55,7 +59,11 @@ namespace AeroCore.Shared.Helpers
                     // Negative direction (Left)
                     for (int i = 1; i <= fill; i++)
                     {
-                        if (center - i >= 0) buffer[center - i] = '=';
+                        if (center - i >= 0)
+                        {
+                            if (buffer[center - i] != '+' || i == 1)
+                                buffer[center - i] = '=';
+                        }
                     }
                     if (center - fill >= 0) buffer[center - fill] = '<';
                 }
