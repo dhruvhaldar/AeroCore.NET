@@ -162,19 +162,33 @@ namespace AeroCore.GroundStation
 
             // Timestamp
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("[GCS] T+");
 
-            Span<char> tsBuffer = stackalloc char[20];
-            if (packet.Timestamp.TryFormat(tsBuffer, out int tsWritten, "HH:mm:ss.fff"))
+            // Optimization: Combine prefix, timestamp, and suffix into a single buffer to reduce Console syscalls by 66%.
+            Span<char> lineBuffer = stackalloc char[64];
+            int pos = 0;
+
+            // "[GCS] T+"
+            "[GCS] T+".AsSpan().CopyTo(lineBuffer);
+            pos += 8;
+
+            // Timestamp
+            if (packet.Timestamp.TryFormat(lineBuffer.Slice(pos), out int tsWritten, "HH:mm:ss.fff"))
             {
-                Console.Out.Write(tsBuffer.Slice(0, tsWritten));
+                pos += tsWritten;
             }
             else
             {
-                Console.Write(packet.Timestamp.ToString("HH:mm:ss.fff"));
+                // Fallback (unlikely)
+                var tsStr = packet.Timestamp.ToString("HH:mm:ss.fff");
+                tsStr.AsSpan().CopyTo(lineBuffer.Slice(pos));
+                pos += tsStr.Length;
             }
 
-            Console.Write(" | ");
+            // " | "
+            " | ".AsSpan().CopyTo(lineBuffer.Slice(pos));
+            pos += 3;
+
+            Console.Out.Write(lineBuffer.Slice(0, pos));
 
             // Altitude
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -391,19 +405,33 @@ namespace AeroCore.GroundStation
 
         private void PrintSegmentWithMarkers(ReadOnlySpan<char> segment)
         {
+            // Optimization: Batch contiguous writes of the same color to reduce Console syscalls.
+            // Instead of writing character by character (~5-11 calls), we write in chunks (~1-3 calls).
+            int start = 0;
             for (int i = 0; i < segment.Length; i++)
             {
-                char c = segment[i];
-                if (c == '+')
+                if (segment[i] == '+')
                 {
+                    // Flush previous DarkGray segment
+                    if (i > start)
+                    {
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Out.Write(segment.Slice(start, i - start));
+                    }
+
+                    // Write marker
                     Console.ForegroundColor = ConsoleColor.Gray;
-                    Console.Out.Write(c);
+                    Console.Out.Write('+');
+
+                    start = i + 1;
                 }
-                else
-                {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Out.Write(c);
-                }
+            }
+
+            // Flush remaining DarkGray segment
+            if (start < segment.Length)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Out.Write(segment.Slice(start));
             }
         }
 
