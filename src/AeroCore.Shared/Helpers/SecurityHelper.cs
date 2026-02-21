@@ -17,6 +17,9 @@ namespace AeroCore.Shared.Helpers
         {
             if (string.IsNullOrWhiteSpace(portName)) return false;
 
+            // Security: Prevent CPU/Memory exhaustion DoS via excessively long input
+            if (portName.Length > 100) return false;
+
             // Check for path traversal attempts
             if (portName.Contains("..")) return false;
 
