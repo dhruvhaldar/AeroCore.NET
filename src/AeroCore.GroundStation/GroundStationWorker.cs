@@ -100,13 +100,21 @@ namespace AeroCore.GroundStation
 
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("^");
+            Console.Write("^^");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write(" / ");
+            Console.Write("/");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.Write("^ ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" .. ");
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("v");
+            Console.Write("v ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("       : Rising / Falling Trend");
+            Console.Write("/");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.Write("vv");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" : Rate of Change");
 
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -162,7 +170,7 @@ namespace AeroCore.GroundStation
 
             // Timestamp
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("[GCS] T+");
+            Console.Write("[GCS] @ ");
 
             Span<char> tsBuffer = stackalloc char[20];
             if (packet.Timestamp.TryFormat(tsBuffer, out int tsWritten, "HH:mm:ss.fff"))
@@ -187,25 +195,35 @@ namespace AeroCore.GroundStation
             if (_lastAltitude.HasValue)
             {
                 double delta = packet.Altitude - _lastAltitude.Value;
-                if (delta > 0.1)
+                if (delta > 1.0)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("^");
+                    Console.Write("^^");
+                }
+                else if (delta > 0.1)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("^ ");
+                }
+                else if (delta < -1.0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("vv");
                 }
                 else if (delta < -0.1)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("v");
+                    Console.Write("v ");
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("-");
+                    Console.Write("- ");
                 }
             }
             else
             {
-                Console.Write(" ");
+                Console.Write("  ");
             }
             _lastAltitude = packet.Altitude;
 
@@ -223,25 +241,35 @@ namespace AeroCore.GroundStation
             if (_lastVelocity.HasValue)
             {
                 double delta = packet.Velocity - _lastVelocity.Value;
-                if (delta > 0.1)
+                if (delta > 1.0)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("^");
+                    Console.Write("^^");
+                }
+                else if (delta > 0.1)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.Write("^ ");
+                }
+                else if (delta < -1.0)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.Write("vv");
                 }
                 else if (delta < -0.1)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("v");
+                    Console.Write("v ");
                 }
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("-");
+                    Console.Write("- ");
                 }
             }
             else
             {
-                Console.Write(" ");
+                Console.Write("  ");
             }
             _lastVelocity = packet.Velocity;
 
