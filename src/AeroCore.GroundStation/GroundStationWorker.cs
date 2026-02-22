@@ -102,11 +102,11 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("^");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write(" / ");
+            Console.Write(" / - / ");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("v");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("       : Rising / Falling Trend");
+            Console.WriteLine("    : Rising / Stable / Falling Trend");
 
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;

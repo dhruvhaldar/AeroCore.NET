@@ -65,3 +65,7 @@
 ## 2026-06-20 - Consistency in Visual Indicators
 **Learning:** When a legend shows a specific visual style (e.g., preserving scale markers `+` inside a gauge bar), the actual implementation must match it. Inconsistency erodes trust and makes the legend confusing.
 **Action:** Verify that dynamic visual elements (like gauges) render exactly as depicted in static legends or help text, including edge cases like full bars.
+
+## 2026-06-25 - Completeness in Legends
+**Learning:** A legend that omits a state (like 'Stable') forces the user to guess its meaning when they encounter it.
+**Action:** Ensure every unique visual symbol or color state used in the UI is explicitly defined in the legend.
