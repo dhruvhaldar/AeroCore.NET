@@ -82,5 +82,19 @@ namespace AeroCore.Tests
 
             Assert.Null(packet);
         }
+
+        [Fact]
+        public void Parse_Bytes_MixedWhitespace_ReturnsPacket()
+        {
+            string line = "1000.5, 250.2,0.5 , -0.1";
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(line);
+            var packet = TelemetryParser.Parse(bytes.AsSpan());
+
+            Assert.NotNull(packet);
+            Assert.Equal(1000.5, packet.Value.Altitude);
+            Assert.Equal(250.2, packet.Value.Velocity);
+            Assert.Equal(0.5, packet.Value.Pitch);
+            Assert.Equal(-0.1, packet.Value.Roll);
+        }
     }
 }

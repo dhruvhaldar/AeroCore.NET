@@ -39,40 +39,23 @@ namespace AeroCore.Shared.Helpers
         {
             // Optimization: Parse sequentially to avoid multiple scans (IndexOf + Trim + Parse).
             // We use Utf8Parser.TryParse which returns bytesConsumed, allowing us to advance the span.
-            // We only need to trim leading whitespace between fields.
+            // We also optimize by inlining whitespace checks to avoid method call overhead on the hot path (compact CSV).
 
-            // Parse Altitude
-            span = TrimWhitespace(span);
-            if (!Utf8Parser.TryParse(span, out double altitude, out int bytesConsumed)) return null;
-            span = span.Slice(bytesConsumed);
+            if (!ParseDouble(ref span, out double altitude)) return null;
+            if (!SkipComma(ref span)) return null;
 
-            // Expect comma
-            span = TrimWhitespace(span);
-            if (span.IsEmpty || span[0] != (byte)',') return null;
-            span = span.Slice(1);
+            if (!ParseDouble(ref span, out double velocity)) return null;
+            if (!SkipComma(ref span)) return null;
 
-            // Parse Velocity
-            span = TrimWhitespace(span);
-            if (!Utf8Parser.TryParse(span, out double velocity, out bytesConsumed)) return null;
-            span = span.Slice(bytesConsumed);
+            if (!ParseDouble(ref span, out double pitch)) return null;
+            if (!SkipComma(ref span)) return null;
 
-            // Expect comma
-            span = TrimWhitespace(span);
-            if (span.IsEmpty || span[0] != (byte)',') return null;
-            span = span.Slice(1);
-
-            // Parse Pitch
-            span = TrimWhitespace(span);
-            if (!Utf8Parser.TryParse(span, out double pitch, out bytesConsumed)) return null;
-            span = span.Slice(bytesConsumed);
-
-            // Expect comma
-            span = TrimWhitespace(span);
-            if (span.IsEmpty || span[0] != (byte)',') return null;
-            span = span.Slice(1);
-
-            // Parse Roll
-            span = TrimWhitespace(span);
+            // Roll (last value, no comma check)
+            // Inline fast path of TrimWhitespace
+            if (span.IsEmpty || span[0] <= 32)
+            {
+                span = TrimWhitespace(span);
+            }
             if (!Utf8Parser.TryParse(span, out double roll, out _)) return null;
 
             // Security: Prevent NaN/Infinity from propagating to control logic
@@ -85,6 +68,42 @@ namespace AeroCore.Shared.Helpers
             // Optimization: Use internal constructor to avoid redundant double.IsFinite checks in property setters.
             // We've already validated the values above.
             return new TelemetryPacket(altitude, velocity, pitch, roll, DateTime.UtcNow);
+        }
+
+        private static bool ParseDouble(ref ReadOnlySpan<byte> span, out double value)
+        {
+            // Optimization: Fast path for no whitespace (compact CSV).
+            // If the first byte is > 32 (e.g. digit, dot, minus), it's not whitespace.
+            // This avoids the TrimWhitespace method call overhead.
+            if (span.IsEmpty || span[0] <= 32)
+            {
+                span = TrimWhitespace(span);
+            }
+
+            if (!Utf8Parser.TryParse(span, out value, out int bytesConsumed)) return false;
+            span = span.Slice(bytesConsumed);
+            return true;
+        }
+
+        private static bool SkipComma(ref ReadOnlySpan<byte> span)
+        {
+            // Optimization: Fast path for comma immediately following number.
+            // 44 is comma, which is > 32. So we check if it's comma directly.
+            // If it is comma, we slice and return true.
+            if (!span.IsEmpty && span[0] == (byte)',')
+            {
+                span = span.Slice(1);
+                return true;
+            }
+
+            // Slow path: potential whitespace
+            span = TrimWhitespace(span);
+            if (!span.IsEmpty && span[0] == (byte)',')
+            {
+                span = span.Slice(1);
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
