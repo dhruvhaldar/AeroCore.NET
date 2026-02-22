@@ -41,3 +41,7 @@
 ## 2026-05-23 - Avoiding SIMD Overhead for Clean Data
 **Learning:** `IndexOfAnyExcept` (SIMD) is extremely fast but still has initialization/call overhead. In high-frequency parsing of clean CSV data (no whitespace), calling it repeatedly (e.g. 8 times per packet) is slower than a simple scalar check `if (span[0] > 32)`.
 **Action:** Add a fast-path check for the common case (clean data) before invoking SIMD search helpers to avoid unnecessary overhead in hot loops.
+
+## 2026-05-24 - Inlining Hot Path Checks
+**Learning:** Even with a fast-path inside a helper method (`TrimWhitespace`), the method call overhead itself becomes measurable in extremely tight loops (parsing millions of fields).
+**Action:** Inline simple checks (like `span[0] <= 32` or `span[0] == ','`) into the caller to avoid the method call entirely for the happy path (compact CSV).
