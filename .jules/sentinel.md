@@ -47,3 +47,8 @@
 **Vulnerability:** The `IsValidSerialPortName` validation allowed arbitrary file paths (e.g., `/dev/mem`, `Common/foo.txt`) because it only checked for forbidden characters and loose prefixes, enabling attackers to read sensitive files if they could control the configuration.
 **Learning:** `SerialPort` APIs on both Windows and Linux treat file paths as valid ports. Validating only "safe characters" is insufficient; strict allowlisting of platform-specific device namespaces (like `/dev/tty` or `COM`) is required.
 **Prevention:** Implement strict prefix allowlisting for serial ports (e.g., `/dev/tty`, `/dev/cu`, `COM` followed by digits) and reject all other paths, even if they contain "safe" characters.
+
+## 2026-06-25 - CPU Denial of Service via Unbounded Parsing
+**Vulnerability:** The `TelemetryParser.Parse` methods accepted unbounded inputs (strings or spans), allowing an attacker to cause CPU exhaustion (DoS) by sending excessively long strings that triggered linear scans (`IndexOf`).
+**Learning:** Parsing logic, especially for string processing (like `IndexOf` or `Split`), often has O(N) complexity. Without input length limits, this becomes a DoS vector.
+**Prevention:** Always enforce strict maximum length limits on inputs to parsing functions, especially those exposed publicly or used in high-frequency loops.

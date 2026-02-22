@@ -37,6 +37,9 @@ namespace AeroCore.Shared.Helpers
         /// </summary>
         public static TelemetryPacket? Parse(ReadOnlySpan<byte> span)
         {
+            // Security: Prevent CPU/Memory exhaustion DoS via excessively long input
+            if (span.Length > 1024) return null;
+
             // Optimization: Parse sequentially to avoid multiple scans (IndexOf + Trim + Parse).
             // We use Utf8Parser.TryParse which returns bytesConsumed, allowing us to advance the span.
             // We also optimize by inlining whitespace checks to avoid method call overhead on the hot path (compact CSV).
@@ -112,6 +115,9 @@ namespace AeroCore.Shared.Helpers
         /// </summary>
         public static TelemetryPacket? Parse(ReadOnlySpan<char> span)
         {
+            // Security: Prevent CPU/Memory exhaustion DoS via excessively long input
+            if (span.Length > 1024) return null;
+
             // Parse Altitude
             int idx = span.IndexOf(',');
             if (idx == -1) return null;
