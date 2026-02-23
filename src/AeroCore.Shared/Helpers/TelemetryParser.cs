@@ -59,7 +59,10 @@ namespace AeroCore.Shared.Helpers
             {
                 span = TrimWhitespace(span);
             }
-            if (!Utf8Parser.TryParse(span, out double roll, out _)) return null;
+            if (!Utf8Parser.TryParse(span, out double roll, out int bytesConsumed)) return null;
+
+            // Security: Ensure no trailing garbage to prevent injection/integrity issues
+            if (!TrimWhitespace(span.Slice(bytesConsumed)).IsEmpty) return null;
 
             // Security: Prevent NaN/Infinity from propagating to control logic
             if (!double.IsFinite(altitude) || !double.IsFinite(velocity) ||
