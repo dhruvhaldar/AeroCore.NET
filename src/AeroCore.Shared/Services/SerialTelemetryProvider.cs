@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Buffers;
 using AeroCore.Shared.Interfaces;
 using AeroCore.Shared.Models;
 using AeroCore.Shared.Helpers;
@@ -15,6 +16,8 @@ namespace AeroCore.Shared.Services
 {
     public class SerialTelemetryProvider : ITelemetryProvider
     {
+        private static readonly SearchValues<byte> _lineSeparators = SearchValues.Create(new byte[] { (byte)'\r', (byte)'\n' });
+
         private readonly ILogger<SerialTelemetryProvider> _logger;
         private readonly IConfiguration _config;
         private SerialPort? _serialPort;
@@ -107,6 +110,7 @@ namespace AeroCore.Shared.Services
             int linePos = 0;
             int totalLineBytes = 0;
             bool isDiscarding = false;
+
             // Reused list to avoid allocation per read
             List<TelemetryPacket> packets = new List<TelemetryPacket>();
 
@@ -186,7 +190,7 @@ namespace AeroCore.Shared.Services
             while (!bufferSpan.IsEmpty)
             {
                 // Find first occurrence of either \r or \n
-                int idx = bufferSpan.IndexOfAny((byte)'\r', (byte)'\n');
+                int idx = bufferSpan.IndexOfAny(_lineSeparators);
 
                 if (isDiscarding)
                 {
