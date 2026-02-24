@@ -18,6 +18,9 @@ namespace AeroCore.GroundStation
         private int _spinnerIndex = 0;
         private static readonly char[] _spinnerChars = { '|', '/', '-', '\\' };
 
+        // Rate limiter state for UI updates (to prevent console I/O blocking stream processing)
+        private DateTime _lastUiUpdate = DateTime.MinValue;
+
         public GroundStationWorker(ITelemetryProvider telemetryProvider, ILogger<GroundStationWorker> logger)
         {
             _telemetryProvider = telemetryProvider;
@@ -146,8 +149,16 @@ namespace AeroCore.GroundStation
             {
                 await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
                 {
-                    // Visualize the data
-                    PrintTelemetry(packet);
+                    // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
+                    // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
+                    // while still providing a smooth visual update for the user.
+                    var now = DateTime.UtcNow;
+                    if ((now - _lastUiUpdate).TotalMilliseconds >= 50)
+                    {
+                        // Visualize the data
+                        PrintTelemetry(packet);
+                        _lastUiUpdate = now;
+                    }
                 }
             }
             catch (OperationCanceledException)
