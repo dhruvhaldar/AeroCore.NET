@@ -69,3 +69,7 @@
 ## 2026-06-25 - Completeness in Legends
 **Learning:** A legend that omits a state (like 'Stable') forces the user to guess its meaning when they encounter it.
 **Action:** Ensure every unique visual symbol or color state used in the UI is explicitly defined in the legend.
+
+## 2026-06-25 - Taskbar Visibility via Console Title
+**Learning:** Console applications are often monitored passively. Updating the window title with high-level status (OK/WARN/CRIT) allows operators to track health even when the window is minimized or obscured.
+**Action:** Always mirror critical application status to the Console.Title property for at-a-glance monitoring.
