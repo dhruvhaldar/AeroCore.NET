@@ -20,6 +20,7 @@ namespace AeroCore.GroundStation
 
         // Rate limiter state for UI updates (to prevent console I/O blocking stream processing)
         private DateTime _lastUiUpdate = DateTime.MinValue;
+        private string _lastTitleStatus = string.Empty;
 
         public GroundStationWorker(ITelemetryProvider telemetryProvider, ILogger<GroundStationWorker> logger)
         {
@@ -36,6 +37,7 @@ namespace AeroCore.GroundStation
 
         private void ShowWelcomeBanner()
         {
+            Console.Title = "AeroCore Ground Station v1.0";
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("============================================================");
@@ -350,34 +352,58 @@ namespace AeroCore.GroundStation
             bool warnRol = !critRol && Math.Abs(packet.Roll) > 35;
             bool isWarn = warnVel || warnPit || warnRol;
 
+            // Build Status String for Title and Console
+            string statusStr = "OK";
+            string reasonsStr = "";
+            ConsoleColor statusColor = ConsoleColor.Green;
+
             if (isCrit)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.Write("[CRIT]");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write(" (");
+                statusStr = "CRIT";
+                statusColor = ConsoleColor.Red;
+
+                var reasons = new System.Text.StringBuilder();
                 bool first = true;
-                if (critAlt) { Console.Write("ALT"); first = false; }
-                if (critPit) { if (!first) Console.Write(","); Console.Write("PIT"); first = false; }
-                if (critRol) { if (!first) Console.Write(","); Console.Write("ROL"); }
-                Console.WriteLine(")");
+                if (critAlt) { reasons.Append("ALT"); first = false; }
+                if (critPit) { if (!first) reasons.Append(","); reasons.Append("PIT"); first = false; }
+                if (critRol) { if (!first) reasons.Append(","); reasons.Append("ROL"); }
+                reasonsStr = reasons.ToString();
             }
             else if (isWarn)
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("[WARN]");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write(" (");
+                statusStr = "WARN";
+                statusColor = ConsoleColor.Yellow;
+
+                var reasons = new System.Text.StringBuilder();
                 bool first = true;
-                if (warnVel) { Console.Write("VEL"); first = false; }
-                if (warnPit) { if (!first) Console.Write(","); Console.Write("PIT"); first = false; }
-                if (warnRol) { if (!first) Console.Write(","); Console.Write("ROL"); }
-                Console.WriteLine(")");
+                if (warnVel) { reasons.Append("VEL"); first = false; }
+                if (warnPit) { if (!first) reasons.Append(","); reasons.Append("PIT"); first = false; }
+                if (warnRol) { if (!first) reasons.Append(","); reasons.Append("ROL"); }
+                reasonsStr = reasons.ToString();
+            }
+
+            // Update Console Title (only if changed)
+            string fullStatus = string.IsNullOrEmpty(reasonsStr) ? $"[{statusStr}]" : $"[{statusStr}] ({reasonsStr})";
+            if (fullStatus != _lastTitleStatus)
+            {
+                Console.Title = $"AeroCore Ground Station - {fullStatus}";
+                _lastTitleStatus = fullStatus;
+            }
+
+            // Print Status
+            Console.ForegroundColor = statusColor;
+            if (statusStr == "OK") Console.Write("[ OK ]");
+            else Console.Write($"[{statusStr}]");
+
+            if (!string.IsNullOrEmpty(reasonsStr))
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine($" ({reasonsStr})");
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("[ OK ]");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.WriteLine(" (Stable)");
             }
 
             Console.ResetColor();
