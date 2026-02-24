@@ -140,11 +140,10 @@ namespace AeroCore.Shared.Helpers
             span = span.Slice(idx + 1);
 
             // Parse Roll
-            // Take until next comma or end of string.
-            // This handles cases with or without trailing extra fields.
-            idx = span.IndexOf(',');
-            ReadOnlySpan<char> rollSpan = (idx == -1) ? span : span.Slice(0, idx);
-            if (!double.TryParse(rollSpan, CultureInfo.InvariantCulture, out double roll)) return null;
+            // Security: Enforce strict parsing (no trailing fields) to match byte[] overload behavior
+            // and prevent data injection or ambiguity.
+            if (span.IndexOf(',') != -1) return null;
+            if (!double.TryParse(span, CultureInfo.InvariantCulture, out double roll)) return null;
 
             // Security: Prevent NaN/Infinity from propagating to control logic
             if (!double.IsFinite(altitude) || !double.IsFinite(velocity) ||
