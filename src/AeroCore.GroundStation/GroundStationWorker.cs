@@ -141,35 +141,46 @@ namespace AeroCore.GroundStation
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // Give the host a moment to finish startup logs so the banner appears after them
-            await Task.Delay(100, stoppingToken);
-
-            ShowWelcomeBanner();
-            _logger.LogInformation("Ground Station Listening for Telemetry...");
+            // Hide cursor to prevent distraction
+            try { Console.CursorVisible = false; } catch { }
 
             try
             {
-                await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
+                // Give the host a moment to finish startup logs so the banner appears after them
+                await Task.Delay(100, stoppingToken);
+
+                ShowWelcomeBanner();
+                _logger.LogInformation("Ground Station Listening for Telemetry...");
+
+                try
                 {
-                    // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
-                    // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
-                    // while still providing a smooth visual update for the user.
-                    var now = DateTime.UtcNow;
-                    if ((now - _lastUiUpdate).TotalMilliseconds >= 50)
+                    await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
                     {
-                        // Visualize the data
-                        PrintTelemetry(packet);
-                        _lastUiUpdate = now;
+                        // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
+                        // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
+                        // while still providing a smooth visual update for the user.
+                        var now = DateTime.UtcNow;
+                        if ((now - _lastUiUpdate).TotalMilliseconds >= 50)
+                        {
+                            // Visualize the data
+                            PrintTelemetry(packet);
+                            _lastUiUpdate = now;
+                        }
                     }
                 }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogInformation("Ground Station Stopped.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Ground Station Error");
+                }
             }
-            catch (OperationCanceledException)
+            finally
             {
-                _logger.LogInformation("Ground Station Stopped.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Ground Station Error");
+                // Restore cursor on exit
+                try { Console.CursorVisible = true; } catch { }
             }
         }
 
@@ -188,8 +199,8 @@ namespace AeroCore.GroundStation
             Span<char> lineBuffer = stackalloc char[64];
             int pos = 0;
 
-            // "[GCS] T+"
-            "[GCS] T+".AsSpan().CopyTo(lineBuffer);
+            // "[GCS] @ " to denote Wall Clock Time
+            "[GCS] @ ".AsSpan().CopyTo(lineBuffer);
             pos += 8;
 
             // Timestamp
@@ -215,7 +226,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("ALT: ");
             Console.ForegroundColor = packet.Altitude < 0 ? ConsoleColor.Red : ConsoleColor.White;
-            WriteFormatted(packet.Altitude, 8, "F2");
+            WriteFormatted(packet.Altitude, 10, "N2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" ft ");
 
@@ -261,7 +272,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("VEL: ");
             Console.ForegroundColor = packet.Velocity > 100 ? ConsoleColor.Yellow : ConsoleColor.White;
-            WriteFormatted(packet.Velocity, 6, "F1");
+            WriteFormatted(packet.Velocity, 7, "N1");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" kts ");
 
