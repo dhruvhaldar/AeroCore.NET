@@ -24,6 +24,9 @@ namespace AeroCore.Shared.Services
         private string _portName = string.Empty;
         private int _baudRate;
 
+        // Rate limiter for error logs to prevent DoS via log flooding
+        private DateTime _lastErrorLog = DateTime.MinValue;
+
         public SerialTelemetryProvider(ILogger<SerialTelemetryProvider> logger, IConfiguration config)
         {
             _logger = logger;
@@ -237,7 +240,12 @@ namespace AeroCore.Shared.Services
                     // DoS Protection: Check total bytes consumed for this line, not just output buffer length.
                     if (totalLineBytes + lengthToCopy > lineBuffer.Length)
                     {
-                        _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                        var now = DateTime.UtcNow;
+                        if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
+                        {
+                            _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                            _lastErrorLog = now;
+                        }
 
                         // Enter discarding state to ignore the rest of this overly long line
                         isDiscarding = true;
@@ -264,7 +272,12 @@ namespace AeroCore.Shared.Services
                     // idx + 1 includes the delimiter.
                     if (totalLineBytes + idx + 1 > lineBuffer.Length)
                     {
-                        _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                        var now = DateTime.UtcNow;
+                        if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
+                        {
+                            _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                            _lastErrorLog = now;
+                        }
 
                         // We found the end of the line, so we discard only this line.
                         // We do NOT set isDiscarding=true because we are done with the long line.
@@ -329,7 +342,12 @@ namespace AeroCore.Shared.Services
                                 }
 
                                 // Security: Do not log raw content to prevent sensitive data leakage and DoS.
-                                _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", idx);
+                                var now = DateTime.UtcNow;
+                                if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
+                                {
+                                    _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", idx);
+                                    _lastErrorLog = now;
+                                }
                                 requiresDelay = true;
                                 linePos = 0;
                                 return; // Return to allow delay
@@ -367,7 +385,12 @@ namespace AeroCore.Shared.Services
                             else
                             {
                                 // Security: Do not log raw content to prevent sensitive data leakage and DoS.
-                                _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", linePos);
+                                var now = DateTime.UtcNow;
+                                if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
+                                {
+                                    _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", linePos);
+                                    _lastErrorLog = now;
+                                }
                                 requiresDelay = true;
                                 linePos = 0;
                                 totalLineBytes = 0;

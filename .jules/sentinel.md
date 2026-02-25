@@ -52,3 +52,8 @@
 **Vulnerability:** The `TelemetryParser.Parse` methods accepted unbounded inputs (strings or spans), allowing an attacker to cause CPU exhaustion (DoS) by sending excessively long strings that triggered linear scans (`IndexOf`).
 **Learning:** Parsing logic, especially for string processing (like `IndexOf` or `Split`), often has O(N) complexity. Without input length limits, this becomes a DoS vector.
 **Prevention:** Always enforce strict maximum length limits on inputs to parsing functions, especially those exposed publicly or used in high-frequency loops.
+
+## 2026-06-25 - Log Flooding via Rate-Limited Errors
+**Vulnerability:** Although a `Task.Delay` throttled the CPU usage of error loops, it still allowed ~10 logs/second, which can accumulate to ~36,000 logs/hour, filling disk space and masking real issues.
+**Learning:** CPU throttling (delays) does not equal Log throttling. Logs should be rate-limited independently based on time (e.g., max 1 per second) to prevent storage exhaustion.
+**Prevention:** Implement explicit time-based rate limiting for repetitive error logs, independent of the processing loop delay.
