@@ -282,10 +282,9 @@ namespace AeroCore.Shared.Services
                     // This avoids copying to lineBuffer and converting to chars.
                     if (linePos == 0)
                     {
-                        var packet = TelemetryParser.Parse(bufferSpan.Slice(0, idx));
-                        if (packet != null)
+                        if (TelemetryParser.TryParse(bufferSpan.Slice(0, idx), out var packet))
                         {
-                            packets.Add(packet.Value);
+                            packets.Add(packet);
 
                             // Advance past delimiter
                             bufferSpan = bufferSpan.Slice(idx + 1);
@@ -361,10 +360,9 @@ namespace AeroCore.Shared.Services
                         // End of line. Process it.
                         if (linePos > 0)
                         {
-                            var packet = ParseBuffer(lineBuffer, linePos);
-                            if (packet != null)
+                            if (ParseBuffer(lineBuffer, linePos, out var packet))
                             {
-                                packets.Add(packet.Value);
+                                packets.Add(packet);
                             }
                             else
                             {
@@ -384,9 +382,9 @@ namespace AeroCore.Shared.Services
             }
         }
 
-        private static TelemetryPacket? ParseBuffer(byte[] buffer, int length)
+        private static bool ParseBuffer(byte[] buffer, int length, out TelemetryPacket packet)
         {
-            return TelemetryParser.Parse(new ReadOnlySpan<byte>(buffer, 0, length));
+            return TelemetryParser.TryParse(new ReadOnlySpan<byte>(buffer, 0, length), out packet);
         }
     }
 }

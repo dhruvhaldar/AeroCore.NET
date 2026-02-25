@@ -37,21 +37,35 @@ namespace AeroCore.Shared.Helpers
         /// </summary>
         public static TelemetryPacket? Parse(ReadOnlySpan<byte> span)
         {
+            if (TryParse(span, out var packet))
+            {
+                return packet;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Tries to parse telemetry data using ReadOnlySpan&lt;byte&gt; without allocations.
+        /// </summary>
+        public static bool TryParse(ReadOnlySpan<byte> span, out TelemetryPacket packet)
+        {
+            packet = default;
+
             // Security: Prevent CPU/Memory exhaustion DoS via excessively long input
-            if (span.Length > 1024) return null;
+            if (span.Length > 1024) return false;
 
             // Optimization: Parse sequentially to avoid multiple scans (IndexOf + Trim + Parse).
             // We use Utf8Parser.TryParse which returns bytesConsumed, allowing us to advance the span.
             // We also optimize by inlining whitespace checks to avoid method call overhead on the hot path (compact CSV).
 
-            if (!ParseDouble(ref span, out double altitude)) return null;
-            if (!SkipComma(ref span)) return null;
+            if (!ParseDouble(ref span, out double altitude)) return false;
+            if (!SkipComma(ref span)) return false;
 
-            if (!ParseDouble(ref span, out double velocity)) return null;
-            if (!SkipComma(ref span)) return null;
+            if (!ParseDouble(ref span, out double velocity)) return false;
+            if (!SkipComma(ref span)) return false;
 
-            if (!ParseDouble(ref span, out double pitch)) return null;
-            if (!SkipComma(ref span)) return null;
+            if (!ParseDouble(ref span, out double pitch)) return false;
+            if (!SkipComma(ref span)) return false;
 
             // Roll (last value, no comma check)
             // Inline fast path of TrimWhitespace
@@ -59,21 +73,22 @@ namespace AeroCore.Shared.Helpers
             {
                 span = TrimWhitespace(span);
             }
-            if (!Utf8Parser.TryParse(span, out double roll, out int bytesConsumed)) return null;
+            if (!Utf8Parser.TryParse(span, out double roll, out int bytesConsumed)) return false;
 
             // Security: Ensure no trailing garbage to prevent injection/integrity issues
-            if (!TrimWhitespace(span.Slice(bytesConsumed)).IsEmpty) return null;
+            if (!TrimWhitespace(span.Slice(bytesConsumed)).IsEmpty) return false;
 
             // Security: Prevent NaN/Infinity from propagating to control logic
             if (!double.IsFinite(altitude) || !double.IsFinite(velocity) ||
                 !double.IsFinite(pitch) || !double.IsFinite(roll))
             {
-                return null;
+                return false;
             }
 
             // Optimization: Use internal constructor to avoid redundant double.IsFinite checks in property setters.
             // We've already validated the values above.
-            return new TelemetryPacket(altitude, velocity, pitch, roll, DateTime.UtcNow);
+            packet = new TelemetryPacket(altitude, velocity, pitch, roll, DateTime.UtcNow);
+            return true;
         }
 
         private static bool ParseDouble(ref ReadOnlySpan<byte> span, out double value)
