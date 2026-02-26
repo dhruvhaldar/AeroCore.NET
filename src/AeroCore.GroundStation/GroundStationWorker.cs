@@ -187,8 +187,12 @@ namespace AeroCore.GroundStation
         private void PrintTelemetry(TelemetryPacket packet)
         {
             // Spinner
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("[");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write($"[{_spinnerChars[_spinnerIndex]}] ");
+            Console.Write(_spinnerChars[_spinnerIndex]);
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("] ");
             _spinnerIndex = (_spinnerIndex + 1) % _spinnerChars.Length;
             Console.ResetColor();
 
@@ -224,7 +228,9 @@ namespace AeroCore.GroundStation
 
             // Altitude
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("ALT: ");
+            Console.Write("ALT");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(": ");
             Console.ForegroundColor = packet.Altitude < 0 ? ConsoleColor.Red : ConsoleColor.White;
             WriteFormatted(packet.Altitude, 10, "N2");
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -270,7 +276,9 @@ namespace AeroCore.GroundStation
 
             // Velocity
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("VEL: ");
+            Console.Write("VEL");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(": ");
             Console.ForegroundColor = packet.Velocity > 100 ? ConsoleColor.Yellow : ConsoleColor.White;
             WriteFormatted(packet.Velocity, 7, "N1");
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -316,7 +324,9 @@ namespace AeroCore.GroundStation
 
             // Pitch
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("PIT: ");
+            Console.Write("PIT");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(": ");
             double absPitch = Math.Abs(packet.Pitch);
             if (absPitch > 45) Console.ForegroundColor = ConsoleColor.Red;
             else if (absPitch > 35) Console.ForegroundColor = ConsoleColor.Yellow;
@@ -334,7 +344,9 @@ namespace AeroCore.GroundStation
 
             // Roll
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.Write("ROL: ");
+            Console.Write("ROL");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(": ");
             double absRoll = Math.Abs(packet.Roll);
             if (absRoll > 45) Console.ForegroundColor = ConsoleColor.Red;
             else if (absRoll > 35) Console.ForegroundColor = ConsoleColor.Yellow;
@@ -402,9 +414,13 @@ namespace AeroCore.GroundStation
             }
 
             // Print Status
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("[");
             Console.ForegroundColor = statusColor;
-            if (statusStr == "OK") Console.Write("[ OK ]");
-            else Console.Write($"[{statusStr}]");
+            if (statusStr == "OK") Console.Write(" OK ");
+            else Console.Write($"{statusStr}");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("]");
 
             if (!string.IsNullOrEmpty(reasonsStr))
             {
