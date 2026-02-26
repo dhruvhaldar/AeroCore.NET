@@ -146,6 +146,10 @@ namespace AeroCore.Shared.Services
                 // we pause and then resume processing the rest of the buffer.
                 int bufferOffset = 0;
 
+                // Optimization: Capture timestamp once per chunk read to avoid repetitive DateTime.UtcNow calls (syscalls).
+                // This reduces CPU overhead significantly in high-frequency loops.
+                DateTime chunkTimestamp = DateTime.UtcNow;
+
                 while (bufferOffset < bytesRead)
                 {
                     int consumed = 0;
@@ -159,6 +163,7 @@ namespace AeroCore.Shared.Services
                         ref totalLineBytes,
                         packets,
                         ref isDiscarding,
+                        chunkTimestamp,
                         out consumed,
                         out requiresDelay);
 
@@ -184,6 +189,7 @@ namespace AeroCore.Shared.Services
             ref int totalLineBytes,
             List<TelemetryPacket> packets,
             ref bool isDiscarding,
+            DateTime timestamp,
             out int consumedBytes,
             out bool requiresDelay)
         {
@@ -295,7 +301,8 @@ namespace AeroCore.Shared.Services
                     // This avoids copying to lineBuffer and converting to chars.
                     if (linePos == 0)
                     {
-                        if (TelemetryParser.TryParse(bufferSpan.Slice(0, idx), out var packet))
+                        // Pass the captured timestamp to avoid syscall
+                        if (TelemetryParser.TryParse(bufferSpan.Slice(0, idx), out var packet, timestamp))
                         {
                             packets.Add(packet);
 
@@ -378,7 +385,7 @@ namespace AeroCore.Shared.Services
                         // End of line. Process it.
                         if (linePos > 0)
                         {
-                            if (ParseBuffer(lineBuffer, linePos, out var packet))
+                            if (ParseBuffer(lineBuffer, linePos, timestamp, out var packet))
                             {
                                 packets.Add(packet);
                             }
@@ -405,9 +412,9 @@ namespace AeroCore.Shared.Services
             }
         }
 
-        private static bool ParseBuffer(byte[] buffer, int length, out TelemetryPacket packet)
+        private static bool ParseBuffer(byte[] buffer, int length, DateTime timestamp, out TelemetryPacket packet)
         {
-            return TelemetryParser.TryParse(new ReadOnlySpan<byte>(buffer, 0, length), out packet);
+            return TelemetryParser.TryParse(new ReadOnlySpan<byte>(buffer, 0, length), out packet, timestamp);
         }
     }
 }
