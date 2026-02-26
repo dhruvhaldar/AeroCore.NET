@@ -49,6 +49,14 @@ namespace AeroCore.Shared.Helpers
         /// </summary>
         public static bool TryParse(ReadOnlySpan<byte> span, out TelemetryPacket packet)
         {
+            return TryParse(span, out packet, DateTime.UtcNow);
+        }
+
+        /// <summary>
+        /// Tries to parse telemetry data using ReadOnlySpan&lt;byte&gt; without allocations, using a specific timestamp.
+        /// </summary>
+        public static bool TryParse(ReadOnlySpan<byte> span, out TelemetryPacket packet, DateTime timestamp)
+        {
             packet = default;
 
             // Security: Prevent CPU/Memory exhaustion DoS via excessively long input
@@ -87,7 +95,7 @@ namespace AeroCore.Shared.Helpers
 
             // Optimization: Use internal constructor to avoid redundant double.IsFinite checks in property setters.
             // We've already validated the values above.
-            packet = new TelemetryPacket(altitude, velocity, pitch, roll, DateTime.UtcNow);
+            packet = new TelemetryPacket(altitude, velocity, pitch, roll, timestamp);
             return true;
         }
 

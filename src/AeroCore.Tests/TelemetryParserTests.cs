@@ -96,5 +96,19 @@ namespace AeroCore.Tests
             Assert.Equal(0.5, packet.Value.Pitch);
             Assert.Equal(-0.1, packet.Value.Roll);
         }
+
+        [Fact]
+        public void TryParse_Bytes_WithTimestamp_UsesProvidedTimestamp()
+        {
+            string line = "1000.5,250.2,0.5,-0.1";
+            byte[] bytes = System.Text.Encoding.UTF8.GetBytes(line);
+            DateTime expectedTimestamp = new DateTime(2023, 10, 27, 10, 0, 0, DateTimeKind.Utc);
+
+            bool success = TelemetryParser.TryParse(bytes.AsSpan(), out var packet, expectedTimestamp);
+
+            Assert.True(success);
+            Assert.Equal(1000.5, packet.Altitude);
+            Assert.Equal(expectedTimestamp, packet.Timestamp);
+        }
     }
 }
