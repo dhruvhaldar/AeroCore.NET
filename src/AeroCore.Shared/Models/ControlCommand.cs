@@ -40,6 +40,12 @@ namespace AeroCore.Shared.Models
             get => _value;
             init
             {
+                // Security: Prevent NaN/Infinity from propagating to control logic
+                if (!double.IsFinite(value))
+                {
+                    throw new ArgumentException("Value must be a finite number.", nameof(Value));
+                }
+
                 if (value < 0.0 || value > 1.0)
                 {
                     throw new ArgumentOutOfRangeException(nameof(Value), value, "Value must be between 0.0 and 1.0.");
