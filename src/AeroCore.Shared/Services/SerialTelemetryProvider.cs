@@ -246,7 +246,7 @@ namespace AeroCore.Shared.Services
                     // DoS Protection: Check total bytes consumed for this line, not just output buffer length.
                     if (totalLineBytes + lengthToCopy > lineBuffer.Length)
                     {
-                        var now = DateTime.UtcNow;
+                        var now = timestamp; // Optimization: Use pre-captured timestamp to avoid syscall
                         if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
                         {
                             _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
@@ -278,7 +278,7 @@ namespace AeroCore.Shared.Services
                     // idx + 1 includes the delimiter.
                     if (totalLineBytes + idx + 1 > lineBuffer.Length)
                     {
-                        var now = DateTime.UtcNow;
+                        var now = timestamp; // Optimization: Use pre-captured timestamp to avoid syscall
                         if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
                         {
                             _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
@@ -349,7 +349,7 @@ namespace AeroCore.Shared.Services
                                 }
 
                                 // Security: Do not log raw content to prevent sensitive data leakage and DoS.
-                                var now = DateTime.UtcNow;
+                                var now = timestamp; // Optimization: Use pre-captured timestamp to avoid syscall
                                 if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
                                 {
                                     _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", idx);
@@ -392,7 +392,7 @@ namespace AeroCore.Shared.Services
                             else
                             {
                                 // Security: Do not log raw content to prevent sensitive data leakage and DoS.
-                                var now = DateTime.UtcNow;
+                                var now = timestamp; // Optimization: Use pre-captured timestamp to avoid syscall
                                 if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
                                 {
                                     _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", linePos);

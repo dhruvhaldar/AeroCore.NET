@@ -19,7 +19,7 @@ namespace AeroCore.GroundStation
         private static readonly char[] _spinnerChars = { '|', '/', '-', '\\' };
 
         // Rate limiter state for UI updates (to prevent console I/O blocking stream processing)
-        private DateTime _lastUiUpdate = DateTime.MinValue;
+        private long _lastUiUpdate = 0;
         private string _lastTitleStatus = string.Empty;
 
         public GroundStationWorker(ITelemetryProvider telemetryProvider, ILogger<GroundStationWorker> logger)
@@ -159,8 +159,10 @@ namespace AeroCore.GroundStation
                         // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
                         // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
                         // while still providing a smooth visual update for the user.
-                        var now = DateTime.UtcNow;
-                        if ((now - _lastUiUpdate).TotalMilliseconds >= 50)
+                        // Use Environment.TickCount64 instead of DateTime.UtcNow to accurately measure wall-clock time
+                        // while avoiding expensive system calls in the per-packet hot loop.
+                        var now = Environment.TickCount64;
+                        if ((now - _lastUiUpdate) >= 50)
                         {
                             // Visualize the data
                             PrintTelemetry(packet);
