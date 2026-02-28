@@ -45,3 +45,7 @@
 ## 2026-05-24 - Inlining Hot Path Checks
 **Learning:** Even with a fast-path inside a helper method (`TrimWhitespace`), the method call overhead itself becomes measurable in extremely tight loops (parsing millions of fields).
 **Action:** Inline simple checks (like `span[0] <= 32` or `span[0] == ','`) into the caller to avoid the method call entirely for the happy path (compact CSV).
+
+## 2025-02-12 - Wall-clock Throttling in Hot Loops (Avoiding DateTime.UtcNow)
+**Learning:** Repeated calls to `DateTime.UtcNow` within high-frequency loops (like telemetry processing or UI updates) introduce significant system call overhead. However, replacing it with domain time (`packet.Timestamp`) for system I/O throttling is a critical mistake: during data bursts (e.g., catching up after lag), domain time advances rapidly while wall-clock time barely moves, completely bypassing the throttle and causing massive I/O blocking.
+**Action:** To rate-limit or throttle system operations (like Console I/O or network sends) inside a hot loop, use `Environment.TickCount64`. It accurately measures wall-clock elapsed time with near-zero overhead compared to `DateTime.UtcNow`. For operations that only care about causal sequence or batch timings, take a snapshot of `DateTime.UtcNow` exactly once at the beginning of the batch.

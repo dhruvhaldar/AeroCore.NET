@@ -18,8 +18,8 @@ namespace AeroCore.FlightComputer.Services
         private readonly Channel<ControlCommand> _commandChannel;
 
         // Rate limiters for logging to prevent DoS via log flooding
-        private DateTime _lastStatusLog = DateTime.MinValue;
-        private DateTime _lastCorrectionLog = DateTime.MinValue;
+        private long _lastStatusLog = 0;
+        private long _lastCorrectionLog = 0;
 
         private static readonly Action<ILogger, double, Exception?> _logPitchCorrection = LoggerMessage.Define<double>(
             LogLevel.Warning,
@@ -125,8 +125,9 @@ namespace AeroCore.FlightComputer.Services
             if (packet.Pitch > 0.5)
             {
                 // Rate limit correction logs to prevent flooding (max 10/sec)
-                var now = DateTime.UtcNow;
-                if ((now - _lastCorrectionLog).TotalMilliseconds > 100)
+                // Optimization: Use Environment.TickCount64 instead of DateTime.UtcNow to eliminate syscalls in hot path for wall-clock throttling.
+                var now = Environment.TickCount64;
+                if ((now - _lastCorrectionLog) > 100)
                 {
                     _logPitchCorrection(_logger, packet.Pitch, null);
                     _lastCorrectionLog = now;
@@ -135,7 +136,7 @@ namespace AeroCore.FlightComputer.Services
                 // Use 'with' to create a copy with new timestamp.
                 // This bypasses the expensive 'init' validation logic for ActuatorId and Value
                 // because it copies the backing fields directly.
-                var cmd = _elevatorDownCmd with { Timestamp = DateTime.UtcNow };
+                var cmd = _elevatorDownCmd with { Timestamp = packet.Timestamp };
 
                 // Non-blocking write, drops oldest if full
                 _commandChannel.Writer.TryWrite(cmd);
@@ -143,8 +144,9 @@ namespace AeroCore.FlightComputer.Services
             else
             {
                 // Rate limit status logs (max 1/sec)
-                var now = DateTime.UtcNow;
-                if ((now - _lastStatusLog).TotalSeconds > 1)
+                // Optimization: Use Environment.TickCount64 instead of DateTime.UtcNow to eliminate syscalls in hot path for wall-clock throttling.
+                var now = Environment.TickCount64;
+                if ((now - _lastStatusLog) > 1000)
                 {
                     _logStatus(_logger, packet.Altitude, packet.Velocity, packet.Pitch, null);
                     _lastStatusLog = now;
