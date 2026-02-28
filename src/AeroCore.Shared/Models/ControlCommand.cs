@@ -24,9 +24,11 @@ namespace AeroCore.Shared.Models
 
                 foreach (char c in value)
                 {
-                    if (!char.IsLetterOrDigit(c) && c != '_' && c != '-')
+                    bool isAsciiLetter = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+                    bool isAsciiDigit = (c >= '0' && c <= '9');
+                    if (!isAsciiLetter && !isAsciiDigit && c != '_' && c != '-')
                     {
-                        throw new ArgumentException($"ActuatorId contains invalid character '{c}'. Only alphanumeric, underscore, and hyphen are allowed.", nameof(ActuatorId));
+                        throw new ArgumentException($"ActuatorId contains invalid character '{c}'. Only ASCII alphanumeric, underscore, and hyphen are allowed.", nameof(ActuatorId));
                     }
                 }
 

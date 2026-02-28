@@ -29,11 +29,13 @@ namespace AeroCore.Shared.Helpers
                 if (char.IsControl(c)) return false;
             }
 
-            // Strict allowlist for characters: A-Z, a-z, 0-9, ., _, -, /, \
-            // This prevents injection characters like ';', '&', '|', '>', '<', ' '
+            // Strict allowlist for characters: ASCII A-Z, a-z, 0-9, ., _, -, /, \
+            // This prevents injection characters and Unicode homoglyph/normalization issues.
             foreach (char c in portName)
             {
-                if (!char.IsLetterOrDigit(c) && c != '.' && c != '_' && c != '-' && c != '/' && c != '\\')
+                bool isAsciiLetter = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+                bool isAsciiDigit = (c >= '0' && c <= '9');
+                if (!isAsciiLetter && !isAsciiDigit && c != '.' && c != '_' && c != '-' && c != '/' && c != '\\')
                 {
                     return false;
                 }
@@ -70,7 +72,7 @@ namespace AeroCore.Shared.Helpers
             if (span.IsEmpty) return false;
             foreach (char c in span)
             {
-                if (!char.IsDigit(c)) return false;
+                if (c < '0' || c > '9') return false;
             }
             return true;
         }
