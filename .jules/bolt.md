@@ -49,3 +49,7 @@
 ## 2025-02-12 - Wall-clock Throttling in Hot Loops (Avoiding DateTime.UtcNow)
 **Learning:** Repeated calls to `DateTime.UtcNow` within high-frequency loops (like telemetry processing or UI updates) introduce significant system call overhead. However, replacing it with domain time (`packet.Timestamp`) for system I/O throttling is a critical mistake: during data bursts (e.g., catching up after lag), domain time advances rapidly while wall-clock time barely moves, completely bypassing the throttle and causing massive I/O blocking.
 **Action:** To rate-limit or throttle system operations (like Console I/O or network sends) inside a hot loop, use `Environment.TickCount64`. It accurately measures wall-clock elapsed time with near-zero overhead compared to `DateTime.UtcNow`. For operations that only care about causal sequence or batch timings, take a snapshot of `DateTime.UtcNow` exactly once at the beginning of the batch.
+
+## 2026-05-25 - StringBuilder Allocation in High-Frequency UI Loops
+**Learning:** `StringBuilder` instantiation within high-frequency UI update loops (like the ~20Hz Ground Station terminal loop) creates excessive and unnecessary allocations for short, predictable strings.
+**Action:** Use `stackalloc char[]` or `Span<char>` with direct character indexing/copying when building small, deterministic strings in hot loops to eliminate heap allocations and reduce GC pressure.

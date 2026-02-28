@@ -399,24 +399,26 @@ namespace AeroCore.GroundStation
                 statusStr = "CRIT";
                 statusColor = ConsoleColor.Red;
 
-                var reasons = new System.Text.StringBuilder();
+                Span<char> reasons = stackalloc char[15]; // Max "ALT,PIT,ROL" is 11 chars
+                int reasonsPos = 0;
                 bool first = true;
-                if (critAlt) { reasons.Append("ALT"); first = false; }
-                if (critPit) { if (!first) reasons.Append(","); reasons.Append("PIT"); first = false; }
-                if (critRol) { if (!first) reasons.Append(","); reasons.Append("ROL"); }
-                reasonsStr = reasons.ToString();
+                if (critAlt) { "ALT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
+                if (critPit) { if (!first) { reasons[reasonsPos++] = ','; } "PIT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
+                if (critRol) { if (!first) { reasons[reasonsPos++] = ','; } "ROL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; }
+                reasonsStr = reasons.Slice(0, reasonsPos).ToString();
             }
             else if (isWarn)
             {
                 statusStr = "WARN";
                 statusColor = ConsoleColor.Yellow;
 
-                var reasons = new System.Text.StringBuilder();
+                Span<char> reasons = stackalloc char[15];
+                int reasonsPos = 0;
                 bool first = true;
-                if (warnVel) { reasons.Append("VEL"); first = false; }
-                if (warnPit) { if (!first) reasons.Append(","); reasons.Append("PIT"); first = false; }
-                if (warnRol) { if (!first) reasons.Append(","); reasons.Append("ROL"); }
-                reasonsStr = reasons.ToString();
+                if (warnVel) { "VEL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
+                if (warnPit) { if (!first) { reasons[reasonsPos++] = ','; } "PIT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
+                if (warnRol) { if (!first) { reasons[reasonsPos++] = ','; } "ROL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; }
+                reasonsStr = reasons.Slice(0, reasonsPos).ToString();
             }
 
             // Update Console Title (only if changed)
