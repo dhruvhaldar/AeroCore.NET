@@ -117,15 +117,15 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("/");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("^");
+            Console.Write("^ ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("/");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("-");
+            Console.Write("- ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("/");
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("v");
+            Console.Write("v ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("/");
             Console.ForegroundColor = ConsoleColor.Red;
@@ -135,15 +135,15 @@ namespace AeroCore.GroundStation
 
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("Green");
+            Console.Write("[ OK ]");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("/");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write("Yel");
+            Console.Write("[WARN]");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("/");
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("Red");
+            Console.Write("[CRIT]");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine(" : Stable / Warning / Critical");
 
