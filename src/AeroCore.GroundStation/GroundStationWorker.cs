@@ -201,6 +201,7 @@ namespace AeroCore.GroundStation
         private void PrintTelemetry(TelemetryPacket packet)
         {
             // Spinner
+            Console.Write("\r");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -441,12 +442,12 @@ namespace AeroCore.GroundStation
             if (!string.IsNullOrEmpty(reasonsStr))
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine($" ({reasonsStr})");
+                Console.Write($" ({reasonsStr})   ");
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.WriteLine(" (Stable)");
+                Console.Write(" (Stable)       ");
             }
 
             Console.ResetColor();
