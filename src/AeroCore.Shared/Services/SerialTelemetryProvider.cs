@@ -39,6 +39,13 @@ namespace AeroCore.Shared.Services
             _portName = _config.GetValue<string>("Serial:PortName") ?? defaultPort;
             _baudRate = _config.GetValue<int>("Serial:BaudRate", 9600);
 
+            // Security: Validate BaudRate to prevent hardware configuration DoS or integer overflow/underflow issues.
+            if (_baudRate <= 0 || _baudRate > 4000000)
+            {
+                _logger.LogError("Invalid baud rate configured: {BaudRate}", _baudRate);
+                throw new ArgumentOutOfRangeException(nameof(_baudRate), "Baud rate must be between 1 and 4,000,000.");
+            }
+
             _logger.LogInformation($"Initializing Serial Telemetry on {SecurityHelper.SanitizeForLog(_portName.AsSpan())} at {_baudRate} baud.");
 
             try
