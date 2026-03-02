@@ -20,7 +20,7 @@ namespace AeroCore.GroundStation
 
         // Rate limiter state for UI updates (to prevent console I/O blocking stream processing)
         private long _lastUiUpdate = 0;
-        private string _lastTitleStatus = string.Empty;
+        private int _lastStatusFlags = -1;
 
         public GroundStationWorker(ITelemetryProvider telemetryProvider, ILogger<GroundStationWorker> logger)
         {
@@ -396,42 +396,42 @@ namespace AeroCore.GroundStation
 
             // Build Status String for Title and Console
             string statusStr = "OK";
-            string reasonsStr = "";
             ConsoleColor statusColor = ConsoleColor.Green;
+
+            Span<char> reasons = stackalloc char[15]; // Max "ALT,PIT,ROL" is 11 chars
+            int reasonsPos = 0;
 
             if (isCrit)
             {
                 statusStr = "CRIT";
                 statusColor = ConsoleColor.Red;
 
-                Span<char> reasons = stackalloc char[15]; // Max "ALT,PIT,ROL" is 11 chars
-                int reasonsPos = 0;
                 bool first = true;
                 if (critAlt) { "ALT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
                 if (critPit) { if (!first) { reasons[reasonsPos++] = ','; } "PIT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
                 if (critRol) { if (!first) { reasons[reasonsPos++] = ','; } "ROL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; }
-                reasonsStr = reasons.Slice(0, reasonsPos).ToString();
             }
             else if (isWarn)
             {
                 statusStr = "WARN";
                 statusColor = ConsoleColor.Yellow;
 
-                Span<char> reasons = stackalloc char[15];
-                int reasonsPos = 0;
                 bool first = true;
                 if (warnVel) { "VEL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
                 if (warnPit) { if (!first) { reasons[reasonsPos++] = ','; } "PIT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
                 if (warnRol) { if (!first) { reasons[reasonsPos++] = ','; } "ROL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; }
-                reasonsStr = reasons.Slice(0, reasonsPos).ToString();
             }
 
             // Update Console Title (only if changed)
-            string fullStatus = string.IsNullOrEmpty(reasonsStr) ? $"[{statusStr}]" : $"[{statusStr}] ({reasonsStr})";
-            if (fullStatus != _lastTitleStatus)
+            int currentStatusFlags = (critAlt ? 1 : 0) | (critPit ? 2 : 0) | (critRol ? 4 : 0) |
+                                     (warnVel ? 8 : 0) | (warnPit ? 16 : 0) | (warnRol ? 32 : 0);
+
+            if (currentStatusFlags != _lastStatusFlags)
             {
+                string reasonsStr = reasonsPos > 0 ? reasons.Slice(0, reasonsPos).ToString() : "";
+                string fullStatus = string.IsNullOrEmpty(reasonsStr) ? $"[{statusStr}]" : $"[{statusStr}] ({reasonsStr})";
                 Console.Title = $"AeroCore Ground Station - {fullStatus}";
-                _lastTitleStatus = fullStatus;
+                _lastStatusFlags = currentStatusFlags;
             }
 
             // Print Status
@@ -439,14 +439,16 @@ namespace AeroCore.GroundStation
             Console.Write("[");
             Console.ForegroundColor = statusColor;
             if (statusStr == "OK") Console.Write(" OK ");
-            else Console.Write($"{statusStr}");
+            else Console.Write(statusStr);
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("]");
 
-            if (!string.IsNullOrEmpty(reasonsStr))
+            if (reasonsPos > 0)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write($" ({reasonsStr})   ");
+                Console.Write(" (");
+                Console.Out.Write(reasons.Slice(0, reasonsPos));
+                Console.Write(")   ");
             }
             else
             {
