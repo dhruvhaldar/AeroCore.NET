@@ -164,6 +164,10 @@ namespace AeroCore.GroundStation
                 ShowWelcomeBanner();
                 _logger.LogInformation("Ground Station Listening for Telemetry...");
 
+                // Register a callback to print a newline upon cancellation to prevent shutdown logs
+                // from appending to the in-place updating (\r) telemetry line.
+                using var _ = stoppingToken.Register(() => Console.WriteLine());
+
                 try
                 {
                     await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
