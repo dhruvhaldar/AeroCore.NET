@@ -53,3 +53,7 @@
 ## 2026-05-25 - StringBuilder Allocation in High-Frequency UI Loops
 **Learning:** `StringBuilder` instantiation within high-frequency UI update loops (like the ~20Hz Ground Station terminal loop) creates excessive and unnecessary allocations for short, predictable strings.
 **Action:** Use `stackalloc char[]` or `Span<char>` with direct character indexing/copying when building small, deterministic strings in hot loops to eliminate heap allocations and reduce GC pressure.
+
+## 2026-05-26 - State Comparison Overhead in Hot UI Loops
+**Learning:** Comparing dynamically generated status strings (e.g., `fullStatus != _lastTitleStatus`) in a high-frequency UI update loop creates new `string` allocations and performs expensive character-by-character comparisons on every tick, even when the state hasn't changed.
+**Action:** Use bit flags (`int`) to track and compare application state across UI ticks. Rebuild and assign the expensive output string only when the bit flag comparison detects a change, eliminating unnecessary allocations and comparison overhead in the steady state.
