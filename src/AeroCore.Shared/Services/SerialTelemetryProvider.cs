@@ -25,7 +25,7 @@ namespace AeroCore.Shared.Services
         private int _baudRate;
 
         // Rate limiter for error logs to prevent DoS via log flooding
-        private DateTime _lastErrorLog = DateTime.MinValue;
+        private long _lastErrorLog = 0;
 
         public SerialTelemetryProvider(ILogger<SerialTelemetryProvider> logger, IConfiguration config)
         {
@@ -156,6 +156,7 @@ namespace AeroCore.Shared.Services
                 // Optimization: Capture timestamp once per chunk read to avoid repetitive DateTime.UtcNow calls (syscalls).
                 // This reduces CPU overhead significantly in high-frequency loops.
                 DateTime chunkTimestamp = DateTime.UtcNow;
+                long wallClockTicks = Environment.TickCount64;
 
                 while (bufferOffset < bytesRead)
                 {
@@ -171,6 +172,7 @@ namespace AeroCore.Shared.Services
                         packets,
                         ref isDiscarding,
                         chunkTimestamp,
+                        wallClockTicks,
                         out consumed,
                         out requiresDelay);
 
@@ -197,6 +199,7 @@ namespace AeroCore.Shared.Services
             List<TelemetryPacket> packets,
             ref bool isDiscarding,
             DateTime timestamp,
+            long wallClockTicks,
             out int consumedBytes,
             out bool requiresDelay)
         {
@@ -253,8 +256,8 @@ namespace AeroCore.Shared.Services
                     // DoS Protection: Check total bytes consumed for this line, not just output buffer length.
                     if (totalLineBytes + lengthToCopy > lineBuffer.Length)
                     {
-                        var now = timestamp; // Optimization: Use pre-captured timestamp to avoid syscall
-                        if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
+                        var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
+                        if ((now - _lastErrorLog) >= 1000)
                         {
                             _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
                             _lastErrorLog = now;
@@ -285,8 +288,8 @@ namespace AeroCore.Shared.Services
                     // idx + 1 includes the delimiter.
                     if (totalLineBytes + idx + 1 > lineBuffer.Length)
                     {
-                        var now = timestamp; // Optimization: Use pre-captured timestamp to avoid syscall
-                        if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
+                        var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
+                        if ((now - _lastErrorLog) >= 1000)
                         {
                             _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
                             _lastErrorLog = now;
@@ -356,8 +359,8 @@ namespace AeroCore.Shared.Services
                                 }
 
                                 // Security: Do not log raw content to prevent sensitive data leakage and DoS.
-                                var now = timestamp; // Optimization: Use pre-captured timestamp to avoid syscall
-                                if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
+                                var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
+                                if ((now - _lastErrorLog) >= 1000)
                                 {
                                     _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", idx);
                                     _lastErrorLog = now;
@@ -399,8 +402,8 @@ namespace AeroCore.Shared.Services
                             else
                             {
                                 // Security: Do not log raw content to prevent sensitive data leakage and DoS.
-                                var now = timestamp; // Optimization: Use pre-captured timestamp to avoid syscall
-                                if ((now - _lastErrorLog).TotalMilliseconds >= 1000)
+                                var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
+                                if ((now - _lastErrorLog) >= 1000)
                                 {
                                     _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", linePos);
                                     _lastErrorLog = now;
