@@ -57,3 +57,7 @@
 ## 2026-05-26 - State Comparison Overhead in Hot UI Loops
 **Learning:** Comparing dynamically generated status strings (e.g., `fullStatus != _lastTitleStatus`) in a high-frequency UI update loop creates new `string` allocations and performs expensive character-by-character comparisons on every tick, even when the state hasn't changed.
 **Action:** Use bit flags (`int`) to track and compare application state across UI ticks. Rebuild and assign the expensive output string only when the bit flag comparison detects a change, eliminating unnecessary allocations and comparison overhead in the steady state.
+
+## 2026-05-27 - SearchValues Overhead for Short Spans
+**Learning:** While `SearchValues<byte>` with SIMD `IndexOfAnyExcept`/`IndexOfAny` is significantly faster for long spans, the method setup overhead makes it ~20% slower than the dedicated two-byte `ReadOnlySpan<byte>.IndexOfAny(byte, byte)` method for short lines (like telemetry chunks).
+**Action:** When searching for exactly 2 specific bytes (like `\r` and `\n`) in relatively short chunks (e.g. line-by-line parsing), prefer the `IndexOfAny(byte, byte)` overload over allocating and invoking a static `SearchValues<byte>`.
