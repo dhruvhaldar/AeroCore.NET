@@ -109,7 +109,7 @@ namespace AeroCore.GroundStation
             Console.Write(" +   ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("]");
-            Console.WriteLine(" : Visual Attitude Indicator");
+            Console.WriteLine(" : Attitude Indicator (Active / Neutral)");
 
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -131,7 +131,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("vv");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(" : Fast / Slow / Stable Trend");
+            Console.WriteLine(" : Fast Rise / Slow Rise / Stable / Slow Fall / Fast Fall");
 
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;
