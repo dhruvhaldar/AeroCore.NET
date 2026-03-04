@@ -57,3 +57,8 @@
 **Vulnerability:** Although a `Task.Delay` throttled the CPU usage of error loops, it still allowed ~10 logs/second, which can accumulate to ~36,000 logs/hour, filling disk space and masking real issues.
 **Learning:** CPU throttling (delays) does not equal Log throttling. Logs should be rate-limited independently based on time (e.g., max 1 per second) to prevent storage exhaustion.
 **Prevention:** Implement explicit time-based rate limiting for repetitive error logs, independent of the processing loop delay.
+
+## 2026-06-25 - Denial of Service via Serial Port Write Blocking
+**Vulnerability:** A missing `WriteTimeout` on the `SerialPort` class instance could allow the serial port driver to block the execution thread indefinitely if writing to the port and the hardware buffer fills up or halts.
+**Learning:** Default configuration for hardware interfaces like serial ports often lacks bounds or timeouts for basic operations. In high-reliability applications, infinite blocking leads to thread exhaustion.
+**Prevention:** Always configure `WriteTimeout` along with `ReadTimeout` for I/O bounds to prevent denial of service through hardware stalls.
