@@ -61,3 +61,7 @@
 ## 2026-05-27 - SearchValues Overhead for Short Spans
 **Learning:** While `SearchValues<byte>` with SIMD `IndexOfAnyExcept`/`IndexOfAny` is significantly faster for long spans, the method setup overhead makes it ~20% slower than the dedicated two-byte `ReadOnlySpan<byte>.IndexOfAny(byte, byte)` method for short lines (like telemetry chunks).
 **Action:** When searching for exactly 2 specific bytes (like `\r` and `\n`) in relatively short chunks (e.g. line-by-line parsing), prefer the `IndexOfAny(byte, byte)` overload over allocating and invoking a static `SearchValues<byte>`.
+
+## 2026-05-28 - Unnecessary Task.Run for Async Loops
+**Learning:** Wrapping a fully asynchronous method that does not contain blocking synchronous code (e.g., `ProcessCommandsAsync` utilizing `await foreach` and `await Task.Delay`) inside `Task.Run` is redundant. It introduces unnecessary thread pool allocation and context-switching overhead without actual benefit.
+**Action:** Directly invoke asynchronous methods (e.g., `var task = ProcessCommandsAsync(ct);`) to execute them concurrently on the calling thread until their first `await` yields control, avoiding thread pool usage where it isn't strictly required to unblock execution.

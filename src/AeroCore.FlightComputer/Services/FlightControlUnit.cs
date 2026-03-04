@@ -72,7 +72,9 @@ namespace AeroCore.FlightComputer.Services
             await _telemetry.InitializeAsync(ct);
 
             // Start the command processor
-            var commandTask = Task.Run(() => ProcessCommandsAsync(ct), ct);
+            // Optimization: Avoid Task.Run overhead and thread pool allocation.
+            // ProcessCommandsAsync awaits asynchronously so it won't block the caller.
+            var commandTask = ProcessCommandsAsync(ct);
 
             try
             {
