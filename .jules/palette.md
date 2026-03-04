@@ -10,3 +10,7 @@
 ## 2025-03-06 - [Explicit Legend Mappings for CLI Apps]
 **Learning:** Symbolic UI legends in console applications must provide explicit 1-to-1 text mappings to prevent cognitive and screen-reader accessibility gaps. Merely listing symbols alongside a grouped description (e.g., "Fast / Slow / Stable Trend") leaves users guessing which symbol maps to which state.
 **Action:** Always ensure a 1-to-1 text mapping is provided for each symbol in a UI legend (e.g., "Fast Rise / Slow Rise / Stable / Slow Fall / Fast Fall").
+
+## 2025-03-07 - [Screen Reader Friendly Symbol Grouping]
+**Learning:** Even when 1-to-1 mappings are provided, grouped symbol descriptions separated by slashes (e.g. `^^ / ^ / - : Fast Rise / Slow Rise / Stable`) are confusing to screen readers, which will read all symbols first and then all descriptions, losing the association.
+**Action:** Always interleave the symbol and its description explicitly (e.g. `^^ : Fast Rise | ^ : Slow Rise | - : Stable`) to ensure screen readers read the symbol and its corresponding meaning together.

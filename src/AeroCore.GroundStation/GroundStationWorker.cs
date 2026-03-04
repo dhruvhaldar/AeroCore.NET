@@ -90,6 +90,7 @@ namespace AeroCore.GroundStation
 
             Console.WriteLine();
 
+            // Attitude Indicator Legend (Explicit 1-to-1 Mapping)
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[");
@@ -100,7 +101,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("==+=>");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("] / [");
+            Console.Write("] : Attitude Indicator (Active) | [");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write("   + ");
             Console.ForegroundColor = ConsoleColor.White;
@@ -109,43 +110,45 @@ namespace AeroCore.GroundStation
             Console.Write(" +   ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("]");
-            Console.WriteLine(" : Attitude Indicator (Active / Neutral)");
+            Console.WriteLine(" : Attitude Indicator (Neutral)");
 
+            // Trend Indicator Legend (Explicit 1-to-1 Mapping)
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("^^");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("/");
+            Console.Write(" : Fast Rise | ");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("^ ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("/");
+            Console.Write(" : Slow Rise | ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("- ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("/");
+            Console.Write(" : Stable | ");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("v ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("/");
+            Console.Write(" : Slow Fall | ");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("vv");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(" : Fast Rise / Slow Rise / Stable / Slow Fall / Fast Fall");
+            Console.WriteLine(" : Fast Fall");
 
+            // Status Indicator Legend (Explicit 1-to-1 Mapping)
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;
             Console.Write("[ OK ]");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("/");
+            Console.Write(" : Stable | ");
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.Write("[WARN]");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("/");
+            Console.Write(" : Warning | ");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("[CRIT]");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(" : Stable / Warning / Critical");
+            Console.WriteLine(" : Critical");
 
             Console.ResetColor();
             Console.WriteLine();
