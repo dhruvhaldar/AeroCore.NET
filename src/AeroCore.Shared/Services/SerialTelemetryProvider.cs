@@ -63,6 +63,8 @@ namespace AeroCore.Shared.Services
                 // Let's create the SerialPort instance.
                 _serialPort = new SerialPort(_portName, _baudRate, Parity.None, 8, StopBits.One);
                 _serialPort.ReadTimeout = 1000;
+                // Security: Prevent DoS via infinite blocking if the application writes to the serial port.
+                _serialPort.WriteTimeout = 1000;
                 // Note: SerialPort.Open() might fail if port doesn't exist.
             }
             catch (Exception ex)
