@@ -353,7 +353,7 @@ namespace AeroCore.GroundStation
             if (absPitch > 45) Console.ForegroundColor = ConsoleColor.Red;
             else if (absPitch > 35) Console.ForegroundColor = ConsoleColor.Yellow;
             else Console.ForegroundColor = ConsoleColor.White;
-            WriteFormatted(packet.Pitch, 5, "F2");
+            WriteFormatted(packet.Pitch, 7, "F2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
@@ -373,7 +373,7 @@ namespace AeroCore.GroundStation
             if (absRoll > 45) Console.ForegroundColor = ConsoleColor.Red;
             else if (absRoll > 35) Console.ForegroundColor = ConsoleColor.Yellow;
             else Console.ForegroundColor = ConsoleColor.White;
-            WriteFormatted(packet.Roll, 5, "F2");
+            WriteFormatted(packet.Roll, 7, "F2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 

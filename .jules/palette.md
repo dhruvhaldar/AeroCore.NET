@@ -14,3 +14,7 @@
 ## 2025-03-07 - [Screen Reader Friendly Symbol Grouping]
 **Learning:** Even when 1-to-1 mappings are provided, grouped symbol descriptions separated by slashes (e.g. `^^ / ^ / - : Fast Rise / Slow Rise / Stable`) are confusing to screen readers, which will read all symbols first and then all descriptions, losing the association.
 **Action:** Always interleave the symbol and its description explicitly (e.g. `^^ : Fast Rise | ^ : Slow Rise | - : Stable`) to ensure screen readers read the symbol and its corresponding meaning together.
+
+## 2025-03-05 - [Visual Polish] Formatting Width on Dynamic TUI Elements
+**Learning:** In in-place updating console CLI dashboards, insufficient fixed formatting widths for numeric values can cause horizontal jitter when value sizes change (e.g. crossing zero into negative values or expanding digit counts).
+**Action:** When working on CLI dashboards, carefully set and review `WriteFormatted` widths to adequately account for negative signs, decimal points, and maximum expected digits to guarantee consistent column alignment.
