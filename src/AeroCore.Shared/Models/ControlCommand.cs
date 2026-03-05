@@ -3,12 +3,12 @@ using System;
 namespace AeroCore.Shared.Models
 {
     // Represents a command sent to actuators
-    public record ControlCommand
+    public readonly record struct ControlCommand
     {
-        private string _actuatorId = "UNKNOWN";
+        private readonly string? _actuatorId;
         public string ActuatorId
         {
-            get => _actuatorId;
+            get => _actuatorId ?? "UNKNOWN";
             init
             {
                 if (string.IsNullOrWhiteSpace(value))
@@ -36,7 +36,7 @@ namespace AeroCore.Shared.Models
             }
         }
 
-        private double _value;
+        private readonly double _value;
         public double Value
         {
             get => _value;
