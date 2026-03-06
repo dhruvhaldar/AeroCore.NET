@@ -23,10 +23,10 @@ namespace AeroCore.Tests
         [Fact]
         public void ControlCommand_InfinityValue_ThrowsArgumentException()
         {
-             // Infinity is technically caught by > 1.0, but we want to be explicit about it being an ArgumentException (or ArgumentOutOfRange)
-             // Ideally we want to prevent non-finite numbers explicitly.
-             // Currently > 1.0 throws ArgumentOutOfRangeException.
-             // Let's see what happens.
+            // Infinity is technically caught by > 1.0, but we want to be explicit about it being an ArgumentException (or ArgumentOutOfRange)
+            // Ideally we want to prevent non-finite numbers explicitly.
+            // Currently > 1.0 throws ArgumentOutOfRangeException.
+            // Let's see what happens.
             Assert.ThrowsAny<ArgumentException>(() =>
             {
                 new ControlCommand

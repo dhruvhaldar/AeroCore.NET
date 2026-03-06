@@ -18,3 +18,7 @@
 ## 2025-03-05 - [Visual Polish] Formatting Width on Dynamic TUI Elements
 **Learning:** In in-place updating console CLI dashboards, insufficient fixed formatting widths for numeric values can cause horizontal jitter when value sizes change (e.g. crossing zero into negative values or expanding digit counts).
 **Action:** When working on CLI dashboards, carefully set and review `WriteFormatted` widths to adequately account for negative signs, decimal points, and maximum expected digits to guarantee consistent column alignment.
+
+## 2025-03-08 - [Dynamic String Artifacting in In-Place CLI Updates]
+**Learning:** In-place updating console dashboards using carriage returns (`\r`) do not clear the end of the line. If a dynamic-length string (e.g., a comma-separated list of error reasons) transitions to a shorter state, the trailing characters of the previous string remain visible as visual garbage, causing severe horizontal UI jitter.
+**Action:** Always enforce fixed-width output for dynamic strings in in-place updating CLIs by explicitly padding them with trailing spaces to match or exceed the maximum possible length of the string, ensuring previous data is fully overwritten.

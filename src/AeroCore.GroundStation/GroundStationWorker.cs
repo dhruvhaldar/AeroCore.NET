@@ -451,12 +451,20 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write(" (");
                 Console.Out.Write(reasons.Slice(0, reasonsPos));
-                Console.Write(")   ");
+                Console.Write(")");
+
+                // Pad with spaces to clear any previous longer reason strings (prevents horizontal UI jitter/artifacting).
+                // Max length of reasons is currently 11 ("ALT,PIT,ROL"). Max string " (ALT,PIT,ROL)" is 14 chars + 3 space padding = 17 chars.
+                int padding = Math.Max(0, 11 - reasonsPos + 3);
+                Span<char> spaces = stackalloc char[padding];
+                spaces.Fill(' ');
+                Console.Out.Write(spaces);
             }
             else
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write(" (Stable)       ");
+                // " (Stable)" is 9 chars. 17 - 9 = 8 spaces padding to exactly match max width
+                Console.Write(" (Stable)        ");
             }
 
             Console.ResetColor();
