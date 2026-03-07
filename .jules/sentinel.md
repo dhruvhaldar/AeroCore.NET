@@ -62,3 +62,7 @@
 **Vulnerability:** A missing `WriteTimeout` on the `SerialPort` class instance could allow the serial port driver to block the execution thread indefinitely if writing to the port and the hardware buffer fills up or halts.
 **Learning:** Default configuration for hardware interfaces like serial ports often lacks bounds or timeouts for basic operations. In high-reliability applications, infinite blocking leads to thread exhaustion.
 **Prevention:** Always configure `WriteTimeout` along with `ReadTimeout` for I/O bounds to prevent denial of service through hardware stalls.
+## 2026-03-07 - DoS via Unbounded String Scanning
+**Vulnerability:** `string.IsNullOrWhiteSpace` performs an O(N) scan. Passing a massive string (e.g. gigabytes of spaces) to `TelemetryParser.ParseFromCsv` could trigger CPU exhaustion (DoS) before any length limits in the downstream `Parse(ReadOnlySpan<char>)` were applied.
+**Learning:** Even simple standard library string checks like `IsNullOrWhiteSpace` can be vectors for Denial of Service if the input length is unbounded.
+**Prevention:** Always enforce strict length limits (e.g. `line.Length > 1024`) *before* executing any O(N) operations on untrusted input strings.
