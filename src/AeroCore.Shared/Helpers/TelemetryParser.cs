@@ -12,6 +12,10 @@ namespace AeroCore.Shared.Helpers
 
         public static TelemetryPacket? ParseFromCsv(string line)
         {
+            // Security: Prevent CPU/Memory exhaustion DoS via excessively long input string
+            // before performing an O(N) scan in string.IsNullOrWhiteSpace.
+            if (line == null || line.Length > 1024) return null;
+
             if (string.IsNullOrWhiteSpace(line)) return null;
 
             return Parse(line.AsSpan());
