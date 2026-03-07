@@ -99,16 +99,22 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("|");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("==+=>");
+            Console.Write("=+==>");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] : Attitude Indicator (Active) | [");
+            Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write("   + ");
+            Console.Write("+");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" ");
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("|");
-            Console.ForegroundColor = ConsoleColor.Gray;
-            Console.Write(" +   ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" ");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write("+");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("   ");
             Console.Write("]");
             Console.WriteLine(" : Attitude Indicator (Neutral)");
 
@@ -137,18 +143,20 @@ namespace AeroCore.GroundStation
 
             // Status Indicator Legend (Explicit 1-to-1 Mapping)
             Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("[");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("[ OK ]");
+            Console.Write(" OK ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write(" : Stable | ");
+            Console.Write("] : Stable | [");
             Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.Write("[WARN]");
+            Console.Write("WARN");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write(" : Warning | ");
+            Console.Write("] : Warning | [");
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("[CRIT]");
+            Console.Write("CRIT");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine(" : Critical");
+            Console.WriteLine("] : Critical");
 
             Console.ResetColor();
             Console.WriteLine();
@@ -353,7 +361,7 @@ namespace AeroCore.GroundStation
             if (absPitch > 45) Console.ForegroundColor = ConsoleColor.Red;
             else if (absPitch > 35) Console.ForegroundColor = ConsoleColor.Yellow;
             else Console.ForegroundColor = ConsoleColor.White;
-            WriteFormatted(packet.Pitch, 7, "F2");
+            WriteFormatted(packet.Pitch, 7, "+0.00;-0.00; 0.00");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
@@ -373,7 +381,7 @@ namespace AeroCore.GroundStation
             if (absRoll > 45) Console.ForegroundColor = ConsoleColor.Red;
             else if (absRoll > 35) Console.ForegroundColor = ConsoleColor.Yellow;
             else Console.ForegroundColor = ConsoleColor.White;
-            WriteFormatted(packet.Roll, 7, "F2");
+            WriteFormatted(packet.Roll, 7, "+0.00;-0.00; 0.00");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
