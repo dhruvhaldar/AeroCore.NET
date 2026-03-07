@@ -73,3 +73,7 @@
 ## 2026-06-25 - Taskbar Visibility via Console Title
 **Learning:** Console applications are often monitored passively. Updating the window title with high-level status (OK/WARN/CRIT) allows operators to track health even when the window is minimized or obscured.
 **Action:** Always mirror critical application status to the Console.Title property for at-a-glance monitoring.
+
+## 2026-06-25 - Explicit Signs for Angular Telemetry
+**Learning:** For signed telemetry data where directionality matters (like Pitch and Roll), omitting the plus sign for positive numbers while including the minus sign for negative numbers creates cognitive imbalance and ambiguity. Users process "+1.23" as an explicit directional value much faster than an unsigned "1.23".
+**Action:** Always format signed angular telemetry with explicit positive (`+`) or negative (`-`) signs (e.g. `+0.00;-0.00; 0.00`).
