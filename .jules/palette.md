@@ -22,3 +22,7 @@
 ## 2025-03-08 - [Dynamic String Artifacting in In-Place CLI Updates]
 **Learning:** In-place updating console dashboards using carriage returns (`\r`) do not clear the end of the line. If a dynamic-length string (e.g., a comma-separated list of error reasons) transitions to a shorter state, the trailing characters of the previous string remain visible as visual garbage, causing severe horizontal UI jitter.
 **Action:** Always enforce fixed-width output for dynamic strings in in-place updating CLIs by explicitly padding them with trailing spaces to match or exceed the maximum possible length of the string, ensuring previous data is fully overwritten.
+
+## 2025-03-09 - [Peripheral Visibility of Critical Status in CLI Dashboards]
+**Learning:** In dense console telemetry dashboards, placing critical status indicators only at the end of a long, dynamically changing string forces users to constantly scan back and forth to assess system health, increasing cognitive load and reaction time.
+**Action:** Always provide peripheral visual cues for critical status changes (e.g., dynamically color-coding the leftmost active spinner or prefix character) to ensure immediate visibility without requiring the user to read the entire data line.

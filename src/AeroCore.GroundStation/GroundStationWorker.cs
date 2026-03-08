@@ -215,11 +215,49 @@ namespace AeroCore.GroundStation
 
         private void PrintTelemetry(TelemetryPacket packet)
         {
+            bool critAlt = packet.Altitude < 0;
+            bool critPit = Math.Abs(packet.Pitch) > 45;
+            bool critRol = Math.Abs(packet.Roll) > 45;
+            bool isCrit = critAlt || critPit || critRol;
+
+            bool warnVel = packet.Velocity > 100;
+            bool warnPit = !critPit && Math.Abs(packet.Pitch) > 35;
+            bool warnRol = !critRol && Math.Abs(packet.Roll) > 35;
+            bool isWarn = warnVel || warnPit || warnRol;
+
+            // Build Status String for Title and Console
+            string statusStr = "OK";
+            ConsoleColor statusColor = ConsoleColor.Green;
+
+            Span<char> reasons = stackalloc char[15]; // Max "ALT,PIT,ROL" is 11 chars
+            int reasonsPos = 0;
+
+            if (isCrit)
+            {
+                statusStr = "CRIT";
+                statusColor = ConsoleColor.Red;
+
+                bool first = true;
+                if (critAlt) { "ALT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
+                if (critPit) { if (!first) { reasons[reasonsPos++] = ','; } "PIT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
+                if (critRol) { if (!first) { reasons[reasonsPos++] = ','; } "ROL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; }
+            }
+            else if (isWarn)
+            {
+                statusStr = "WARN";
+                statusColor = ConsoleColor.Yellow;
+
+                bool first = true;
+                if (warnVel) { "VEL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
+                if (warnPit) { if (!first) { reasons[reasonsPos++] = ','; } "PIT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
+                if (warnRol) { if (!first) { reasons[reasonsPos++] = ','; } "ROL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; }
+            }
+
             // Spinner
             Console.Write("\r");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[");
-            Console.ForegroundColor = ConsoleColor.Green;
+            Console.ForegroundColor = statusColor;
             Console.Write(_spinnerChars[_spinnerIndex]);
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] ");
@@ -394,44 +432,6 @@ namespace AeroCore.GroundStation
 
             // Status Indicator
             Console.Write(" | ");
-
-            bool critAlt = packet.Altitude < 0;
-            bool critPit = Math.Abs(packet.Pitch) > 45;
-            bool critRol = Math.Abs(packet.Roll) > 45;
-            bool isCrit = critAlt || critPit || critRol;
-
-            bool warnVel = packet.Velocity > 100;
-            bool warnPit = !critPit && Math.Abs(packet.Pitch) > 35;
-            bool warnRol = !critRol && Math.Abs(packet.Roll) > 35;
-            bool isWarn = warnVel || warnPit || warnRol;
-
-            // Build Status String for Title and Console
-            string statusStr = "OK";
-            ConsoleColor statusColor = ConsoleColor.Green;
-
-            Span<char> reasons = stackalloc char[15]; // Max "ALT,PIT,ROL" is 11 chars
-            int reasonsPos = 0;
-
-            if (isCrit)
-            {
-                statusStr = "CRIT";
-                statusColor = ConsoleColor.Red;
-
-                bool first = true;
-                if (critAlt) { "ALT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
-                if (critPit) { if (!first) { reasons[reasonsPos++] = ','; } "PIT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
-                if (critRol) { if (!first) { reasons[reasonsPos++] = ','; } "ROL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; }
-            }
-            else if (isWarn)
-            {
-                statusStr = "WARN";
-                statusColor = ConsoleColor.Yellow;
-
-                bool first = true;
-                if (warnVel) { "VEL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
-                if (warnPit) { if (!first) { reasons[reasonsPos++] = ','; } "PIT".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; first = false; }
-                if (warnRol) { if (!first) { reasons[reasonsPos++] = ','; } "ROL".AsSpan().CopyTo(reasons.Slice(reasonsPos)); reasonsPos += 3; }
-            }
 
             // Update Console Title (only if changed)
             int currentStatusFlags = (critAlt ? 1 : 0) | (critPit ? 2 : 0) | (critRol ? 4 : 0) |
