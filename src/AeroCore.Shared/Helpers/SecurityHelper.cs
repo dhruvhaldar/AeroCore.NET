@@ -47,11 +47,11 @@ namespace AeroCore.Shared.Helpers
                 // This prevents opening files like "Common/foo.txt" or "Command.log".
                 if (portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase))
                 {
-                    return IsDigitsOnly(portName.AsSpan(3));
+                    return portName.Length > 3 && IsDigitsOnly(portName.AsSpan(3));
                 }
                 if (portName.StartsWith(@"\\.\COM", StringComparison.OrdinalIgnoreCase))
                 {
-                    return IsDigitsOnly(portName.AsSpan(7));
+                    return portName.Length > 7 && IsDigitsOnly(portName.AsSpan(7));
                 }
                 return false;
             }
@@ -59,11 +59,28 @@ namespace AeroCore.Shared.Helpers
             {
                 // Linux/Mac: Strict allowlist of prefixes to prevent arbitrary file read (e.g. /dev/mem, /dev/sda).
                 // Allowed: /dev/tty*, /dev/cu*, /dev/serial*, /dev/pts*, /dev/rfcomm*
-                return portName.StartsWith("/dev/tty") ||
-                       portName.StartsWith("/dev/cu.") ||
-                       portName.StartsWith("/dev/serial/") ||
-                       portName.StartsWith("/dev/pts/") ||
-                       portName.StartsWith("/dev/rfcomm");
+                // Also require the prefix to be followed by alphanumeric characters or dots/hyphens,
+                // and explicitly reject exactly /dev/tty etc. if there's no suffix.
+                if (portName.StartsWith("/dev/tty") ||
+                    portName.StartsWith("/dev/cu.") ||
+                    portName.StartsWith("/dev/serial/") ||
+                    portName.StartsWith("/dev/pts/") ||
+                    portName.StartsWith("/dev/rfcomm"))
+                {
+                    int prefixLen = 0;
+                    if (portName.StartsWith("/dev/tty")) prefixLen = 8;
+                    else if (portName.StartsWith("/dev/cu.")) prefixLen = 8;
+                    else if (portName.StartsWith("/dev/serial/")) prefixLen = 12;
+                    else if (portName.StartsWith("/dev/pts/")) prefixLen = 9;
+                    else if (portName.StartsWith("/dev/rfcomm")) prefixLen = 11;
+
+                    if (portName.Length <= prefixLen) return false;
+
+                    // Ensure the suffix doesn't allow escaping or arbitrary files,
+                    // though the char allowlist above already restricts to alphanumeric, ., _, -, /, \
+                    return true;
+                }
+                return false;
             }
         }
 

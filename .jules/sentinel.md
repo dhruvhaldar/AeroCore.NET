@@ -66,3 +66,7 @@
 **Vulnerability:** `string.IsNullOrWhiteSpace` performs an O(N) scan. Passing a massive string (e.g. gigabytes of spaces) to `TelemetryParser.ParseFromCsv` could trigger CPU exhaustion (DoS) before any length limits in the downstream `Parse(ReadOnlySpan<char>)` were applied.
 **Learning:** Even simple standard library string checks like `IsNullOrWhiteSpace` can be vectors for Denial of Service if the input length is unbounded.
 **Prevention:** Always enforce strict length limits (e.g. `line.Length > 1024`) *before* executing any O(N) operations on untrusted input strings.
+## 2024-05-24 - Strict Serial Port Name Validation
+**Vulnerability:** The `SecurityHelper.IsValidSerialPortName` allowed device prefixes without a suffix, and didn't enforce a length limit, allowing DoS via CPU/Memory exhaustion and opening base devices like `/dev/tty` or `COM`. It also allowed `/dev/mem` or `/dev/sda`. It also allowed Windows to open files like `Common/foo.txt` because it only checked `StartsWith("COM")`.
+**Learning:** Checking `StartsWith` is insufficient for validating device paths if the suffix is not checked for existence or content.
+**Prevention:** Ensure device paths have a specific allowed prefix, a minimum length (prefix + suffix), and that the suffix matches expected patterns (e.g., digits for Windows COM ports).
