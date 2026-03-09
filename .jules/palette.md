@@ -26,3 +26,6 @@
 ## 2025-03-09 - [Peripheral Visibility of Critical Status in CLI Dashboards]
 **Learning:** In dense console telemetry dashboards, placing critical status indicators only at the end of a long, dynamically changing string forces users to constantly scan back and forth to assess system health, increasing cognitive load and reaction time.
 **Action:** Always provide peripheral visual cues for critical status changes (e.g., dynamically color-coding the leftmost active spinner or prefix character) to ensure immediate visibility without requiring the user to read the entire data line.
+## 2025-03-09 - Semantic Unicode Arrows for CLI Dashboards
+**Learning:** Using ASCII characters (like `^^` or `v `) for trend indicators in dense CLI dashboards can be visually noisy and less intuitive. Semantic Unicode arrows (`↑↑`, `↑ `, `↓ `, `↓↓`) significantly improve scannability and visual polish, while providing better meaning.
+**Action:** When designing or updating CLI dashboards that indicate directional trends, prefer Unicode arrows over ASCII approximations. Always ensure `Console.OutputEncoding = System.Text.Encoding.UTF8;` is set to guarantee proper rendering across different terminals.
