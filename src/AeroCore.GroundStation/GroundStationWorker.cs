@@ -121,11 +121,11 @@ namespace AeroCore.GroundStation
             // Trend Indicator Legend (Explicit 1-to-1 Mapping)
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("^^");
+            Console.Write("↑↑");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" : Fast Rise | ");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("^ ");
+            Console.Write("↑ ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" : Slow Rise | ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -133,11 +133,11 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" : Stable | ");
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("v ");
+            Console.Write("↓ ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" : Slow Fall | ");
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.Write("vv");
+            Console.Write("↓↓");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine(" : Fast Fall");
 
@@ -310,22 +310,22 @@ namespace AeroCore.GroundStation
                 if (delta > 1.0)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("^^");
+                    Console.Write("↑↑");
                 }
                 else if (delta > 0.1)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("^ ");
+                    Console.Write("↑ ");
                 }
                 else if (delta < -1.0)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("vv");
+                    Console.Write("↓↓");
                 }
                 else if (delta < -0.1)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("v ");
+                    Console.Write("↓ ");
                 }
                 else
                 {
@@ -358,22 +358,22 @@ namespace AeroCore.GroundStation
                 if (delta > 1.0)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("^^");
+                    Console.Write("↑↑");
                 }
                 else if (delta > 0.1)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
-                    Console.Write("^ ");
+                    Console.Write("↑ ");
                 }
                 else if (delta < -1.0)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("vv");
+                    Console.Write("↓↓");
                 }
                 else if (delta < -0.1)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.Write("v ");
+                    Console.Write("↓ ");
                 }
                 else
                 {
