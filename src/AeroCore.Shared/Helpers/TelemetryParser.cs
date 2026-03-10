@@ -2,6 +2,7 @@ using System;
 using System.Buffers;
 using System.Buffers.Text;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using AeroCore.Shared.Models;
 
 namespace AeroCore.Shared.Helpers
@@ -24,6 +25,7 @@ namespace AeroCore.Shared.Helpers
         // Optimization: Helper method to trim whitespace using SIMD-optimized SearchValues.
         // This is significantly faster (~16x) than span.TrimStart(byte[]) which scans repeatedly.
         // Note: span.TrimStart(SearchValues) is not available in .NET 8 for ReadOnlySpan<byte>.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ReadOnlySpan<byte> TrimWhitespace(ReadOnlySpan<byte> span)
         {
             // Optimization: Fast path for no whitespace.
@@ -103,6 +105,7 @@ namespace AeroCore.Shared.Helpers
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool ParseDouble(ref ReadOnlySpan<byte> span, out double value)
         {
             // Optimization: Fast path for no whitespace (compact CSV).
@@ -118,6 +121,7 @@ namespace AeroCore.Shared.Helpers
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool SkipComma(ref ReadOnlySpan<byte> span)
         {
             // Optimization: Fast path for comma immediately following number.

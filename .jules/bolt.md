@@ -65,3 +65,7 @@
 ## 2026-05-28 - Unnecessary Task.Run for Async Loops
 **Learning:** Wrapping a fully asynchronous method that does not contain blocking synchronous code (e.g., `ProcessCommandsAsync` utilizing `await foreach` and `await Task.Delay`) inside `Task.Run` is redundant. It introduces unnecessary thread pool allocation and context-switching overhead without actual benefit.
 **Action:** Directly invoke asynchronous methods (e.g., `var task = ProcessCommandsAsync(ct);`) to execute them concurrently on the calling thread until their first `await` yields control, avoiding thread pool usage where it isn't strictly required to unblock execution.
+
+## 2026-06-12 - Method Call Overhead in Tight Parsing Loops
+**Learning:** Even heavily optimized, fast-path helper methods (`TrimWhitespace`, `ParseDouble`, `SkipComma`) incur method call overhead when executed millions of times in tight parsing loops like `TelemetryParser.TryParse`.
+**Action:** Use `[MethodImpl(MethodImplOptions.AggressiveInlining)]` on small, hot-path helper methods to instruct the JIT compiler to inline the instructions directly into the caller, eliminating call overhead and allowing for better instruction fusion.
