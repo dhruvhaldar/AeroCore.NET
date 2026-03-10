@@ -76,8 +76,19 @@ namespace AeroCore.Shared.Helpers
 
                     if (portName.Length <= prefixLen) return false;
 
-                    // Ensure the suffix doesn't allow escaping or arbitrary files,
-                    // though the char allowlist above already restricts to alphanumeric, ., _, -, /, \
+                    // Security: Strictly allowlist suffix characters to alphanumeric, ., _, - to prevent arbitrary file access.
+                    // Note: / and \ are rejected in the suffix to prevent path traversal inside the valid prefix.
+                    for (int i = prefixLen; i < portName.Length; i++)
+                    {
+                        char c = portName[i];
+                        bool isAsciiLetter = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+                        bool isAsciiDigit = (c >= '0' && c <= '9');
+                        if (!isAsciiLetter && !isAsciiDigit && c != '.' && c != '_' && c != '-')
+                        {
+                            return false;
+                        }
+                    }
+
                     return true;
                 }
                 return false;
