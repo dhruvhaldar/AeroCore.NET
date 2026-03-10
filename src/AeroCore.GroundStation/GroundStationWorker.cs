@@ -16,7 +16,7 @@ namespace AeroCore.GroundStation
         private double? _lastAltitude;
         private double? _lastVelocity;
         private int _spinnerIndex = 0;
-        private static readonly char[] _spinnerChars = { '|', '/', '-', '\\' };
+        private static readonly char[] _spinnerChars = { '⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏' };
 
         // Rate limiter state for UI updates (to prevent console I/O blocking stream processing)
         private long _lastUiUpdate = 0;
