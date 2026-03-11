@@ -129,7 +129,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" : Slow Rise | ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.Write("- ");
+            Console.Write("→ ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" : Stable | ");
             Console.ForegroundColor = ConsoleColor.Red;
@@ -330,7 +330,7 @@ namespace AeroCore.GroundStation
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("- ");
+                    Console.Write("→ ");
                 }
             }
             else
@@ -378,7 +378,7 @@ namespace AeroCore.GroundStation
                 else
                 {
                     Console.ForegroundColor = ConsoleColor.DarkGray;
-                    Console.Write("- ");
+                    Console.Write("→ ");
                 }
             }
             else

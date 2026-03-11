@@ -33,3 +33,7 @@
 ## 2025-03-10 - Smooth Braille Spinners for CLI Animations
 **Learning:** Using basic ASCII characters (like `|`, `/`, `-`, `\`) for loading animations or spinners in CLI applications can feel clunky and visually outdated, especially in modern UTF-8 supported terminals.
 **Action:** Always prefer Braille block characters (e.g., `⠋`, `⠙`, `⠹`, `⠸`, `⠼`, `⠴`, `⠦`, `⠧`, `⠇`, `⠏`) for CLI spinners to provide a significantly smoother, more visually polished, and modern loading animation when `Console.OutputEncoding = System.Text.Encoding.UTF8;` is enabled.
+
+## 2025-03-11 - Semantic Unicode Arrows for CLI Dashboards (Stable)
+**Learning:** Using ASCII characters (like `- `) for trend indicators in dense CLI dashboards can be visually noisy and less intuitive. Semantic Unicode arrows (`→ `) significantly improve scannability and visual polish, while providing better meaning.
+**Action:** When designing or updating CLI dashboards that indicate directional trends, prefer Unicode arrows over ASCII approximations. Always ensure `Console.OutputEncoding = System.Text.Encoding.UTF8;` is set to guarantee proper rendering across different terminals.
