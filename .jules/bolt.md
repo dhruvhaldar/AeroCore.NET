@@ -69,3 +69,7 @@
 ## 2026-06-12 - Method Call Overhead in Tight Parsing Loops
 **Learning:** Even heavily optimized, fast-path helper methods (`TrimWhitespace`, `ParseDouble`, `SkipComma`) incur method call overhead when executed millions of times in tight parsing loops like `TelemetryParser.TryParse`.
 **Action:** Use `[MethodImpl(MethodImplOptions.AggressiveInlining)]` on small, hot-path helper methods to instruct the JIT compiler to inline the instructions directly into the caller, eliminating call overhead and allowing for better instruction fusion.
+
+## 2026-06-12 - Channel Options Optimization for Single Producer/Consumer
+**Learning:** `Channel.CreateBounded` provisions a multi-producer/multi-consumer queue by default which uses heavier lock-based synchronization. In cases like `FlightControlUnit` where there is strictly one producer loop and one consumer loop, this default overhead is unnecessary and impacts high-frequency throughput.
+**Action:** When a `Channel<T>` is strictly accessed by a single producer and single consumer, configure the `BoundedChannelOptions` (or `UnboundedChannelOptions`) with `SingleWriter = true` and `SingleReader = true` to allow the runtime to use an optimized, lock-free queue.

@@ -52,9 +52,12 @@ namespace AeroCore.FlightComputer.Services
             _logger = logger;
 
             // Use bounded channel to prevent memory exhaustion (DoS)
+            // Optimization: SingleWriter and SingleReader avoid heavy locks, making the channel much faster
             _commandChannel = Channel.CreateBounded<ControlCommand>(new BoundedChannelOptions(100)
             {
-                FullMode = BoundedChannelFullMode.DropOldest
+                FullMode = BoundedChannelFullMode.DropOldest,
+                SingleWriter = true,
+                SingleReader = true
             });
         }
 
