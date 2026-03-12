@@ -95,11 +95,11 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("<==+=");
+            Console.Write("◄■■+■");
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("|");
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("=+==>");
+            Console.Write("■+■■►");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] : Attitude Indicator (Active) | [");
             Console.Write("   ");

@@ -49,10 +49,10 @@ namespace AeroCore.Shared.Helpers
                         if (center + i < width)
                         {
                             if (buffer[center + i] != '+' || i == 1)
-                                buffer[center + i] = '=';
+                                buffer[center + i] = '■';
                         }
                     }
-                    if (center + fill < width) buffer[center + fill] = '>';
+                    if (center + fill < width) buffer[center + fill] = '►';
                 }
                 else
                 {
@@ -62,10 +62,10 @@ namespace AeroCore.Shared.Helpers
                         if (center - i >= 0)
                         {
                             if (buffer[center - i] != '+' || i == 1)
-                                buffer[center - i] = '=';
+                                buffer[center - i] = '■';
                         }
                     }
-                    if (center - fill >= 0) buffer[center - fill] = '<';
+                    if (center - fill >= 0) buffer[center - fill] = '◄';
                 }
             }
 
