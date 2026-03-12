@@ -23,7 +23,7 @@ namespace AeroCore.Tests
             int fill = GaugeVisualizer.Fill(buffer, 100, 100);
 
             Assert.Equal(5, fill);
-            Assert.Equal("   + |=+==>", buffer.ToString());
+            Assert.Equal("   + |■+■■►", buffer.ToString());
         }
 
         [Fact]
@@ -33,7 +33,7 @@ namespace AeroCore.Tests
             int fill = GaugeVisualizer.Fill(buffer, -100, 100);
 
             Assert.Equal(5, fill);
-            Assert.Equal("<==+=| +   ", buffer.ToString());
+            Assert.Equal("◄■■+■| +   ", buffer.ToString());
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace AeroCore.Tests
 
             // 0.5 * 5 = 2.5 -> Round to Even -> 2
             Assert.Equal(2, fill);
-            Assert.Equal("   + |=>   ", buffer.ToString());
+            Assert.Equal("   + |■►   ", buffer.ToString());
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace AeroCore.Tests
 
             // width 3, center 1. fill = 1.
             Assert.Equal(1, fill);
-            Assert.Equal(" |>", buffer.ToString());
+            Assert.Equal(" |►", buffer.ToString());
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace AeroCore.Tests
 
             // width 4, center 2. fill = 2.
             Assert.Equal(2, fill);
-            Assert.Equal(" +|=", buffer.ToString());
+            Assert.Equal(" +|■", buffer.ToString());
         }
     }
 }

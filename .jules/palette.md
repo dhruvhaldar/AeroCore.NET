@@ -37,3 +37,7 @@
 ## 2025-03-11 - Semantic Unicode Arrows for CLI Dashboards (Stable)
 **Learning:** Using ASCII characters (like `- `) for trend indicators in dense CLI dashboards can be visually noisy and less intuitive. Semantic Unicode arrows (`→ `) significantly improve scannability and visual polish, while providing better meaning.
 **Action:** When designing or updating CLI dashboards that indicate directional trends, prefer Unicode arrows over ASCII approximations. Always ensure `Console.OutputEncoding = System.Text.Encoding.UTF8;` is set to guarantee proper rendering across different terminals.
+
+## 2025-03-11 - [Visual Polish] Semantic Unicode Block Characters for CLI Gauges
+**Learning:** Using basic ASCII characters (like `=`, `<`, `>`) for continuous progress bars or analog gauges in dense terminal applications looks outdated and lacks visual solidity, making it harder to read at a glance.
+**Action:** When designing or updating CLI gauges and progress bars, prefer semantic Unicode block characters (e.g., `■`, `◄`, `►`) to provide a more cohesive, modern, and easily scannable visual representation when `Console.OutputEncoding = System.Text.Encoding.UTF8;` is enabled.
