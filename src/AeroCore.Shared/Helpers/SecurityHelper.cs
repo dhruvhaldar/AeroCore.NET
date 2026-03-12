@@ -61,37 +61,30 @@ namespace AeroCore.Shared.Helpers
                 // Allowed: /dev/tty*, /dev/cu*, /dev/serial*, /dev/pts*, /dev/rfcomm*
                 // Also require the prefix to be followed by alphanumeric characters or dots/hyphens,
                 // and explicitly reject exactly /dev/tty etc. if there's no suffix.
-                if (portName.StartsWith("/dev/tty") ||
-                    portName.StartsWith("/dev/cu.") ||
-                    portName.StartsWith("/dev/serial/") ||
-                    portName.StartsWith("/dev/pts/") ||
-                    portName.StartsWith("/dev/rfcomm"))
+                int prefixLen = 0;
+                if (portName.StartsWith("/dev/tty")) prefixLen = 8;
+                else if (portName.StartsWith("/dev/cu.")) prefixLen = 8;
+                else if (portName.StartsWith("/dev/serial/")) prefixLen = 12;
+                else if (portName.StartsWith("/dev/pts/")) prefixLen = 9;
+                else if (portName.StartsWith("/dev/rfcomm")) prefixLen = 11;
+
+                if (prefixLen == 0) return false;
+                if (portName.Length <= prefixLen) return false;
+
+                // Security: Strictly allowlist suffix characters to alphanumeric, ., _, - to prevent arbitrary file access.
+                // Note: / and \ are rejected in the suffix to prevent path traversal inside the valid prefix.
+                for (int i = prefixLen; i < portName.Length; i++)
                 {
-                    int prefixLen = 0;
-                    if (portName.StartsWith("/dev/tty")) prefixLen = 8;
-                    else if (portName.StartsWith("/dev/cu.")) prefixLen = 8;
-                    else if (portName.StartsWith("/dev/serial/")) prefixLen = 12;
-                    else if (portName.StartsWith("/dev/pts/")) prefixLen = 9;
-                    else if (portName.StartsWith("/dev/rfcomm")) prefixLen = 11;
-
-                    if (portName.Length <= prefixLen) return false;
-
-                    // Security: Strictly allowlist suffix characters to alphanumeric, ., _, - to prevent arbitrary file access.
-                    // Note: / and \ are rejected in the suffix to prevent path traversal inside the valid prefix.
-                    for (int i = prefixLen; i < portName.Length; i++)
+                    char c = portName[i];
+                    bool isAsciiLetter = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+                    bool isAsciiDigit = (c >= '0' && c <= '9');
+                    if (!isAsciiLetter && !isAsciiDigit && c != '.' && c != '_' && c != '-')
                     {
-                        char c = portName[i];
-                        bool isAsciiLetter = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-                        bool isAsciiDigit = (c >= '0' && c <= '9');
-                        if (!isAsciiLetter && !isAsciiDigit && c != '.' && c != '_' && c != '-')
-                        {
-                            return false;
-                        }
+                        return false;
                     }
-
-                    return true;
                 }
-                return false;
+
+                return true;
             }
         }
 
