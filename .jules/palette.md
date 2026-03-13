@@ -41,3 +41,6 @@
 ## 2025-03-11 - [Visual Polish] Semantic Unicode Block Characters for CLI Gauges
 **Learning:** Using basic ASCII characters (like `=`, `<`, `>`) for continuous progress bars or analog gauges in dense terminal applications looks outdated and lacks visual solidity, making it harder to read at a glance.
 **Action:** When designing or updating CLI gauges and progress bars, prefer semantic Unicode block characters (e.g., `■`, `◄`, `►`) to provide a more cohesive, modern, and easily scannable visual representation when `Console.OutputEncoding = System.Text.Encoding.UTF8;` is enabled.
+## 2026-03-13 - [Visual Polish] Dynamic Color Coding for Telemetry Labels
+**Learning:** In dense console telemetry dashboards, fixed-color parameter labels (e.g., always Cyan) force the user to rely entirely on the value's color to identify which specific parameter triggered a WARNING or CRITICAL state. This slows down identification during rapid state changes.
+**Action:** Always apply dynamic color coding to the parameter label itself (e.g., turning 'ALT' Red instead of just the value) to provide a stronger, immediate peripheral visual cue that highlights exactly which parameter is causing the system alert.
