@@ -295,7 +295,7 @@ namespace AeroCore.GroundStation
             Console.Out.Write(lineBuffer.Slice(0, pos));
 
             // Altitude
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = critAlt ? ConsoleColor.Red : ConsoleColor.Cyan;
             Console.Write("ALT");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
@@ -343,7 +343,7 @@ namespace AeroCore.GroundStation
             Console.Write(" | ");
 
             // Velocity
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = warnVel ? ConsoleColor.Yellow : ConsoleColor.Cyan;
             Console.Write("VEL");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
@@ -391,7 +391,7 @@ namespace AeroCore.GroundStation
             Console.Write(" | ");
 
             // Pitch
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = critPit ? ConsoleColor.Red : (warnPit ? ConsoleColor.Yellow : ConsoleColor.Cyan);
             Console.Write("PIT");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
@@ -411,7 +411,7 @@ namespace AeroCore.GroundStation
             Console.Write("] | ");
 
             // Roll
-            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.ForegroundColor = critRol ? ConsoleColor.Red : (warnRol ? ConsoleColor.Yellow : ConsoleColor.Cyan);
             Console.Write("ROL");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
