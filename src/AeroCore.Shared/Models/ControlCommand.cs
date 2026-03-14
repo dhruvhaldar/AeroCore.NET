@@ -28,7 +28,8 @@ namespace AeroCore.Shared.Models
                     bool isAsciiDigit = (c >= '0' && c <= '9');
                     if (!isAsciiLetter && !isAsciiDigit && c != '_' && c != '-')
                     {
-                        throw new ArgumentException($"ActuatorId contains invalid character '{c}'. Only ASCII alphanumeric, underscore, and hyphen are allowed.", nameof(ActuatorId));
+                        // Security: Do not include raw invalid characters in the exception message to prevent Log Injection
+                        throw new ArgumentException("ActuatorId contains an invalid character. Only ASCII alphanumeric, underscore, and hyphen are allowed.", nameof(ActuatorId));
                     }
                 }
 
