@@ -44,3 +44,7 @@
 ## 2026-03-13 - [Visual Polish] Dynamic Color Coding for Telemetry Labels
 **Learning:** In dense console telemetry dashboards, fixed-color parameter labels (e.g., always Cyan) force the user to rely entirely on the value's color to identify which specific parameter triggered a WARNING or CRITICAL state. This slows down identification during rapid state changes.
 **Action:** Always apply dynamic color coding to the parameter label itself (e.g., turning 'ALT' Red instead of just the value) to provide a stronger, immediate peripheral visual cue that highlights exactly which parameter is causing the system alert.
+
+## 2026-03-14 - [Auditory Cues for Critical States]
+**Learning:** In high-frequency CLI dashboards, visual cues alone are sometimes insufficient to alert users to immediate, critical system health changes, especially if the user is focused elsewhere or visually impaired.
+**Action:** Use auditory cues, such as a terminal bell (`\a`), to supplement visual indicators during CRITICAL state transitions to ensure immediate awareness, and always document these cues in the UI legend for transparency.

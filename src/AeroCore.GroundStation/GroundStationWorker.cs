@@ -156,7 +156,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write("CRIT");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("] : Critical");
+            Console.WriteLine("] : Critical (Audible Alert)");
 
             Console.ResetColor();
             Console.WriteLine();
@@ -442,6 +442,13 @@ namespace AeroCore.GroundStation
                 string reasonsStr = reasonsPos > 0 ? reasons.Slice(0, reasonsPos).ToString() : "";
                 string fullStatus = string.IsNullOrEmpty(reasonsStr) ? $"[{statusStr}]" : $"[{statusStr}] ({reasonsStr})";
                 Console.Title = $"AeroCore Ground Station - {fullStatus}";
+
+                // Emitting an auditory alert when a new CRITICAL state occurs or if CRITICAL reasons change
+                if (isCrit)
+                {
+                    Console.Write("\a");
+                }
+
                 _lastStatusFlags = currentStatusFlags;
             }
 
