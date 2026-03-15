@@ -99,6 +99,12 @@ namespace AeroCore.Shared.Helpers
                 return false;
             }
 
+            // Security: Enforce physical bounds to prevent out-of-range data injection
+            if (pitch < -180.0 || pitch > 180.0 || roll < -180.0 || roll > 180.0)
+            {
+                return false;
+            }
+
             // Optimization: Use internal constructor to avoid redundant double.IsFinite checks in property setters.
             // We've already validated the values above.
             packet = new TelemetryPacket(altitude, velocity, pitch, roll, timestamp);
@@ -179,6 +185,12 @@ namespace AeroCore.Shared.Helpers
             // Security: Prevent NaN/Infinity from propagating to control logic
             if (!double.IsFinite(altitude) || !double.IsFinite(velocity) ||
                 !double.IsFinite(pitch) || !double.IsFinite(roll))
+            {
+                return null;
+            }
+
+            // Security: Enforce physical bounds to prevent out-of-range data injection
+            if (pitch < -180.0 || pitch > 180.0 || roll < -180.0 || roll > 180.0)
             {
                 return null;
             }

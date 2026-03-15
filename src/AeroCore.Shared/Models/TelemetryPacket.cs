@@ -35,6 +35,8 @@ namespace AeroCore.Shared.Models
             init
             {
                 if (!double.IsFinite(value)) throw new ArgumentException("Pitch must be finite.", nameof(Pitch));
+                // Security: Enforce physical bounds to prevent out-of-range data injection
+                if (value < -180.0 || value > 180.0) throw new ArgumentOutOfRangeException(nameof(Pitch), "Pitch must be between -180.0 and 180.0 degrees.");
                 _pitch = value;
             }
         }
@@ -46,6 +48,8 @@ namespace AeroCore.Shared.Models
             init
             {
                 if (!double.IsFinite(value)) throw new ArgumentException("Roll must be finite.", nameof(Roll));
+                // Security: Enforce physical bounds to prevent out-of-range data injection
+                if (value < -180.0 || value > 180.0) throw new ArgumentOutOfRangeException(nameof(Roll), "Roll must be between -180.0 and 180.0 degrees.");
                 _roll = value;
             }
         }
