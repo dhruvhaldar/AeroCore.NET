@@ -465,7 +465,9 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write(" (");
+                Console.ForegroundColor = statusColor;
                 Console.Out.Write(reasons.Slice(0, reasonsPos));
+                Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write(")");
 
                 // Pad with spaces to clear any previous longer reason strings (prevents horizontal UI jitter/artifacting).
@@ -478,8 +480,12 @@ namespace AeroCore.GroundStation
             else
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                // " (Stable)" is 9 chars. 17 - 9 = 8 spaces padding to exactly match max width
-                Console.Write(" (Stable)        ");
+                Console.Write(" (");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.Write("Stable");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                // ")        " is 1 char + 8 spaces padding to exactly match max width
+                Console.Write(")        ");
             }
 
             Console.ResetColor();
