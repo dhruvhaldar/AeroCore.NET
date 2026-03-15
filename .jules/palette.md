@@ -48,3 +48,7 @@
 ## 2026-03-14 - [Auditory Cues for Critical States]
 **Learning:** In high-frequency CLI dashboards, visual cues alone are sometimes insufficient to alert users to immediate, critical system health changes, especially if the user is focused elsewhere or visually impaired.
 **Action:** Use auditory cues, such as a terminal bell (`\a`), to supplement visual indicators during CRITICAL state transitions to ensure immediate awareness, and always document these cues in the UI legend for transparency.
+
+## 2026-03-15 - [Color Contrast for Dimmed Delimiter Patterns]
+**Learning:** When applying a 'dimmed delimiter' pattern (e.g., printing brackets `()` in `DarkGray` to reduce visual noise), accidentally dimming the critical dynamic data inside the delimiters (e.g., `(VEL)`) severely reduces color contrast and scannability, defeating the purpose of the alert.
+**Action:** Always maintain high color contrast for the dynamic data values (e.g., using Red/Yellow/Green) while keeping only the structural delimiter characters dimmed.
