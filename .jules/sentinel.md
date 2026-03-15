@@ -70,3 +70,8 @@
 **Vulnerability:** The `SecurityHelper.IsValidSerialPortName` allowed device prefixes without a suffix, and didn't enforce a length limit, allowing DoS via CPU/Memory exhaustion and opening base devices like `/dev/tty` or `COM`. It also allowed `/dev/mem` or `/dev/sda`. It also allowed Windows to open files like `Common/foo.txt` because it only checked `StartsWith("COM")`.
 **Learning:** Checking `StartsWith` is insufficient for validating device paths if the suffix is not checked for existence or content.
 **Prevention:** Ensure device paths have a specific allowed prefix, a minimum length (prefix + suffix), and that the suffix matches expected patterns (e.g., digits for Windows COM ports).
+
+## 2026-06-25 - Data Injection via Unbounded Angles
+**Vulnerability:** The telemetry parser verified that numerical values (e.g., `Pitch`, `Roll`) were finite to prevent logic crashes, but failed to enforce specific mathematical and physical bounds (e.g., `[-180.0, 180.0]` for degrees). This exposed the system to maliciously crafted telemetry that could destabilize downstream state controllers.
+**Learning:** Enforcing mathematically finite input is necessary but not sufficient for safety-critical logic. Domain logic bounding ("Physical Bounds Checking") is critical to preventing exploitation through unexpected edge states.
+**Prevention:** Apply strict value range validation in parsers and models immediately upon instantiating telemetry input structures, rejecting logic-breaking edge cases safely.
