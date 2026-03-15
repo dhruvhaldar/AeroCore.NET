@@ -23,11 +23,8 @@ namespace AeroCore.Shared.Helpers
             // Check for path traversal attempts
             if (portName.Contains("..")) return false;
 
-            // Check for control characters
-            foreach (char c in portName)
-            {
-                if (char.IsControl(c)) return false;
-            }
+            // Optimization: The strict allowlist below inherently rejects all control characters.
+            // Removed the redundant O(N) loop that explicitly checked char.IsControl(c).
 
             // Strict allowlist for characters: ASCII A-Z, a-z, 0-9, ., _, -, /, \
             // This prevents injection characters and Unicode homoglyph/normalization issues.
