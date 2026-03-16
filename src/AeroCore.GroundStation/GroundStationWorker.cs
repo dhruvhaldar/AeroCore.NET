@@ -158,6 +158,11 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("] : Critical (Audible Alert)");
 
+            // Dynamic Label Note
+            Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("* Parameter labels (e.g., ALT) change color to match alert status.");
+
             Console.ResetColor();
             Console.WriteLine();
         }
@@ -267,35 +272,25 @@ namespace AeroCore.GroundStation
             _spinnerIndex = (_spinnerIndex + 1) % _spinnerChars.Length;
             Console.ResetColor();
 
-            // Timestamp
+            // Timestamp Prefix
             Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("[GCS] @ ");
 
-            // Optimization: Combine prefix, timestamp, and suffix into a single buffer to reduce Console syscalls by 66%.
-            Span<char> lineBuffer = stackalloc char[64];
-            int pos = 0;
-
-            // "[GCS] @ " to denote Wall Clock Time
-            "[GCS] @ ".AsSpan().CopyTo(lineBuffer);
-            pos += 8;
-
-            // Timestamp
-            if (packet.Timestamp.TryFormat(lineBuffer.Slice(pos), out int tsWritten, "HH:mm:ss.fff"))
+            // Dynamic Timestamp (High Contrast)
+            Console.ForegroundColor = ConsoleColor.White;
+            Span<char> tsBuffer = stackalloc char[32];
+            if (packet.Timestamp.TryFormat(tsBuffer, out int tsWritten, "HH:mm:ss.fff"))
             {
-                pos += tsWritten;
+                Console.Out.Write(tsBuffer.Slice(0, tsWritten));
             }
             else
             {
-                // Fallback (unlikely)
-                var tsStr = packet.Timestamp.ToString("HH:mm:ss.fff");
-                tsStr.AsSpan().CopyTo(lineBuffer.Slice(pos));
-                pos += tsStr.Length;
+                Console.Out.Write(packet.Timestamp.ToString("HH:mm:ss.fff"));
             }
 
-            // " | "
-            " | ".AsSpan().CopyTo(lineBuffer.Slice(pos));
-            pos += 3;
-
-            Console.Out.Write(lineBuffer.Slice(0, pos));
+            // Timestamp Suffix
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" | ");
 
             // Altitude
             Console.ForegroundColor = critAlt ? ConsoleColor.Red : ConsoleColor.Cyan;
