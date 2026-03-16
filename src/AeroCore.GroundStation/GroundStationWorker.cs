@@ -215,14 +215,17 @@ namespace AeroCore.GroundStation
 
         private void PrintTelemetry(TelemetryPacket packet)
         {
+            double absPitch = Math.Abs(packet.Pitch);
+            double absRoll = Math.Abs(packet.Roll);
+
             bool critAlt = packet.Altitude < 0;
-            bool critPit = Math.Abs(packet.Pitch) > 45;
-            bool critRol = Math.Abs(packet.Roll) > 45;
+            bool critPit = absPitch > 45;
+            bool critRol = absRoll > 45;
             bool isCrit = critAlt || critPit || critRol;
 
             bool warnVel = packet.Velocity > 100;
-            bool warnPit = !critPit && Math.Abs(packet.Pitch) > 35;
-            bool warnRol = !critRol && Math.Abs(packet.Roll) > 35;
+            bool warnPit = !critPit && absPitch > 35;
+            bool warnRol = !critRol && absRoll > 35;
             bool isWarn = warnVel || warnPit || warnRol;
 
             // Build Status String for Title and Console
@@ -299,7 +302,7 @@ namespace AeroCore.GroundStation
             Console.Write("ALT");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
-            Console.ForegroundColor = packet.Altitude < 0 ? ConsoleColor.Red : ConsoleColor.White;
+            Console.ForegroundColor = critAlt ? ConsoleColor.Red : ConsoleColor.White;
             WriteFormatted(packet.Altitude, 10, "N2");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" ft ");
@@ -347,7 +350,7 @@ namespace AeroCore.GroundStation
             Console.Write("VEL");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
-            Console.ForegroundColor = packet.Velocity > 100 ? ConsoleColor.Yellow : ConsoleColor.White;
+            Console.ForegroundColor = warnVel ? ConsoleColor.Yellow : ConsoleColor.White;
             WriteFormatted(packet.Velocity, 7, "N1");
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" kts ");
@@ -395,9 +398,8 @@ namespace AeroCore.GroundStation
             Console.Write("PIT");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
-            double absPitch = Math.Abs(packet.Pitch);
-            if (absPitch > 45) Console.ForegroundColor = ConsoleColor.Red;
-            else if (absPitch > 35) Console.ForegroundColor = ConsoleColor.Yellow;
+            if (critPit) Console.ForegroundColor = ConsoleColor.Red;
+            else if (warnPit) Console.ForegroundColor = ConsoleColor.Yellow;
             else Console.ForegroundColor = ConsoleColor.White;
             WriteFormatted(packet.Pitch, 7, "+0.00;-0.00; 0.00");
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -415,9 +417,8 @@ namespace AeroCore.GroundStation
             Console.Write("ROL");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
-            double absRoll = Math.Abs(packet.Roll);
-            if (absRoll > 45) Console.ForegroundColor = ConsoleColor.Red;
-            else if (absRoll > 35) Console.ForegroundColor = ConsoleColor.Yellow;
+            if (critRol) Console.ForegroundColor = ConsoleColor.Red;
+            else if (warnRol) Console.ForegroundColor = ConsoleColor.Yellow;
             else Console.ForegroundColor = ConsoleColor.White;
             WriteFormatted(packet.Roll, 7, "+0.00;-0.00; 0.00");
             Console.ForegroundColor = ConsoleColor.Gray;
