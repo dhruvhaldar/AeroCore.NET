@@ -98,12 +98,18 @@ namespace AeroCore.Shared.Services
             // Use BaseStream to read async chunks directly, avoiding Task.Run overhead and single-byte reads.
             System.IO.Stream stream = _serialPort.BaseStream;
 
-            await foreach (var packet in ProcessStreamAsync(stream, ct, () => _serialPort.IsOpen))
+            try
             {
-                yield return packet;
+                await foreach (var packet in ProcessStreamAsync(stream, ct, () => _serialPort.IsOpen))
+                {
+                    yield return packet;
+                }
             }
-
-            if (_serialPort.IsOpen) _serialPort.Close();
+            finally
+            {
+                // Security: Ensure port is reliably closed to prevent resource exhaustion DoS.
+                if (_serialPort.IsOpen) _serialPort.Close();
+            }
         }
 
         /// <summary>
