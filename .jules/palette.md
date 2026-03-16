@@ -52,3 +52,7 @@
 ## 2026-03-15 - [Color Contrast for Dimmed Delimiter Patterns]
 **Learning:** When applying a 'dimmed delimiter' pattern (e.g., printing brackets `()` in `DarkGray` to reduce visual noise), accidentally dimming the critical dynamic data inside the delimiters (e.g., `(VEL)`) severely reduces color contrast and scannability, defeating the purpose of the alert.
 **Action:** Always maintain high color contrast for the dynamic data values (e.g., using Red/Yellow/Green) while keeping only the structural delimiter characters dimmed.
+
+## 2026-03-16 - [High Contrast for Critical Metadata]
+**Learning:** When using a "dimmed delimiter" pattern for structural UI elements (like `[GCS] @ `), accidentally dimming the dynamic critical metadata (like the timestamp) within or adjacent to those delimiters drastically reduces color contrast and scannability, obscuring important context.
+**Action:** Always decouple the formatting of dynamic metadata from its surrounding structural delimiters. Ensure critical text like timestamps maintains high contrast (`ConsoleColor.White`) to remain legible against dimmed prefixes and suffixes.
