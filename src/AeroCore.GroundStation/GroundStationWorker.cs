@@ -180,6 +180,20 @@ namespace AeroCore.GroundStation
                 ShowWelcomeBanner();
                 _logger.LogInformation("Ground Station Listening for Telemetry...");
 
+                // UX: Show initial empty state with helpful guidance while waiting for the first telemetry packet
+                Console.Write("\r");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("[");
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.Write("⠋");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("] ");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.Write("AWAITING TELEMETRY STREAM... ");
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+                Console.Write("(Ensure sensor is connected and transmitting)");
+                Console.ResetColor();
+
                 // Register a callback to print a newline upon cancellation to prevent shutdown logs
                 // from appending to the in-place updating (\r) telemetry line.
                 using var _ = stoppingToken.Register(() => Console.WriteLine());
@@ -262,6 +276,10 @@ namespace AeroCore.GroundStation
             }
 
             // Spinner
+            // UX: The initial "AWAITING TELEMETRY STREAM..." string might be longer than the incoming telemetry line.
+            // When updating in-place using '\r', we must pad the new line to overwrite residual characters.
+            // We use trailing spaces at the very end of the line for this, but to keep the structural layout clean
+            // we first just write the spinner. We will handle the trailing spaces at the end of this method.
             Console.Write("\r");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[");
@@ -466,9 +484,10 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 Console.Write(")");
 
-                // Pad with spaces to clear any previous longer reason strings (prevents horizontal UI jitter/artifacting).
-                // Max length of reasons is currently 11 ("ALT,PIT,ROL"). Max string " (ALT,PIT,ROL)" is 14 chars + 3 space padding = 17 chars.
-                int padding = Math.Max(0, 11 - reasonsPos + 3);
+                // UX: Ensure trailing spaces pad out the dynamic status to clear residual chars
+                // from longer warnings or the initial "AWAITING TELEMETRY STREAM..." text.
+                // The awaiting stream text is ~70 chars. The telemetry status is usually shorter.
+                int padding = Math.Max(0, 11 - reasonsPos + 30);
                 Span<char> spaces = stackalloc char[padding];
                 spaces.Fill(' ');
                 Console.Out.Write(spaces);
@@ -480,8 +499,8 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.Write("Stable");
                 Console.ForegroundColor = ConsoleColor.DarkGray;
-                // ")        " is 1 char + 8 spaces padding to exactly match max width
-                Console.Write(")        ");
+                // UX: Pad significantly to overwrite the initial "AWAITING TELEMETRY STREAM..." string
+                Console.Write(")                              ");
             }
 
             Console.ResetColor();
