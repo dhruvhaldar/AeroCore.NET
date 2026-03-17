@@ -56,3 +56,7 @@
 ## 2026-03-16 - [High Contrast for Critical Metadata]
 **Learning:** When using a "dimmed delimiter" pattern for structural UI elements (like `[GCS] @ `), accidentally dimming the dynamic critical metadata (like the timestamp) within or adjacent to those delimiters drastically reduces color contrast and scannability, obscuring important context.
 **Action:** Always decouple the formatting of dynamic metadata from its surrounding structural delimiters. Ensure critical text like timestamps maintains high contrast (`ConsoleColor.White`) to remain legible against dimmed prefixes and suffixes.
+
+## 2025-03-17 - [Initial Empty States with Contextual Guidance]
+**Learning:** Starting a streaming CLI dashboard with a blank or unresponsive UI line while waiting for the first telemetry packet creates confusion, making users wonder if the application is frozen or misconfigured.
+**Action:** Always provide a visually distinct initial empty state (e.g., "AWAITING TELEMETRY STREAM...") with contextual guidance (e.g., "Ensure sensor is connected") to reassure users that the application is running and actively waiting for data. Additionally, ensure that transitions from this initial state to the active streaming state are correctly padded with trailing spaces to overwrite the initial placeholder text cleanly.
