@@ -161,26 +161,26 @@ namespace AeroCore.Shared.Helpers
             // Parse Altitude
             int idx = span.IndexOf(',');
             if (idx == -1) return null;
-            if (!double.TryParse(span.Slice(0, idx), CultureInfo.InvariantCulture, out double altitude)) return null;
+            if (!double.TryParse(span.Slice(0, idx), NumberStyles.Float, CultureInfo.InvariantCulture, out double altitude)) return null;
             span = span.Slice(idx + 1);
 
             // Parse Velocity
             idx = span.IndexOf(',');
             if (idx == -1) return null;
-            if (!double.TryParse(span.Slice(0, idx), CultureInfo.InvariantCulture, out double velocity)) return null;
+            if (!double.TryParse(span.Slice(0, idx), NumberStyles.Float, CultureInfo.InvariantCulture, out double velocity)) return null;
             span = span.Slice(idx + 1);
 
             // Parse Pitch
             idx = span.IndexOf(',');
             if (idx == -1) return null;
-            if (!double.TryParse(span.Slice(0, idx), CultureInfo.InvariantCulture, out double pitch)) return null;
+            if (!double.TryParse(span.Slice(0, idx), NumberStyles.Float, CultureInfo.InvariantCulture, out double pitch)) return null;
             span = span.Slice(idx + 1);
 
             // Parse Roll
             // Security: Enforce strict parsing (no trailing fields) to match byte[] overload behavior
             // and prevent data injection or ambiguity.
             if (span.IndexOf(',') != -1) return null;
-            if (!double.TryParse(span, CultureInfo.InvariantCulture, out double roll)) return null;
+            if (!double.TryParse(span, NumberStyles.Float, CultureInfo.InvariantCulture, out double roll)) return null;
 
             // Security: Prevent NaN/Infinity from propagating to control logic
             if (!double.IsFinite(altitude) || !double.IsFinite(velocity) ||

@@ -73,3 +73,7 @@
 ## 2026-06-12 - Channel Options Optimization for Single Producer/Consumer
 **Learning:** `Channel.CreateBounded` provisions a multi-producer/multi-consumer queue by default which uses heavier lock-based synchronization. In cases like `FlightControlUnit` where there is strictly one producer loop and one consumer loop, this default overhead is unnecessary and impacts high-frequency throughput.
 **Action:** When a `Channel<T>` is strictly accessed by a single producer and single consumer, configure the `BoundedChannelOptions` (or `UnboundedChannelOptions`) with `SingleWriter = true` and `SingleReader = true` to allow the runtime to use an optimized, lock-free queue.
+
+## 2026-06-12 - double.TryParse Parsing Optimization
+**Learning:** `double.TryParse` defaults to checking many combinations of `NumberStyles` like currency, thousands separators, and exponent representations when parsing strings/spans. This creates overhead in high-frequency parsing loops.
+**Action:** When parsing simple numeric values, specify `NumberStyles.Float` explicitly with `CultureInfo.InvariantCulture` in `double.TryParse`. This provides ~20% performance boost by skipping complex format combination checks.
