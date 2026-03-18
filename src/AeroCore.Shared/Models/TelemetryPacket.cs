@@ -58,6 +58,15 @@ namespace AeroCore.Shared.Models
 
         internal TelemetryPacket(double altitude, double velocity, double pitch, double roll, DateTime timestamp)
         {
+            if (!double.IsFinite(altitude)) throw new ArgumentException("Altitude must be finite.", nameof(altitude));
+            if (!double.IsFinite(velocity)) throw new ArgumentException("Velocity must be finite.", nameof(velocity));
+
+            if (!double.IsFinite(pitch)) throw new ArgumentException("Pitch must be finite.", nameof(pitch));
+            if (pitch < -180.0 || pitch > 180.0) throw new ArgumentOutOfRangeException(nameof(pitch), "Pitch must be between -180.0 and 180.0 degrees.");
+
+            if (!double.IsFinite(roll)) throw new ArgumentException("Roll must be finite.", nameof(roll));
+            if (roll < -180.0 || roll > 180.0) throw new ArgumentOutOfRangeException(nameof(roll), "Roll must be between -180.0 and 180.0 degrees.");
+
             _altitude = altitude;
             _velocity = velocity;
             _pitch = pitch;
