@@ -60,3 +60,7 @@
 ## 2025-03-17 - [Initial Empty States with Contextual Guidance]
 **Learning:** Starting a streaming CLI dashboard with a blank or unresponsive UI line while waiting for the first telemetry packet creates confusion, making users wonder if the application is frozen or misconfigured.
 **Action:** Always provide a visually distinct initial empty state (e.g., "AWAITING TELEMETRY STREAM...") with contextual guidance (e.g., "Ensure sensor is connected") to reassure users that the application is running and actively waiting for data. Additionally, ensure that transitions from this initial state to the active streaming state are correctly padded with trailing spaces to overwrite the initial placeholder text cleanly.
+
+## 2025-03-18 - [Inverted Colors for Critical Dashboard Values]
+**Learning:** In dense console telemetry dashboards, simply changing the text color of a critical value to Red might not provide enough contrast or visual "pop" to immediately draw the operator's eye, especially if the screen is full of data.
+**Action:** Always use inverted color blocks (e.g., White text on Red background for CRITICAL, Black text on Yellow background for WARNING) for the specific parameter values that exceed thresholds to create an unmissable, high-contrast visual cue.

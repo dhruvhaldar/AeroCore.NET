@@ -161,7 +161,7 @@ namespace AeroCore.GroundStation
             // Dynamic Label Note
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("* Parameter labels (e.g., ALT) change color to match alert status.");
+            Console.WriteLine("* Alerts highlight labels and display values with high-contrast backgrounds.");
 
             Console.ResetColor();
             Console.WriteLine();
@@ -315,8 +315,17 @@ namespace AeroCore.GroundStation
             Console.Write("ALT");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
-            Console.ForegroundColor = critAlt ? ConsoleColor.Red : ConsoleColor.White;
+            if (critAlt)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
             WriteFormatted(packet.Altitude, 10, "N2");
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" ft ");
 
@@ -363,8 +372,17 @@ namespace AeroCore.GroundStation
             Console.Write("VEL");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
-            Console.ForegroundColor = warnVel ? ConsoleColor.Yellow : ConsoleColor.White;
+            if (warnVel)
+            {
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
             WriteFormatted(packet.Velocity, 7, "N1");
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" kts ");
 
@@ -411,10 +429,22 @@ namespace AeroCore.GroundStation
             Console.Write("PIT");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
-            if (critPit) Console.ForegroundColor = ConsoleColor.Red;
-            else if (warnPit) Console.ForegroundColor = ConsoleColor.Yellow;
-            else Console.ForegroundColor = ConsoleColor.White;
+            if (critPit)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else if (warnPit)
+            {
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
             WriteFormatted(packet.Pitch, 7, "+0.00;-0.00; 0.00");
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
@@ -430,10 +460,22 @@ namespace AeroCore.GroundStation
             Console.Write("ROL");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
-            if (critRol) Console.ForegroundColor = ConsoleColor.Red;
-            else if (warnRol) Console.ForegroundColor = ConsoleColor.Yellow;
-            else Console.ForegroundColor = ConsoleColor.White;
+            if (critRol)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else if (warnRol)
+            {
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+            }
             WriteFormatted(packet.Roll, 7, "+0.00;-0.00; 0.00");
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
 
