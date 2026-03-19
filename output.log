@@ -1,37 +1,0 @@
-Using launch settings from src/AeroCore.GroundStation/Properties/launchSettings.json...
-Building...
-info: AeroCore.GroundStation.GroundStationWorker[0]
-      Ground Station Starting...
-info: AeroCore.Shared.Services.MockTelemetryProvider[0]
-      Mock Telemetry Sensor Initialized.
-info: Microsoft.Hosting.Lifetime[0]
-      Application started. Press Ctrl+C to shut down.
-info: Microsoft.Hosting.Lifetime[0]
-      Hosting environment: Development
-info: Microsoft.Hosting.Lifetime[0]
-      Content root path: /app/src/AeroCore.GroundStation
-
-============================================================
-              AEROCORE GROUND STATION v1.0
-============================================================
-  > System Init:      18:29:15
-  > System Status:    Ready
-  > Telemetry Link:   Listening (Mock)...
-  (Press Ctrl+C to exit)
-
-  [LEGEND]
-   ALT: Altitude (ft)   VEL: Velocity (kts)
-   PIT: Pitch (deg)     ROL: Roll (deg)
-
-   [◄■■+■|■+■■►] : Attitude Indicator (Active) | [   + | +   ] : Attitude Indicator (Neutral)
-   ↑↑ : Fast Rise | ↑  : Slow Rise | →  : Stable | ↓  : Slow Fall | ↓↓ : Fast Fall
-   [ OK ] : Stable | [WARN] : Warning | [CRIT] : Critical (Audible Alert)
-   * Parameter labels (e.g., ALT) change color to match alert status.
-
-[⠋] AWAITING TELEMETRY STREAM... (Ensure sensor is connected and transmitting)info: AeroCore.GroundStation.GroundStationWorker[0]
-      Ground Station Listening for Telemetry...
-[⠋] [GCS] @ 18:29:16.005 | ALT:  10,079.82 ft    | VEL:   252.5 kts    | PIT:   +0.18 deg [   + | +   ] | ROL:   +0.46 deg [   + | +   ] | [WARN] (VEL)                                      [⠙] [GCS] @ 18:29:16.519 | ALT:  10,024.23 ft ↓↓ | VEL:   254.9 kts ↑↑ | PIT:   -0.15 deg [   + | +   ] | ROL:   -0.28 deg [   + | +   ] | [WARN] (VEL)                                      [⠹] [GCS] @ 18:29:17.021 | ALT:  10,096.18 ft ↑↑ | VEL:   255.7 kts ↑  | PIT:   +0.33 deg [   + | +   ] | ROL:   -0.40 deg [   + | +   ] | [WARN] (VEL)                                      [⠸] [GCS] @ 18:29:17.521 | ALT:  10,089.61 ft ↓↓ | VEL:   251.5 kts ↓↓ | PIT:   -0.31 deg [   + | +   ] | ROL:   +0.69 deg [   + | +   ] | [WARN] (VEL)                                      [⠼] [GCS] @ 18:29:18.022 | ALT:  10,051.90 ft ↓↓ | VEL:   257.1 kts ↑↑ | PIT:   -0.70 deg [   + | +   ] | ROL:   +0.84 deg [   + | +   ] | [WARN] (VEL)                                      [⠴] [GCS] @ 18:29:18.523 | ALT:  10,026.54 ft ↓↓ | VEL:   251.8 kts ↓↓ | PIT:   -0.36 deg [   + | +   ] | ROL:   +0.26 deg [   + | +   ] | [WARN] (VEL)                                      [⠦] [GCS] @ 18:29:19.024 | ALT:  10,077.43 ft ↑↑ | VEL:   251.8 kts →  | PIT:   +0.68 deg [   + | +   ] | ROL:   +0.32 deg [   + | +   ] | [WARN] (VEL)                                      [⠧] [GCS] @ 18:29:19.525 | ALT:  10,014.77 ft ↓↓ | VEL:   257.8 kts ↑↑ | PIT:   +0.38 deg [   + | +   ] | ROL:   -0.55 deg [   + | +   ] | [WARN] (VEL)                                      [⠇] [GCS] @ 18:29:20.027 | ALT:  10,097.24 ft ↑↑ | VEL:   256.4 kts ↓↓ | PIT:   -0.20 deg [   + | +   ] | ROL:   -0.13 deg [   + | +   ] | [WARN] (VEL)                                      [⠏] [GCS] @ 18:29:20.528 | ALT:  10,019.10 ft ↓↓ | VEL:   259.6 kts ↑↑ | PIT:   +0.91 deg [   + | +   ] | ROL:   +0.03 deg [   + | +   ] | [WARN] (VEL)                                      [⠋] [GCS] @ 18:29:21.029 | ALT:  10,055.51 ft ↑↑ | VEL:   251.3 kts ↓↓ | PIT:   -0.62 deg [   + | +   ] | ROL:   -0.83 deg [   + | +   ] | [WARN] (VEL)                                      [⠙] [GCS] @ 18:29:21.529 | ALT:  10,032.58 ft ↓↓ | VEL:   253.7 kts ↑↑ | PIT:   -0.42 deg [   + | +   ] | ROL:   -0.10 deg [   + | +   ] | [WARN] (VEL)                                      [⠹] [GCS] @ 18:29:22.030 | ALT:  10,078.21 ft ↑↑ | VEL:   259.5 kts ↑↑ | PIT:   +0.49 deg [   + | +   ] | ROL:   +0.70 deg [   + | +   ] | [WARN] (VEL)                                      [⠸] [GCS] @ 18:29:22.531 | ALT:  10,033.45 ft ↓↓ | VEL:   250.7 kts ↓↓ | PIT:   +0.64 deg [   + | +   ] | ROL:   +0.62 deg [   + | +   ] | [WARN] (VEL)                                      [⠼] [GCS] @ 18:29:23.032 | ALT:  10,039.74 ft ↑↑ | VEL:   252.8 kts ↑↑ | PIT:   -0.93 deg [   + | +   ] | ROL:   +0.15 deg [   + | +   ] | [WARN] (VEL)                                      [⠴] [GCS] @ 18:29:23.533 | ALT:  10,053.92 ft ↑↑ | VEL:   252.4 kts ↓  | PIT:   +0.23 deg [   + | +   ] | ROL:   +0.25 deg [   + | +   ] | [WARN] (VEL)                                      [⠦] [GCS] @ 18:29:24.033 | ALT:  10,068.00 ft ↑↑ | VEL:   253.7 kts ↑↑ | PIT:   -0.66 deg [   + | +   ] | ROL:   -0.21 deg [   + | +   ] | [WARN] (VEL)                                      [⠧] [GCS] @ 18:29:24.534 | ALT:  10,002.74 ft ↓↓ | VEL:   252.1 kts ↓↓ | PIT:   +0.22 deg [   + | +   ] | ROL:   +0.19 deg [   + | +   ] | [WARN] (VEL)                                      [⠇] [GCS] @ 18:29:25.035 | ALT:  10,026.41 ft ↑↑ | VEL:   258.8 kts ↑↑ | PIT:   +0.61 deg [   + | +   ] | ROL:   -0.17 deg [   + | +   ] | [WARN] (VEL)                                      [⠏] [GCS] @ 18:29:25.536 | ALT:  10,056.86 ft ↑↑ | VEL:   250.2 kts ↓↓ | PIT:   +0.37 deg [   + | +   ] | ROL:   +0.46 deg [   + | +   ] | [WARN] (VEL)                                      info: Microsoft.Hosting.Lifetime[0]
-      Application is shutting down...
-
-info: AeroCore.GroundStation.GroundStationWorker[0]
-      Ground Station Stopped.
