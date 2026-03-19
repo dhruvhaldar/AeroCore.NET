@@ -495,9 +495,16 @@ namespace AeroCore.GroundStation
 
             if (currentStatusFlags != _lastStatusFlags)
             {
-                string reasonsStr = reasonsPos > 0 ? reasons.Slice(0, reasonsPos).ToString() : "";
-                string fullStatus = string.IsNullOrEmpty(reasonsStr) ? $"[{statusStr}]" : $"[{statusStr}] ({reasonsStr})";
-                Console.Title = $"AeroCore Ground Station - {fullStatus}";
+                // Optimization: Avoid multiple string allocations (reasonsStr, fullStatus, Console.Title)
+                // by using string interpolation that natively supports ReadOnlySpan<char> in .NET.
+                if (reasonsPos > 0)
+                {
+                    Console.Title = $"AeroCore Ground Station - [{statusStr}] ({reasons.Slice(0, reasonsPos)})";
+                }
+                else
+                {
+                    Console.Title = $"AeroCore Ground Station - [{statusStr}]";
+                }
 
                 // Emitting an auditory alert when a new CRITICAL state occurs or if CRITICAL reasons change
                 if (isCrit)
