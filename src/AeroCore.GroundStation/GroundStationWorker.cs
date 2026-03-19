@@ -529,7 +529,7 @@ namespace AeroCore.GroundStation
                 // UX: Ensure trailing spaces pad out the dynamic status to clear residual chars
                 // from longer warnings or the initial "AWAITING TELEMETRY STREAM..." text.
                 // The awaiting stream text is ~70 chars. The telemetry status is usually shorter.
-                int padding = Math.Max(0, 11 - reasonsPos + 30);
+                int padding = Math.Max(0, 11 - reasonsPos + 40);
                 Span<char> spaces = stackalloc char[padding];
                 spaces.Fill(' ');
                 Console.Out.Write(spaces);
@@ -542,7 +542,7 @@ namespace AeroCore.GroundStation
                 Console.Write("Stable");
                 Console.ForegroundColor = ConsoleColor.DarkGray;
                 // UX: Pad significantly to overwrite the initial "AWAITING TELEMETRY STREAM..." string
-                Console.Write(")                              ");
+                Console.Write(")                                        ");
             }
 
             Console.ResetColor();
