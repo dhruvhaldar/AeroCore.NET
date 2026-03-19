@@ -77,3 +77,7 @@
 ## 2026-06-12 - double.TryParse Parsing Optimization
 **Learning:** `double.TryParse` defaults to checking many combinations of `NumberStyles` like currency, thousands separators, and exponent representations when parsing strings/spans. This creates overhead in high-frequency parsing loops.
 **Action:** When parsing simple numeric values, specify `NumberStyles.Float` explicitly with `CultureInfo.InvariantCulture` in `double.TryParse`. This provides ~20% performance boost by skipping complex format combination checks.
+
+## 2026-06-12 - Console Title String Allocation
+**Learning:** Constructing a dynamically changing `string` for `Console.Title` inside a high-frequency UI loop using `span.ToString()` and string concatenation creates multiple string allocations per tick.
+**Action:** Use string interpolation directly with `ReadOnlySpan<char>` because the C# 10 default interpolated string handler natively supports appending spans without intermediate heap allocations.
