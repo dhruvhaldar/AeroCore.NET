@@ -13,6 +13,8 @@ namespace AeroCore.Shared.Models
             init
             {
                 if (!double.IsFinite(value)) throw new ArgumentException("Altitude must be finite.", nameof(Altitude));
+                // Security: Enforce physical bounds to prevent out-of-range data injection
+                if (value < -10000.0 || value > 100000.0) throw new ArgumentOutOfRangeException(nameof(Altitude), "Altitude must be between -10,000 and 100,000 feet.");
                 _altitude = value;
             }
         }
@@ -24,6 +26,8 @@ namespace AeroCore.Shared.Models
             init
             {
                 if (!double.IsFinite(value)) throw new ArgumentException("Velocity must be finite.", nameof(Velocity));
+                // Security: Enforce physical bounds to prevent out-of-range data injection
+                if (value < 0.0 || value > 10000.0) throw new ArgumentOutOfRangeException(nameof(Velocity), "Velocity must be between 0.0 and 10,000 knots.");
                 _velocity = value;
             }
         }
@@ -59,7 +63,10 @@ namespace AeroCore.Shared.Models
         internal TelemetryPacket(double altitude, double velocity, double pitch, double roll, DateTime timestamp)
         {
             if (!double.IsFinite(altitude)) throw new ArgumentException("Altitude must be finite.", nameof(altitude));
+            if (altitude < -10000.0 || altitude > 100000.0) throw new ArgumentOutOfRangeException(nameof(altitude), "Altitude must be between -10,000 and 100,000 feet.");
+
             if (!double.IsFinite(velocity)) throw new ArgumentException("Velocity must be finite.", nameof(velocity));
+            if (velocity < 0.0 || velocity > 10000.0) throw new ArgumentOutOfRangeException(nameof(velocity), "Velocity must be between 0.0 and 10,000 knots.");
 
             if (!double.IsFinite(pitch)) throw new ArgumentException("Pitch must be finite.", nameof(pitch));
             if (pitch < -180.0 || pitch > 180.0) throw new ArgumentOutOfRangeException(nameof(pitch), "Pitch must be between -180.0 and 180.0 degrees.");
