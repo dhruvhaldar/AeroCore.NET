@@ -81,3 +81,7 @@
 ## 2026-06-12 - Console Title String Allocation
 **Learning:** Constructing a dynamically changing `string` for `Console.Title` inside a high-frequency UI loop using `span.ToString()` and string concatenation creates multiple string allocations per tick.
 **Action:** Use string interpolation directly with `ReadOnlySpan<char>` because the C# 10 default interpolated string handler natively supports appending spans without intermediate heap allocations.
+
+## 2026-06-12 - UnicodeCategory Optimization in Hot Paths
+**Learning:** Checking `char.GetUnicodeCategory(c)` for every character in a string parsing or validation loop (like `SanitizeForLog`) is very slow due to Unicode lookup overhead. For ASCII characters (the vast majority in telemetry), these lookups are unnecessary.
+**Action:** Add a fast-path check `if (c < 128)` and use simple scalar comparisons (e.g., `c < 32 || c == 127` for control characters) before falling back to `char.GetUnicodeCategory` for non-ASCII characters.

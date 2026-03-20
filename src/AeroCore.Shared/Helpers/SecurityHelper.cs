@@ -120,15 +120,28 @@ namespace AeroCore.Shared.Helpers
             for (int i = 0; i < lengthToProcess; i++)
             {
                 char c = input[i];
-                var category = char.GetUnicodeCategory(c);
+                bool isControlOrFormat = false;
 
-                // Replace control characters (Cc) and format characters (Cf) with underscores.
-                // We also strip LineSeparator (Zl) and ParagraphSeparator (Zp) to prevent Log Forging.
-                // We avoid \p{C} because it includes Surrogates (Cs), which would break Emojis.
-                if (category == UnicodeCategory.Control ||
-                    category == UnicodeCategory.Format ||
-                    category == UnicodeCategory.LineSeparator ||
-                    category == UnicodeCategory.ParagraphSeparator)
+                // Optimization: Avoid char.GetUnicodeCategory() for ASCII characters.
+                if (c < 128)
+                {
+                    // Fast path for ASCII: 0-31 and 127 are control characters.
+                    isControlOrFormat = (c < 32 || c == 127);
+                }
+                else
+                {
+                    var category = char.GetUnicodeCategory(c);
+
+                    // Replace control characters (Cc) and format characters (Cf) with underscores.
+                    // We also strip LineSeparator (Zl) and ParagraphSeparator (Zp) to prevent Log Forging.
+                    // We avoid \p{C} because it includes Surrogates (Cs), which would break Emojis.
+                    isControlOrFormat = (category == UnicodeCategory.Control ||
+                                         category == UnicodeCategory.Format ||
+                                         category == UnicodeCategory.LineSeparator ||
+                                         category == UnicodeCategory.ParagraphSeparator);
+                }
+
+                if (isControlOrFormat)
                 {
                     buffer[bufferPos++] = '_';
 
@@ -136,11 +149,22 @@ namespace AeroCore.Shared.Helpers
                     while (i + 1 < lengthToProcess)
                     {
                         char nextC = input[i + 1];
-                        var nextCategory = char.GetUnicodeCategory(nextC);
-                        if (nextCategory == UnicodeCategory.Control ||
-                            nextCategory == UnicodeCategory.Format ||
-                            nextCategory == UnicodeCategory.LineSeparator ||
-                            nextCategory == UnicodeCategory.ParagraphSeparator)
+                        bool nextIsControlOrFormat = false;
+
+                        if (nextC < 128)
+                        {
+                            nextIsControlOrFormat = (nextC < 32 || nextC == 127);
+                        }
+                        else
+                        {
+                            var nextCategory = char.GetUnicodeCategory(nextC);
+                            nextIsControlOrFormat = (nextCategory == UnicodeCategory.Control ||
+                                                     nextCategory == UnicodeCategory.Format ||
+                                                     nextCategory == UnicodeCategory.LineSeparator ||
+                                                     nextCategory == UnicodeCategory.ParagraphSeparator);
+                        }
+
+                        if (nextIsControlOrFormat)
                         {
                             i++;
                         }
