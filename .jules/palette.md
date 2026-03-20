@@ -64,3 +64,7 @@
 ## 2025-03-18 - [Inverted Colors for Critical Dashboard Values]
 **Learning:** In dense console telemetry dashboards, simply changing the text color of a critical value to Red might not provide enough contrast or visual "pop" to immediately draw the operator's eye, especially if the screen is full of data.
 **Action:** Always use inverted color blocks (e.g., White text on Red background for CRITICAL, Black text on Yellow background for WARNING) for the specific parameter values that exceed thresholds to create an unmissable, high-contrast visual cue.
+
+## 2026-03-19 - [Clean Slate for TUI Dashboards]
+**Learning:** In .NET console applications hosted via Generic Host, asynchronous startup logs (e.g., "Application started", "Hosting environment") frequently clutter the terminal before the main application UI starts, detracting from the "dashboard" feel and confusing users. Furthermore, emitting `ILogger` standard information messages right after rendering a UI banner visually corrupts the layout.
+**Action:** Always issue a `try { Console.Clear(); } catch { }` immediately before rendering the initial layout of a Terminal User Interface (TUI) to ensure a clean, distraction-free slate that feels like an application rather than a log stream, and avoid mixing `ILogger` output into the active UI area unless necessary for error reporting.
