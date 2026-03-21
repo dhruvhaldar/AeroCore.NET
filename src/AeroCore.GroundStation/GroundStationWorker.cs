@@ -40,9 +40,9 @@ namespace AeroCore.GroundStation
             Console.Title = "AeroCore Ground Station v1.0";
             Console.WriteLine();
             Console.ForegroundColor = ConsoleColor.Cyan;
-            Console.WriteLine("============================================================");
+            Console.WriteLine("════════════════════════════════════════════════════════════");
             Console.WriteLine("              AEROCORE GROUND STATION v1.0");
-            Console.WriteLine("============================================================");
+            Console.WriteLine("════════════════════════════════════════════════════════════");
             Console.ResetColor();
             Console.WriteLine($"  > System Init:      {DateTime.Now:HH:mm:ss}");
 
@@ -177,6 +177,7 @@ namespace AeroCore.GroundStation
                 // Give the host a moment to finish startup logs so the banner appears after them
                 await Task.Delay(100, stoppingToken);
 
+                Console.Clear();
                 ShowWelcomeBanner();
                 _logger.LogInformation("Ground Station Listening for Telemetry...");
 
