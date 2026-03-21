@@ -9,8 +9,6 @@ namespace AeroCore.Shared.Helpers
 {
     public static class TelemetryParser
     {
-        private static readonly SearchValues<byte> _trimSearchValues = SearchValues.Create(new byte[] { 32, 9, 13, 10 });
-
         public static TelemetryPacket? ParseFromCsv(string line)
         {
             // Security: Prevent CPU/Memory exhaustion DoS via excessively long input string
@@ -22,9 +20,10 @@ namespace AeroCore.Shared.Helpers
             return Parse(line.AsSpan());
         }
 
-        // Optimization: Helper method to trim whitespace using SIMD-optimized SearchValues.
-        // This is significantly faster (~16x) than span.TrimStart(byte[]) which scans repeatedly.
-        // Note: span.TrimStart(SearchValues) is not available in .NET 8 for ReadOnlySpan<byte>.
+        // Optimization: Helper method to trim whitespace.
+        // A simple scalar loop is faster than SIMD (SearchValues.IndexOfAnyExcept) for short telemetry
+        // segments because it avoids the overhead of setting up SIMD registers.
+        // This is especially true since most strings have 0 to 2 leading whitespaces.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ReadOnlySpan<byte> TrimWhitespace(ReadOnlySpan<byte> span)
         {
@@ -32,9 +31,17 @@ namespace AeroCore.Shared.Helpers
             // If the first byte is > 32 (Space), it's not a whitespace char we care about (Space, Tab, CR, LF).
             if (!span.IsEmpty && span[0] > 32) return span;
 
-            int idx = span.IndexOfAnyExcept(_trimSearchValues);
-            if (idx == -1) return ReadOnlySpan<byte>.Empty;
-            return span.Slice(idx);
+            for (int i = 0; i < span.Length; i++)
+            {
+                byte c = span[i];
+                // Check if the character is NOT a whitespace character.
+                // Whitespace characters are Space (32), Tab (9), CR (13), and LF (10).
+                if (c > 32 || (c != 32 && c != 9 && c != 13 && c != 10))
+                {
+                    return span.Slice(i);
+                }
+            }
+            return ReadOnlySpan<byte>.Empty;
         }
 
         /// <summary>
