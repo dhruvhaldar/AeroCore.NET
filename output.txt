@@ -1,0 +1,36 @@
+Using launch settings from src/AeroCore.GroundStation/Properties/launchSettings.json...
+info: AeroCore.GroundStation.GroundStationWorker[0]
+      Ground Station Starting...
+info: AeroCore.Shared.Services.MockTelemetryProvider[0]
+      Mock Telemetry Sensor Initialized.
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: /app/src/AeroCore.GroundStation
+
+════════════════════════════════════════════════════════════
+              AEROCORE GROUND STATION v1.0
+════════════════════════════════════════════════════════════
+  > System Init:      20:49:07
+  > System Status:    Ready
+  > Telemetry Link:   Listening (Mock)...
+  (Press Ctrl+C to exit)
+
+  [LEGEND]
+   ALT: Altitude (ft)   VEL: Velocity (kts)
+   PIT: Pitch (deg)     ROL: Roll (deg)
+
+   [◄■■+■|■+■■►] : Attitude Indicator (Active) | [   + | +   ] : Attitude Indicator (Neutral)
+   ↑↑ : Fast Rise | ↑  : Slow Rise | →  : Stable | ↓  : Slow Fall | ↓↓ : Fast Fall
+   [ OK ] : Stable | [WARN] : Warning | [CRIT] : Critical (Audible Alert)
+   * Alerts highlight labels and display values with high-contrast backgrounds.
+
+[⠋] AWAITING TELEMETRY STREAM... (Ensure sensor is connected and transmitting)info: AeroCore.GroundStation.GroundStationWorker[0]
+      Ground Station Listening for Telemetry...
+info: Microsoft.Hosting.Lifetime[0]
+      Application is shutting down...
+
+info: AeroCore.GroundStation.GroundStationWorker[0]
+      Ground Station Stopped.
