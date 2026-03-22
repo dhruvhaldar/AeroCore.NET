@@ -36,7 +36,9 @@ namespace AeroCore.Shared.Helpers
                 byte c = span[i];
                 // Check if the character is NOT a whitespace character.
                 // Whitespace characters are Space (32), Tab (9), CR (13), and LF (10).
-                if (c > 32 || (c != 32 && c != 9 && c != 13 && c != 10))
+                // Optimization: Replace multiple equality checks with a single bitmask lookup.
+                // (1UL << 32) | (1UL << 13) | (1UL << 10) | (1UL << 9) = 4294977024
+                if (c > 32 || ((1UL << c) & 4294977024UL) == 0)
                 {
                     return span.Slice(i);
                 }
