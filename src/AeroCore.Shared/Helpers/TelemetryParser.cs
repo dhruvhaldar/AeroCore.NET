@@ -113,6 +113,10 @@ namespace AeroCore.Shared.Helpers
             {
                 return false;
             }
+            if (altitude < -10000.0 || altitude > 100000.0 || velocity < 0.0 || velocity > 10000.0)
+            {
+                return false;
+            }
 
             // Optimization: Use internal constructor to avoid redundant double.IsFinite checks in property setters.
             // We've already validated the values above.
@@ -200,6 +204,10 @@ namespace AeroCore.Shared.Helpers
 
             // Security: Enforce physical bounds to prevent out-of-range data injection
             if (pitch < -180.0 || pitch > 180.0 || roll < -180.0 || roll > 180.0)
+            {
+                return null;
+            }
+            if (altitude < -10000.0 || altitude > 100000.0 || velocity < 0.0 || velocity > 10000.0)
             {
                 return null;
             }
