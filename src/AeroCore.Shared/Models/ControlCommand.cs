@@ -58,5 +58,42 @@ namespace AeroCore.Shared.Models
         }
 
         public DateTime Timestamp { get; init; }
+
+        public ControlCommand(string actuatorId, double value, DateTime timestamp)
+        {
+            if (string.IsNullOrWhiteSpace(actuatorId))
+            {
+                throw new ArgumentException("ActuatorId cannot be null or whitespace.", nameof(actuatorId));
+            }
+
+            if (actuatorId.Length > 50)
+            {
+                throw new ArgumentException("ActuatorId cannot exceed 50 characters.", nameof(actuatorId));
+            }
+
+            foreach (char c in actuatorId)
+            {
+                bool isAsciiLetter = (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+                bool isAsciiDigit = (c >= '0' && c <= '9');
+                if (!isAsciiLetter && !isAsciiDigit && c != '_' && c != '-')
+                {
+                    throw new ArgumentException("ActuatorId contains an invalid character. Only ASCII alphanumeric, underscore, and hyphen are allowed.", nameof(actuatorId));
+                }
+            }
+
+            if (!double.IsFinite(value))
+            {
+                throw new ArgumentException("Value must be a finite number.", nameof(value));
+            }
+
+            if (value < 0.0 || value > 1.0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value), value, "Value must be between 0.0 and 1.0.");
+            }
+
+            _actuatorId = actuatorId;
+            _value = value;
+            Timestamp = timestamp;
+        }
     }
 }
