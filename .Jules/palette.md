@@ -77,3 +77,7 @@
 ## 2026-06-25 - Explicit Signs for Angular Telemetry
 **Learning:** For signed telemetry data where directionality matters (like Pitch and Roll), omitting the plus sign for positive numbers while including the minus sign for negative numbers creates cognitive imbalance and ambiguity. Users process "+1.23" as an explicit directional value much faster than an unsigned "1.23".
 **Action:** Always format signed angular telemetry with explicit positive (`+`) or negative (`-`) signs (e.g. `+0.00;-0.00; 0.00`).
+
+## 2026-06-26 - Dim Fractional Values to Reduce Flicker
+**Learning:** In high-frequency CLI monitoring streams (like telemetry at 20+ FPS), fast-changing fractional values (e.g., milliseconds in timestamps, trailing decimals in coordinates) create intense visual flicker. This noise distracts from the slower-changing, critical main values.
+**Action:** When displaying rapidly updating data where the exact fractional value isn't critical for immediate state assessment, dim the fractional portion (e.g., `.fff` in DarkGray) while keeping the main portion (e.g., `HH:mm:ss` in White) in high contrast.
