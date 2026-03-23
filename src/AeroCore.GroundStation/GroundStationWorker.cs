@@ -295,20 +295,32 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[GCS] @ ");
 
-            // Dynamic Timestamp (High Contrast)
+            // Dynamic Timestamp (Main time high contrast, fractional seconds dimmed to reduce flicker)
             Console.ForegroundColor = ConsoleColor.White;
-            Span<char> tsBuffer = stackalloc char[32];
-            if (packet.Timestamp.TryFormat(tsBuffer, out int tsWritten, "HH:mm:ss.fff"))
+            Span<char> tsMainBuffer = stackalloc char[16];
+            Span<char> tsFracBuffer = stackalloc char[16];
+
+            if (packet.Timestamp.TryFormat(tsMainBuffer, out int tsMainWritten, "HH:mm:ss"))
             {
-                Console.Out.Write(tsBuffer.Slice(0, tsWritten));
+                Console.Out.Write(tsMainBuffer.Slice(0, tsMainWritten));
             }
             else
             {
-                Console.Out.Write(packet.Timestamp.ToString("HH:mm:ss.fff"));
+                Console.Out.Write(packet.Timestamp.ToString("HH:mm:ss"));
+            }
+
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+
+            if (packet.Timestamp.TryFormat(tsFracBuffer, out int tsFracWritten, ".fff"))
+            {
+                Console.Out.Write(tsFracBuffer.Slice(0, tsFracWritten));
+            }
+            else
+            {
+                Console.Out.Write(packet.Timestamp.ToString(".fff"));
             }
 
             // Timestamp Suffix
-            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" | ");
 
             // Altitude
