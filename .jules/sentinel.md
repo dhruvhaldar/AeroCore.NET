@@ -79,3 +79,8 @@
 **Vulnerability:** A `SerialPort` could remain open if the `await foreach` loop consuming its stream throws an exception (e.g., `TaskCanceledException`) or gets canceled before completing normally. This prevents subsequent connections, causing a resource exhaustion Denial of Service (DoS).
 **Learning:** Returning from an `IAsyncEnumerable` (`yield return`) does not guarantee that code placed *after* the `await foreach` loop will execute if the loop is broken or canceled abruptly.
 **Prevention:** Always wrap iteration loops (`await foreach`) over resources (like serial ports, network streams, files) in a `try...finally` block, placing the resource cleanup/close logic in the `finally` block to ensure reliable execution regardless of how the loop exits.
+
+## 2026-03-23 - Enforcing Invariants in C# Records Constructors
+**Vulnerability:** C# `record struct` types automatically generate a constructor that assigns fields directly, completely bypassing validation logic placed inside `init` property accessors. This allows attackers to instantiate invalid/malicious objects directly.
+**Learning:** Relying solely on `init` property setters for input validation and security bounds checks in C# models is insufficient to prevent security bypasses during direct object instantiation.
+**Prevention:** When relying on `init` property setters for input validation, ensure that an explicit internal or public constructor is also defined to enforce the exact same validation rules.
