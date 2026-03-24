@@ -337,7 +337,7 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            WriteFormatted(packet.Altitude, 10, "N2");
+            WriteFormatted(packet.Altitude, 10, "N2", critAlt);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" ft ");
@@ -394,7 +394,7 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            WriteFormatted(packet.Velocity, 7, "N1");
+            WriteFormatted(packet.Velocity, 7, "N1", warnVel);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" kts ");
@@ -456,7 +456,7 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            WriteFormatted(packet.Pitch, 7, "+0.00;-0.00; 0.00");
+            WriteFormatted(packet.Pitch, 7, "+0.00;-0.00; 0.00", critPit || warnPit);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
@@ -487,7 +487,7 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            WriteFormatted(packet.Roll, 7, "+0.00;-0.00; 0.00");
+            WriteFormatted(packet.Roll, 7, "+0.00;-0.00; 0.00", critRol || warnRol);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
@@ -659,7 +659,7 @@ namespace AeroCore.GroundStation
             }
         }
 
-        private void WriteFormatted(double value, int width, ReadOnlySpan<char> format)
+        private void WriteFormatted(double value, int width, ReadOnlySpan<char> format, bool isAlert = false)
         {
             // Allocate a buffer large enough for typical numbers + padding.
             // 32 chars is usually enough for double string representation.
@@ -679,6 +679,22 @@ namespace AeroCore.GroundStation
                     {
                         combinedBuffer.Slice(0, padding).Fill(' ');
                         valueBuffer.Slice(0, charsWritten).CopyTo(combinedBuffer.Slice(padding));
+
+                        if (!isAlert)
+                        {
+                            char decSep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
+                            int dotIndex = valueBuffer.Slice(0, charsWritten).IndexOf(decSep);
+                            if (dotIndex >= 0)
+                            {
+                                Console.Out.Write(combinedBuffer.Slice(0, padding + dotIndex));
+                                var prevColor = Console.ForegroundColor;
+                                Console.ForegroundColor = ConsoleColor.DarkGray;
+                                Console.Out.Write(combinedBuffer.Slice(padding + dotIndex, charsWritten - dotIndex));
+                                Console.ForegroundColor = prevColor;
+                                return;
+                            }
+                        }
+
                         Console.Out.Write(combinedBuffer.Slice(0, padding + charsWritten));
                         return;
                     }
@@ -688,12 +704,43 @@ namespace AeroCore.GroundStation
                     spaces.Fill(' ');
                     Console.Out.Write(spaces);
                 }
+
+                if (!isAlert)
+                {
+                    char decSep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
+                    int dotIndex = valueBuffer.Slice(0, charsWritten).IndexOf(decSep);
+                    if (dotIndex >= 0)
+                    {
+                        Console.Out.Write(valueBuffer.Slice(0, dotIndex));
+                        var prevColor = Console.ForegroundColor;
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Out.Write(valueBuffer.Slice(dotIndex, charsWritten - dotIndex));
+                        Console.ForegroundColor = prevColor;
+                        return;
+                    }
+                }
+
                 Console.Out.Write(valueBuffer.Slice(0, charsWritten));
             }
             else
             {
                 // Fallback
-                Console.Write(value.ToString(format.ToString()));
+                string fallbackStr = value.ToString(format.ToString());
+                if (!isAlert)
+                {
+                    char decSep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
+                    int dotIndex = fallbackStr.IndexOf(decSep);
+                    if (dotIndex >= 0)
+                    {
+                        Console.Write(fallbackStr.Substring(0, dotIndex));
+                        var prevColor = Console.ForegroundColor;
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write(fallbackStr.Substring(dotIndex));
+                        Console.ForegroundColor = prevColor;
+                        return;
+                    }
+                }
+                Console.Write(fallbackStr);
             }
         }
     }

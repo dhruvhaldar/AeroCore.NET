@@ -81,3 +81,7 @@
 ## 2026-06-26 - Dim Fractional Values to Reduce Flicker
 **Learning:** In high-frequency CLI monitoring streams (like telemetry at 20+ FPS), fast-changing fractional values (e.g., milliseconds in timestamps, trailing decimals in coordinates) create intense visual flicker. This noise distracts from the slower-changing, critical main values.
 **Action:** When displaying rapidly updating data where the exact fractional value isn't critical for immediate state assessment, dim the fractional portion (e.g., `.fff` in DarkGray) while keeping the main portion (e.g., `HH:mm:ss` in White) in high contrast.
+
+## 2024-05-24 - Dimming Fractional Values in CLI Dashboards
+**Learning:** In high-frequency CLI monitoring streams (like telemetry at 20+ FPS), fast-changing fractional values (e.g., milliseconds in timestamps, trailing decimals) create intense visual flicker, increasing cognitive load and visual noise for the user. However, when these values indicate an alert or critical state, reducing their contrast makes the alert harder to spot, defeating the purpose of high-contrast warning backgrounds.
+**Action:** Implemented an alert-aware dimming mechanism. By default, dim the fractional portion (e.g., `.fff` or `.00` in `DarkGray`) while keeping the main significant digits in high contrast (`White`). However, explicitly disable this dimming when the value enters a Warning or Critical state, ensuring the entire number remains fully legible and high-contrast against the alert background.
