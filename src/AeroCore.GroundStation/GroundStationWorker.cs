@@ -58,7 +58,11 @@ namespace AeroCore.GroundStation
             Console.ResetColor();
 
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("  (Press Ctrl+C to exit)");
+            Console.Write("  (Press ");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write("Ctrl+C");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine(" to exit)");
             Console.ResetColor();
 
             Console.WriteLine();

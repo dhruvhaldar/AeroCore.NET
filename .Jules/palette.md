@@ -85,3 +85,7 @@
 ## 2024-05-24 - Dimming Fractional Values in CLI Dashboards
 **Learning:** In high-frequency CLI monitoring streams (like telemetry at 20+ FPS), fast-changing fractional values (e.g., milliseconds in timestamps, trailing decimals) create intense visual flicker, increasing cognitive load and visual noise for the user. However, when these values indicate an alert or critical state, reducing their contrast makes the alert harder to spot, defeating the purpose of high-contrast warning backgrounds.
 **Action:** Implemented an alert-aware dimming mechanism. By default, dim the fractional portion (e.g., `.fff` or `.00` in `DarkGray`) while keeping the main significant digits in high contrast (`White`). However, explicitly disable this dimming when the value enters a Warning or Critical state, ensuring the entire number remains fully legible and high-contrast against the alert background.
+
+## 2024-05-24 - High Contrast for Keyboard Shortcuts in CLI
+**Learning:** In terminal applications, critical instructions like exit commands (Ctrl+C) can easily blend in with surrounding help text if they share the same muted color. Users scanning for a way out often miss these key bindings.
+**Action:** Always highlight keyboard shortcuts within instructional text using a high-contrast color (like White) against the surrounding muted text (like DarkGray) to make them instantly discoverable.
