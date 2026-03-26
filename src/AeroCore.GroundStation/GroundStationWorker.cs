@@ -313,7 +313,10 @@ namespace AeroCore.GroundStation
                 Console.Out.Write(packet.Timestamp.ToString("HH:mm:ss"));
             }
 
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            if (!isWarn && !isCrit)
+            {
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            }
 
             if (packet.Timestamp.TryFormat(tsFracBuffer, out int tsFracWritten, ".fff"))
             {
@@ -325,6 +328,7 @@ namespace AeroCore.GroundStation
             }
 
             // Timestamp Suffix
+            Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(" | ");
 
             // Altitude
