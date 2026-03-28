@@ -14,7 +14,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace AeroCore.Shared.Services
 {
-    public class SerialTelemetryProvider : ITelemetryProvider
+    public class SerialTelemetryProvider : ITelemetryProvider, IDisposable
     {
         private readonly ILogger<SerialTelemetryProvider> _logger;
         private readonly IConfiguration _config;
@@ -44,7 +44,7 @@ namespace AeroCore.Shared.Services
                 throw new ArgumentOutOfRangeException(nameof(_baudRate), "Baud rate must be between 1 and 4,000,000.");
             }
 
-            _logger.LogInformation($"Initializing Serial Telemetry on {SecurityHelper.SanitizeForLog(_portName.AsSpan())} at {_baudRate} baud.");
+            _logger.LogInformation("Initializing Serial Telemetry on {PortName} at {BaudRate} baud.", SecurityHelper.SanitizeForLog(_portName.AsSpan()), _baudRate);
 
             try
             {
@@ -266,7 +266,7 @@ namespace AeroCore.Shared.Services
                         var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
                         if ((now - _lastErrorLog) >= 1000)
                         {
-                            _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                            _logger.LogWarning("Telemetry line exceeded length limit of {Limit}. Resetting.", lineBuffer.Length);
                             _lastErrorLog = now;
                         }
 
@@ -298,7 +298,7 @@ namespace AeroCore.Shared.Services
                         var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
                         if ((now - _lastErrorLog) >= 1000)
                         {
-                            _logger.LogWarning($"Telemetry line exceeded length limit of {lineBuffer.Length}. Resetting.");
+                            _logger.LogWarning("Telemetry line exceeded length limit of {Limit}. Resetting.", lineBuffer.Length);
                             _lastErrorLog = now;
                         }
 
@@ -432,6 +432,18 @@ namespace AeroCore.Shared.Services
         private static bool ParseBuffer(byte[] buffer, int length, DateTime timestamp, out TelemetryPacket packet)
         {
             return TelemetryParser.TryParse(new ReadOnlySpan<byte>(buffer, 0, length), out packet, timestamp);
+        }
+
+        public void Dispose()
+        {
+            if (_serialPort != null)
+            {
+                if (_serialPort.IsOpen)
+                {
+                    try { _serialPort.Close(); } catch { }
+                }
+                _serialPort.Dispose();
+            }
         }
     }
 }
