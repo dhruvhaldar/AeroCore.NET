@@ -89,3 +89,7 @@
 ## 2024-05-24 - High Contrast for Keyboard Shortcuts in CLI
 **Learning:** In terminal applications, critical instructions like exit commands (Ctrl+C) can easily blend in with surrounding help text if they share the same muted color. Users scanning for a way out often miss these key bindings.
 **Action:** Always highlight keyboard shortcuts within instructional text using a high-contrast color (like White) against the surrounding muted text (like DarkGray) to make them instantly discoverable.
+
+## 2026-06-25 - Explain Every Symbol in CLI Legends
+**Learning:** Users cannot guess the meaning of icon-only indicators like spinners if they are omitted from the legend, even if they seem obvious to the developer. Unexplained dynamic symbols cause cognitive friction.
+**Action:** Always include explicitly mapped text descriptions for all dynamic visual symbols (like spinners) in the UI legend, making it truly complete.

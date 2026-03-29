@@ -162,6 +162,15 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.WriteLine("] : Critical (Audible Alert)");
 
+            // Stream Liveness Legend
+            Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write("[");
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            Console.Write("⠋");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("] : Stream Liveness (Rotating = Active, Color matches status)");
+
             // Dynamic Label Note
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
