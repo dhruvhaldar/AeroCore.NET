@@ -27,6 +27,24 @@ namespace AeroCore.FlightComputer
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            // Yield to allow host startup logs to complete before drawing the banner
+            await Task.Delay(100, stoppingToken);
+
+            System.Console.WriteLine();
+            System.Console.ForegroundColor = System.ConsoleColor.Cyan;
+            System.Console.WriteLine("════════════════════════════════════════════════════════════");
+            System.Console.WriteLine("              AEROCORE FLIGHT COMPUTER v1.0");
+            System.Console.WriteLine("════════════════════════════════════════════════════════════");
+            System.Console.ResetColor();
+            System.Console.ForegroundColor = System.ConsoleColor.DarkGray;
+            System.Console.Write("  (Press ");
+            System.Console.ForegroundColor = System.ConsoleColor.White;
+            System.Console.Write("Ctrl+C");
+            System.Console.ForegroundColor = System.ConsoleColor.DarkGray;
+            System.Console.WriteLine(" to exit)");
+            System.Console.ResetColor();
+            System.Console.WriteLine();
+
             // Fire and forget the control loop logic inside the hosted service context
             await _fcu.ProcessLoopAsync(stoppingToken);
         }
