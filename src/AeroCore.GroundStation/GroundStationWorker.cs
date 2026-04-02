@@ -309,31 +309,34 @@ namespace AeroCore.GroundStation
             Console.Write("[GCS] @ ");
 
             // Dynamic Timestamp (Main time high contrast, fractional seconds dimmed to reduce flicker)
+            // Optimization: Format DateTime once to "HH:mm:ss.fff" instead of formatting twice.
+            // This eliminates redundant tick-to-calendar-part conversion overhead in this high-frequency loop.
             Console.ForegroundColor = ConsoleColor.White;
-            Span<char> tsMainBuffer = stackalloc char[16];
-            Span<char> tsFracBuffer = stackalloc char[16];
+            Span<char> tsBuffer = stackalloc char[32];
 
-            if (packet.Timestamp.TryFormat(tsMainBuffer, out int tsMainWritten, "HH:mm:ss"))
+            if (packet.Timestamp.TryFormat(tsBuffer, out int tsWritten, "HH:mm:ss.fff"))
             {
-                Console.Out.Write(tsMainBuffer.Slice(0, tsMainWritten));
+                // "HH:mm:ss" is exactly 8 characters
+                Console.Out.Write(tsBuffer.Slice(0, 8));
+
+                if (!isWarn && !isCrit)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
+
+                Console.Out.Write(tsBuffer.Slice(8, tsWritten - 8));
             }
             else
             {
-                Console.Out.Write(packet.Timestamp.ToString("HH:mm:ss"));
-            }
+                string tsStr = packet.Timestamp.ToString("HH:mm:ss.fff");
+                Console.Out.Write(tsStr.Substring(0, 8));
 
-            if (!isWarn && !isCrit)
-            {
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-            }
+                if (!isWarn && !isCrit)
+                {
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
 
-            if (packet.Timestamp.TryFormat(tsFracBuffer, out int tsFracWritten, ".fff"))
-            {
-                Console.Out.Write(tsFracBuffer.Slice(0, tsFracWritten));
-            }
-            else
-            {
-                Console.Out.Write(packet.Timestamp.ToString(".fff"));
+                Console.Out.Write(tsStr.Substring(8));
             }
 
             // Timestamp Suffix
