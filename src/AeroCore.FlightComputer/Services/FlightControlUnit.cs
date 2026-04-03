@@ -24,12 +24,12 @@ namespace AeroCore.FlightComputer.Services
         private static readonly Action<ILogger, double, Exception?> _logPitchCorrection = LoggerMessage.Define<double>(
             LogLevel.Warning,
             new EventId(1, "PitchCorrection"),
-            "[CORRECTION] Pitch High: {Pitch:F2} deg. Adjusting Elevators.");
+            "[CORRECTION] Pitch High: {Pitch:+0.00;-0.00; 0.00} deg. Adjusting Elevators.");
 
         private static readonly Action<ILogger, double, double, double, Exception?> _logStatus = LoggerMessage.Define<double, double, double>(
             LogLevel.Information,
             new EventId(2, "StatusUpdate"),
-            "[STATUS] Alt: {Altitude:F1} ft | Vel: {Velocity:F1} kts | Pitch: {Pitch:F2} deg");
+            "[STATUS] Alt: {Altitude:F1} ft | Vel: {Velocity:F1} kts | Pitch: {Pitch:+0.00;-0.00; 0.00} deg");
 
         private static readonly Action<ILogger, string, double, Exception?> _logCommandExecution = LoggerMessage.Define<string, double>(
             LogLevel.Information,
