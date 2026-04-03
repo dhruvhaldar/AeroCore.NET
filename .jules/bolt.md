@@ -85,3 +85,7 @@
 ## 2026-06-12 - UnicodeCategory Optimization in Hot Paths
 **Learning:** Checking `char.GetUnicodeCategory(c)` for every character in a string parsing or validation loop (like `SanitizeForLog`) is very slow due to Unicode lookup overhead. For ASCII characters (the vast majority in telemetry), these lookups are unnecessary.
 **Action:** Add a fast-path check `if (c < 128)` and use simple scalar comparisons (e.g., `c < 32 || c == 127` for control characters) before falling back to `char.GetUnicodeCategory` for non-ASCII characters.
+
+## 2026-06-13 - Caching CultureInfo Properties in High-Frequency Loops
+**Learning:** Repeatedly accessing `System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator` within a high-frequency UI rendering loop (e.g., thousands of times a minute) incurs measurable overhead due to async-local context lookups and property evaluations. However, caching this statically is a severe anti-pattern because `CurrentCulture` is thread/context-specific and can change dynamically.
+**Action:** Extract frequently used thread-local configuration properties (like decimal separators) locally once per high-frequency batch or UI tick and pass them down, rather than evaluating them deep within tight inner formatting loops or caching them globally.
