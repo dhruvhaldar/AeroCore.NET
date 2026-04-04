@@ -195,18 +195,30 @@ namespace AeroCore.GroundStation
                 _logger.LogInformation("Ground Station Listening for Telemetry...");
 
                 // UX: Show initial empty state with helpful guidance while waiting for the first telemetry packet
-                Console.Write("\r");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("[");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("⠋");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("] ");
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("AWAITING TELEMETRY STREAM... ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("(Ensure sensor is connected and transmitting)");
-                Console.ResetColor();
+                using var awaitingCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                var animationTask = Task.Run(async () =>
+                {
+                    int i = 0;
+                    while (!awaitingCts.Token.IsCancellationRequested)
+                    {
+                        Console.Write("\r");
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("[");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write(_spinnerChars[i]);
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("] ");
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write("AWAITING TELEMETRY STREAM... ");
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("(Ensure sensor is connected and transmitting)");
+                        Console.ResetColor();
+
+                        i = (i + 1) % _spinnerChars.Length;
+
+                        try { await Task.Delay(100, awaitingCts.Token); } catch { }
+                    }
+                }, CancellationToken.None);
 
                 // Register a callback to print a newline upon cancellation to prevent shutdown logs
                 // from appending to the in-place updating (\r) telemetry line.
@@ -214,8 +226,16 @@ namespace AeroCore.GroundStation
 
                 try
                 {
+                    bool isFirstPacket = true;
                     await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
                     {
+                        if (isFirstPacket)
+                        {
+                            awaitingCts.Cancel();
+                            try { await animationTask; } catch { }
+                            isFirstPacket = false;
+                        }
+
                         // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
                         // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
                         // while still providing a smooth visual update for the user.
@@ -237,6 +257,11 @@ namespace AeroCore.GroundStation
                 catch (Exception ex)
                 {
                     _logger.LogError(ex, "Ground Station Error");
+                }
+                finally
+                {
+                    awaitingCts.Cancel();
+                    try { await animationTask; } catch { }
                 }
             }
             finally
