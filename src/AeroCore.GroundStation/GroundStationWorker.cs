@@ -195,18 +195,31 @@ namespace AeroCore.GroundStation
                 _logger.LogInformation("Ground Station Listening for Telemetry...");
 
                 // UX: Show initial empty state with helpful guidance while waiting for the first telemetry packet
-                Console.Write("\r");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("[");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("⠋");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("] ");
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("AWAITING TELEMETRY STREAM... ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("(Ensure sensor is connected and transmitting)");
-                Console.ResetColor();
+                // Animate the spinner asynchronously so it doesn't appear frozen while waiting.
+                using var initialWaitCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                var animationTask = Task.Run(async () =>
+                {
+                    int index = 0;
+                    while (!initialWaitCts.Token.IsCancellationRequested)
+                    {
+                        Console.Write("\r");
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("[");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write(_spinnerChars[index]);
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("] ");
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write("AWAITING TELEMETRY STREAM... ");
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("(Ensure sensor is connected and transmitting)");
+                        Console.ResetColor();
+
+                        index = (index + 1) % _spinnerChars.Length;
+                        try { await Task.Delay(100, initialWaitCts.Token); }
+                        catch (TaskCanceledException) { break; }
+                    }
+                }, initialWaitCts.Token);
 
                 // Register a callback to print a newline upon cancellation to prevent shutdown logs
                 // from appending to the in-place updating (\r) telemetry line.
@@ -214,20 +227,37 @@ namespace AeroCore.GroundStation
 
                 try
                 {
-                    await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
+                    try
                     {
-                        // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
-                        // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
-                        // while still providing a smooth visual update for the user.
-                        // Use Environment.TickCount64 instead of DateTime.UtcNow to accurately measure wall-clock time
-                        // while avoiding expensive system calls in the per-packet hot loop.
-                        var now = Environment.TickCount64;
-                        if ((now - _lastUiUpdate) >= 50)
+                        bool isFirstPacket = true;
+                        await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
                         {
-                            // Visualize the data
-                            PrintTelemetry(packet);
-                            _lastUiUpdate = now;
+                            if (isFirstPacket)
+                            {
+                                initialWaitCts.Cancel();
+                                try { await animationTask; } catch { }
+                                isFirstPacket = false;
+                            }
+
+                            // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
+                            // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
+                            // while still providing a smooth visual update for the user.
+                            // Use Environment.TickCount64 instead of DateTime.UtcNow to accurately measure wall-clock time
+                            // while avoiding expensive system calls in the per-packet hot loop.
+                            var now = Environment.TickCount64;
+                            if ((now - _lastUiUpdate) >= 50)
+                            {
+                                // Visualize the data
+                                PrintTelemetry(packet);
+                                _lastUiUpdate = now;
+                            }
                         }
+                    }
+                    finally
+                    {
+                        // Ensure animation stops if the stream completes immediately or errors out
+                        initialWaitCts.Cancel();
+                        try { await animationTask; } catch { }
                     }
                 }
                 catch (OperationCanceledException)
