@@ -194,28 +194,45 @@ namespace AeroCore.GroundStation
                 ShowWelcomeBanner();
                 _logger.LogInformation("Ground Station Listening for Telemetry...");
 
-                // UX: Show initial empty state with helpful guidance while waiting for the first telemetry packet
-                Console.Write("\r");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("[");
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.Write("⠋");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("] ");
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.Write("AWAITING TELEMETRY STREAM... ");
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write("(Ensure sensor is connected and transmitting)");
-                Console.ResetColor();
-
                 // Register a callback to print a newline upon cancellation to prevent shutdown logs
                 // from appending to the in-place updating (\r) telemetry line.
                 using var _ = stoppingToken.Register(() => Console.WriteLine());
+
+                // UX: Show initial empty state with helpful guidance and an asynchronous spinner while waiting for the first telemetry packet.
+                // A static spinner looks broken during the synchronous wait on `await foreach`.
+                using var spinnerCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+                var spinnerTask = Task.Run(async () =>
+                {
+                    while (!spinnerCts.Token.IsCancellationRequested)
+                    {
+                        Console.Write("\r");
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("[");
+                        Console.ForegroundColor = ConsoleColor.Cyan;
+                        Console.Write(_spinnerChars[_spinnerIndex]);
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("] ");
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.Write("AWAITING TELEMETRY STREAM... ");
+                        Console.ForegroundColor = ConsoleColor.DarkGray;
+                        Console.Write("(Ensure sensor is connected and transmitting)");
+                        Console.ResetColor();
+
+                        _spinnerIndex = (_spinnerIndex + 1) % _spinnerChars.Length;
+                        await Task.Delay(100, spinnerCts.Token);
+                    }
+                }, spinnerCts.Token);
 
                 try
                 {
                     await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
                     {
+                        // Cancel the spinner task as soon as the first packet arrives
+                        if (!spinnerCts.IsCancellationRequested)
+                        {
+                            await spinnerCts.CancelAsync();
+                            try { await spinnerTask; } catch (OperationCanceledException) { }
+                        }
                         // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
                         // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
                         // while still providing a smooth visual update for the user.

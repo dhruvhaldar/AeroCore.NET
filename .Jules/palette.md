@@ -93,3 +93,7 @@
 ## 2026-06-25 - Explain Every Symbol in CLI Legends
 **Learning:** Users cannot guess the meaning of icon-only indicators like spinners if they are omitted from the legend, even if they seem obvious to the developer. Unexplained dynamic symbols cause cognitive friction.
 **Action:** Always include explicitly mapped text descriptions for all dynamic visual symbols (like spinners) in the UI legend, making it truly complete.
+
+## 2026-06-27 - Asynchronous Loading Spinners in CLI
+**Learning:** Using static loading spinner characters during synchronous wait states (like `await foreach`) makes the application appear broken or frozen because the visual indicator does not animate.
+**Action:** Always animate loading states asynchronously (e.g., via `Task.Run` loops) when waiting for initial stream data to reassure users the application is alive.
