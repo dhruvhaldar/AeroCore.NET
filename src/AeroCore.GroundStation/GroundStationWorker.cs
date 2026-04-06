@@ -265,6 +265,10 @@ namespace AeroCore.GroundStation
 
         private void PrintTelemetry(TelemetryPacket packet)
         {
+            // Optimization: Cache decimal separator once per tick to avoid repeated culture property lookups
+            // across multiple WriteFormatted calls.
+            char decSep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
+
             double absPitch = Math.Abs(packet.Pitch);
             double absRoll = Math.Abs(packet.Roll);
 
@@ -374,7 +378,7 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            WriteFormatted(packet.Altitude, 10, "N2", critAlt);
+            WriteFormatted(packet.Altitude, 10, "N2", decSep, critAlt);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" ft ");
@@ -431,7 +435,7 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            WriteFormatted(packet.Velocity, 7, "N1", warnVel);
+            WriteFormatted(packet.Velocity, 7, "N1", decSep, warnVel);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" kts ");
@@ -493,7 +497,7 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            WriteFormatted(packet.Pitch, 7, "+0.00;-0.00; 0.00", critPit || warnPit);
+            WriteFormatted(packet.Pitch, 7, "+0.00;-0.00; 0.00", decSep, critPit || warnPit);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
@@ -524,7 +528,7 @@ namespace AeroCore.GroundStation
             {
                 Console.ForegroundColor = ConsoleColor.White;
             }
-            WriteFormatted(packet.Roll, 7, "+0.00;-0.00; 0.00", critRol || warnRol);
+            WriteFormatted(packet.Roll, 7, "+0.00;-0.00; 0.00", decSep, critRol || warnRol);
             Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.Gray;
             Console.Write(" deg");
@@ -696,7 +700,7 @@ namespace AeroCore.GroundStation
             }
         }
 
-        private void WriteFormatted(double value, int width, ReadOnlySpan<char> format, bool isAlert = false)
+        private void WriteFormatted(double value, int width, ReadOnlySpan<char> format, char decSep, bool isAlert = false)
         {
             // Allocate a buffer large enough for typical numbers + padding.
             // 32 chars is usually enough for double string representation.
@@ -719,7 +723,6 @@ namespace AeroCore.GroundStation
 
                         if (!isAlert)
                         {
-                            char decSep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
                             int dotIndex = valueBuffer.Slice(0, charsWritten).IndexOf(decSep);
                             if (dotIndex >= 0)
                             {
@@ -744,7 +747,6 @@ namespace AeroCore.GroundStation
 
                 if (!isAlert)
                 {
-                    char decSep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
                     int dotIndex = valueBuffer.Slice(0, charsWritten).IndexOf(decSep);
                     if (dotIndex >= 0)
                     {
@@ -765,7 +767,6 @@ namespace AeroCore.GroundStation
                 string fallbackStr = value.ToString(format.ToString());
                 if (!isAlert)
                 {
-                    char decSep = System.Globalization.CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
                     int dotIndex = fallbackStr.IndexOf(decSep);
                     if (dotIndex >= 0)
                     {
