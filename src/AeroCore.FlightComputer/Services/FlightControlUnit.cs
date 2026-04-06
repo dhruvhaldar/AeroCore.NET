@@ -26,10 +26,10 @@ namespace AeroCore.FlightComputer.Services
             new EventId(1, "PitchCorrection"),
             "[CORRECTION] Pitch High: {Pitch:+0.00;-0.00; 0.00} deg. Adjusting Elevators.");
 
-        private static readonly Action<ILogger, double, double, double, Exception?> _logStatus = LoggerMessage.Define<double, double, double>(
+        private static readonly Action<ILogger, double, double, double, double, Exception?> _logStatus = LoggerMessage.Define<double, double, double, double>(
             LogLevel.Information,
             new EventId(2, "StatusUpdate"),
-            "[STATUS] Alt: {Altitude:F1} ft | Vel: {Velocity:F1} kts | Pitch: {Pitch:+0.00;-0.00; 0.00} deg");
+            "[STATUS] Alt: {Altitude:F1} ft | Vel: {Velocity:F1} kts | Pitch: {Pitch:+0.00;-0.00; 0.00} deg | Roll: {Roll:+0.00;-0.00; 0.00} deg");
 
         private static readonly Action<ILogger, string, double, Exception?> _logCommandExecution = LoggerMessage.Define<string, double>(
             LogLevel.Information,
@@ -153,7 +153,7 @@ namespace AeroCore.FlightComputer.Services
                 var now = Environment.TickCount64;
                 if ((now - _lastStatusLog) > 1000)
                 {
-                    _logStatus(_logger, packet.Altitude, packet.Velocity, packet.Pitch, null);
+                    _logStatus(_logger, packet.Altitude, packet.Velocity, packet.Pitch, packet.Roll, null);
                     _lastStatusLog = now;
                 }
             }
