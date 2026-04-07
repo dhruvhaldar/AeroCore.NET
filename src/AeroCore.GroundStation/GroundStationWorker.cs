@@ -169,7 +169,7 @@ namespace AeroCore.GroundStation
             Console.ForegroundColor = ConsoleColor.Cyan;
             Console.Write("⠋");
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            Console.WriteLine("] : Stream Liveness (Rotating = Active, Color matches status)");
+            Console.WriteLine("] : Stream Liveness (Rotating = Active, Uses inverted colors on alerts)");
 
             // Dynamic Label Note
             Console.Write("   ");
@@ -320,8 +320,22 @@ namespace AeroCore.GroundStation
             Console.Write("\r");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[");
-            Console.ForegroundColor = statusColor;
+            if (isCrit)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else if (isWarn)
+            {
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.ForegroundColor = statusColor;
+            }
             Console.Write(_spinnerChars[_spinnerIndex]);
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("] ");
             _spinnerIndex = (_spinnerIndex + 1) % _spinnerChars.Length;
