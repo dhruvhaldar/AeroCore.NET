@@ -184,9 +184,9 @@ namespace AeroCore.Shared.Services
 
                     bufferOffset += consumed;
 
-                    foreach (var packet in packets)
+                    for (int i = 0; i < packets.Count; i++)
                     {
-                        yield return packet;
+                        yield return packets[i];
                     }
 
                     if (requiresDelay)
