@@ -89,3 +89,11 @@
 ## 2026-06-12 - CultureInfo Property Lookup Overhead
 **Learning:** Accessing context-sensitive properties like `CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator[0]` inside helper methods called multiple times per tick in a high-frequency UI loop causes redundant and expensive property evaluations.
 **Action:** Fetch context-sensitive properties locally once per loop tick and pass them down as parameters to helper methods, eliminating redundant lookup overhead.
+
+## 2026-06-12 - Volatile Reads in High-Frequency Loops
+**Learning:** In high-frequency loops (e.g., telemetry stream processing), repeatedly querying volatile thread-safe properties like `CancellationTokenSource.IsCancellationRequested` introduces unnecessary atomic volatile read overhead.
+**Action:** Cache condition checks locally (e.g., via a boolean flag) instead of repeatedly querying volatile properties once the condition is met and handled.
+
+## 2026-06-12 - State Machine Overhead in IAsyncEnumerable
+**Learning:** In high-frequency `async` iterator methods (`IAsyncEnumerable`), using `foreach` over a `List<T>` causes the state machine to store and manage a `List<T>.Enumerator` struct. Replacing it with an index-based `for` loop prevents this struct from being boxed or stored inside the generated async state machine, reducing overhead. Additionally, C# 12.0 does not support `ref struct` types (like `Span<T>`) within `async` iterator methods, making the `for` loop the optimal compatible approach.
+**Action:** To minimize state machine overhead in high-frequency `async` iterator methods, prefer index-based `for` loops over `foreach` when iterating over `List<T>`.

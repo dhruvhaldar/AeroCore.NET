@@ -225,11 +225,13 @@ namespace AeroCore.GroundStation
 
                 try
                 {
+                    bool isSpinnerActive = true;
                     await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
                     {
                         // Cancel the spinner task as soon as the first packet arrives
-                        if (!spinnerCts.IsCancellationRequested)
+                        if (isSpinnerActive && !spinnerCts.IsCancellationRequested)
                         {
+                            isSpinnerActive = false;
                             await spinnerCts.CancelAsync();
                             try { await spinnerTask; } catch (OperationCanceledException) { }
                         }
