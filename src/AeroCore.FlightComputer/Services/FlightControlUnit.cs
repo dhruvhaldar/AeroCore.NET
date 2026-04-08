@@ -82,11 +82,11 @@ namespace AeroCore.FlightComputer.Services
             try
             {
                 // Consuming the async stream from the provider
+                // Optimization: Removed redundant ct.IsCancellationRequested check inside the hot loop.
+                // The IAsyncEnumerable stream inherently handles cancellation efficiently.
                 await foreach (var packet in _telemetry.StreamTelemetryAsync(ct))
                 {
                     AnalyzeAndReact(packet);
-
-                    if (ct.IsCancellationRequested) break;
                 }
             }
             catch (OperationCanceledException)
