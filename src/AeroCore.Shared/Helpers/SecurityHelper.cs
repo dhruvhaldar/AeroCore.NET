@@ -95,6 +95,33 @@ namespace AeroCore.Shared.Helpers
             return true;
         }
 
+        public static string SanitizeForLog(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return string.Empty;
+            if (input.Length > MaxLogLength) return SanitizeForLog(input.AsSpan());
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                char c = input[i];
+                if (c < 128)
+                {
+                    if (c < 32 || c == 127) return SanitizeForLog(input.AsSpan());
+                }
+                else
+                {
+                    var category = char.GetUnicodeCategory(c);
+                    if (category == UnicodeCategory.Control ||
+                        category == UnicodeCategory.Format ||
+                        category == UnicodeCategory.LineSeparator ||
+                        category == UnicodeCategory.ParagraphSeparator)
+                    {
+                        return SanitizeForLog(input.AsSpan());
+                    }
+                }
+            }
+            return input;
+        }
+
         public static string SanitizeForLog(ReadOnlySpan<char> input)
         {
             if (input.IsEmpty)

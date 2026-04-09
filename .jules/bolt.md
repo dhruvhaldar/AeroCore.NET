@@ -97,3 +97,7 @@
 ## 2026-06-12 - State Machine Overhead in IAsyncEnumerable
 **Learning:** In high-frequency `async` iterator methods (`IAsyncEnumerable`), using `foreach` over a `List<T>` causes the state machine to store and manage a `List<T>.Enumerator` struct. Replacing it with an index-based `for` loop prevents this struct from being boxed or stored inside the generated async state machine, reducing overhead. Additionally, C# 12.0 does not support `ref struct` types (like `Span<T>`) within `async` iterator methods, making the `for` loop the optimal compatible approach.
 **Action:** To minimize state machine overhead in high-frequency `async` iterator methods, prefer index-based `for` loops over `foreach` when iterating over `List<T>`.
+
+## 2026-06-12 - Fast Path for String Sanitization
+**Learning:** When creating 'fast paths' in string sanitization methods that accept `ReadOnlySpan<char>` and return a `string`, returning a newly allocated string from the span (e.g. `buffer.ToString()` or `new string(span)`) when no modifications are needed still allocates a new string on the heap, negating the optimization.
+**Action:** Implement an overload that accepts `string` and returns the original unmodified string reference if no modifications are necessary, avoiding the heap allocation entirely.

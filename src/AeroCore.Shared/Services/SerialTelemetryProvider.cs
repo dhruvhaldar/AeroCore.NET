@@ -44,7 +44,7 @@ namespace AeroCore.Shared.Services
                 throw new ArgumentOutOfRangeException(nameof(_baudRate), "Baud rate must be between 1 and 4,000,000.");
             }
 
-            _logger.LogInformation("Initializing Serial Telemetry on {PortName} at {BaudRate} baud.", SecurityHelper.SanitizeForLog(_portName.AsSpan()), _baudRate);
+            _logger.LogInformation("Initializing Serial Telemetry on {PortName} at {BaudRate} baud.", SecurityHelper.SanitizeForLog(_portName), _baudRate);
 
             try
             {
@@ -53,7 +53,7 @@ namespace AeroCore.Shared.Services
                 {
                     // We throw here to be caught by the block below, ensuring we don't proceed with invalid config.
                     // Security: Sanitize the invalid input before logging it in the exception to prevent Log Injection.
-                    string safePortName = SecurityHelper.SanitizeForLog(_portName.AsSpan());
+                    string safePortName = SecurityHelper.SanitizeForLog(_portName);
                     throw new ArgumentException($"Invalid serial port name format: {safePortName}");
                 }
 
