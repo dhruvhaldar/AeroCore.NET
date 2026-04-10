@@ -97,3 +97,7 @@
 ## 2026-06-27 - Asynchronous Loading Spinners in CLI
 **Learning:** Using static loading spinner characters during synchronous wait states (like `await foreach`) makes the application appear broken or frozen because the visual indicator does not animate.
 **Action:** Always animate loading states asynchronously (e.g., via `Task.Run` loops) when waiting for initial stream data to reassure users the application is alive.
+
+## 2026-06-27 - Log Spatial Parameters Together
+**Learning:** To maintain complete operator visibility in telemetry and status logs, all relevant spatial parameters (e.g., Altitude, Velocity, Pitch, and Roll) should be logged together. Fragmenting this context forces operators to correlate multiple log lines, increasing cognitive load and reducing situational awareness.
+**Action:** Ensure all relevant spatial parameters (e.g., Altitude, Velocity, Pitch, and Roll) are logged together in the same status log line.
