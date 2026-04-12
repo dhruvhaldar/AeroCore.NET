@@ -44,18 +44,23 @@ namespace AeroCore.Shared.Services
                 throw new ArgumentOutOfRangeException(nameof(_baudRate), "Baud rate must be between 1 and 4,000,000.");
             }
 
-            _logger.LogInformation("Initializing Serial Telemetry on {PortName} at {BaudRate} baud.", SecurityHelper.SanitizeForLog(_portName), _baudRate);
-
             try
             {
                 // Security: Validate port name to prevent path traversal and command injection risks.
+                // We validate BEFORE logging the formal initialization attempt to avoid logging misleading/unauthorized paths.
                 if (!SecurityHelper.IsValidSerialPortName(_portName))
                 {
                     // We throw here to be caught by the block below, ensuring we don't proceed with invalid config.
                     // Security: Sanitize the invalid input before logging it in the exception to prevent Log Injection.
                     string safePortName = SecurityHelper.SanitizeForLog(_portName);
+
+                    // Security Enhancement: Add explicit audit logging for security events/anomalies.
+                    _logger.LogWarning("SECURITY: Unauthorized serial port configuration attempt rejected: {PortName}", safePortName);
+
                     throw new ArgumentException($"Invalid serial port name format: {safePortName}");
                 }
+
+                _logger.LogInformation("Initializing Serial Telemetry on {PortName} at {BaudRate} baud.", _portName, _baudRate);
 
                 // In a real scenario, we might retry or fail fast.
                 // For now we setup the object but don't open until streaming starts or now.

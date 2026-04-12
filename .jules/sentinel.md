@@ -84,3 +84,8 @@
 **Vulnerability:** C# `record struct` types automatically generate a constructor that assigns fields directly, completely bypassing validation logic placed inside `init` property accessors. This allows attackers to instantiate invalid/malicious objects directly.
 **Learning:** Relying solely on `init` property setters for input validation and security bounds checks in C# models is insufficient to prevent security bypasses during direct object instantiation.
 **Prevention:** When relying on `init` property setters for input validation, ensure that an explicit internal or public constructor is also defined to enforce the exact same validation rules.
+
+## 2026-06-26 - Formal Acknowledgment of Unauthorized Paths
+**Vulnerability:** The application logged "Initializing Serial Telemetry..." with the user-provided path *before* validating if the path was authorized or safe. While the path was sanitized of control characters, this allowed an attacker to pollute standard logs with formal initialization messages for sensitive paths (e.g. `/dev/sda`).
+**Learning:** Logging the initiation of a service on an untrusted input before validating it creates misleading audit trails and violates the "Validate before Processing" principle.
+**Prevention:** Always validate external resource identifiers (e.g. file paths, serial port names) *before* logging their standard initialization. Log validation failures as explicit security anomalies (e.g. `LogWarning("SECURITY: Unauthorized...")`).
