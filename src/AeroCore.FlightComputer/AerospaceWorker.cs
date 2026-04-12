@@ -30,6 +30,7 @@ namespace AeroCore.FlightComputer
             // Yield to allow host startup logs to complete before drawing the banner
             await Task.Delay(100, stoppingToken);
 
+            System.Console.Title = "AeroCore Flight Computer v1.0";
             System.Console.WriteLine();
             System.Console.ForegroundColor = System.ConsoleColor.Cyan;
             System.Console.WriteLine("════════════════════════════════════════════════════════════");
