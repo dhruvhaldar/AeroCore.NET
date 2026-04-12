@@ -35,12 +35,12 @@ namespace AeroCore.Tests
             await provider.InitializeAsync(CancellationToken.None);
 
             // Assert
-            // We verify that the LogInformation call contained the SANITIZED string ("COM1_INJECTED_LOG")
+            // We verify that the LogWarning call (audit log) contained the SANITIZED string ("COM1_INJECTED_LOG")
             // and NOT the original newline ("\n").
 
             mockLogger.Verify(
                 x => x.Log(
-                    LogLevel.Information,
+                    LogLevel.Warning,
                     It.IsAny<EventId>(),
                     It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("COM1_INJECTED_LOG") && !v.ToString()!.Contains('\n')),
                     It.IsAny<Exception?>(),
