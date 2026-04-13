@@ -101,3 +101,7 @@
 ## 2026-06-27 - Log Spatial Parameters Together
 **Learning:** To maintain complete operator visibility in telemetry and status logs, all relevant spatial parameters (e.g., Altitude, Velocity, Pitch, and Roll) should be logged together. Fragmenting this context forces operators to correlate multiple log lines, increasing cognitive load and reducing situational awareness.
 **Action:** Ensure all relevant spatial parameters (e.g., Altitude, Velocity, Pitch, and Roll) are logged together in the same status log line.
+
+## 2024-05-25 - Cohesive Alert Blocks in CLI
+**Learning:** In dense console telemetry dashboards, when applying high-contrast styling (e.g., inverted colors) to alert values, leaving the associated label (like 'ALT' or 'VEL') in its normal style creates a fragmented visual experience. The user's eye has to connect the highlighted value back to the unhighlighted label.
+**Action:** Use inverted color blocks (e.g., White text on Red background for CRITICAL, Black text on Yellow background for WARNING) for both parameter values *and* their corresponding labels when thresholds are exceeded. This creates a cohesive, unmissable visual block that fulfills the user's expectation of how an "alert" should look.
