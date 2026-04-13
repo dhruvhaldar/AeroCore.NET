@@ -381,8 +381,17 @@ namespace AeroCore.GroundStation
             Console.Write(" | ");
 
             // Altitude
-            Console.ForegroundColor = critAlt ? ConsoleColor.Red : ConsoleColor.Cyan;
+            if (critAlt)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+            }
             Console.Write("ALT");
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
             if (critAlt)
@@ -438,8 +447,17 @@ namespace AeroCore.GroundStation
             Console.Write(" | ");
 
             // Velocity
-            Console.ForegroundColor = warnVel ? ConsoleColor.Yellow : ConsoleColor.Cyan;
+            if (warnVel)
+            {
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+            }
             Console.Write("VEL");
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
             if (warnVel)
@@ -495,8 +513,22 @@ namespace AeroCore.GroundStation
             Console.Write(" | ");
 
             // Pitch
-            Console.ForegroundColor = critPit ? ConsoleColor.Red : (warnPit ? ConsoleColor.Yellow : ConsoleColor.Cyan);
+            if (critPit)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else if (warnPit)
+            {
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+            }
             Console.Write("PIT");
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
             if (critPit)
@@ -526,8 +558,22 @@ namespace AeroCore.GroundStation
             Console.Write("] | ");
 
             // Roll
-            Console.ForegroundColor = critRol ? ConsoleColor.Red : (warnRol ? ConsoleColor.Yellow : ConsoleColor.Cyan);
+            if (critRol)
+            {
+                Console.BackgroundColor = ConsoleColor.Red;
+                Console.ForegroundColor = ConsoleColor.White;
+            }
+            else if (warnRol)
+            {
+                Console.BackgroundColor = ConsoleColor.Yellow;
+                Console.ForegroundColor = ConsoleColor.Black;
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+            }
             Console.Write("ROL");
+            Console.ResetColor();
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write(": ");
             if (critRol)
