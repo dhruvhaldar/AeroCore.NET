@@ -391,8 +391,11 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.Cyan;
             }
             Console.Write("ALT");
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            if (!critAlt)
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            }
             Console.Write(": ");
             if (critAlt)
             {
@@ -404,9 +407,13 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.White;
             }
             WriteFormatted(packet.Altitude, 10, "N2", decSep, critAlt);
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            if (!critAlt)
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
             Console.Write(" ft ");
+            Console.ResetColor();
 
             if (_lastAltitude.HasValue)
             {
@@ -457,8 +464,11 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.Cyan;
             }
             Console.Write("VEL");
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            if (!warnVel)
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            }
             Console.Write(": ");
             if (warnVel)
             {
@@ -470,9 +480,13 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.White;
             }
             WriteFormatted(packet.Velocity, 7, "N1", decSep, warnVel);
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            if (!warnVel)
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
             Console.Write(" kts ");
+            Console.ResetColor();
 
             if (_lastVelocity.HasValue)
             {
@@ -528,8 +542,11 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.Cyan;
             }
             Console.Write("PIT");
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            if (!critPit && !warnPit)
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            }
             Console.Write(": ");
             if (critPit)
             {
@@ -546,9 +563,13 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.White;
             }
             WriteFormatted(packet.Pitch, 7, "+0.00;-0.00; 0.00", decSep, critPit || warnPit);
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            if (!critPit && !warnPit)
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
             Console.Write(" deg");
+            Console.ResetColor();
 
             // Pitch Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
@@ -573,8 +594,11 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.Cyan;
             }
             Console.Write("ROL");
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.DarkGray;
+            if (!critRol && !warnRol)
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.DarkGray;
+            }
             Console.Write(": ");
             if (critRol)
             {
@@ -591,9 +615,13 @@ namespace AeroCore.GroundStation
                 Console.ForegroundColor = ConsoleColor.White;
             }
             WriteFormatted(packet.Roll, 7, "+0.00;-0.00; 0.00", decSep, critRol || warnRol);
-            Console.ResetColor();
-            Console.ForegroundColor = ConsoleColor.Gray;
+            if (!critRol && !warnRol)
+            {
+                Console.ResetColor();
+                Console.ForegroundColor = ConsoleColor.Gray;
+            }
             Console.Write(" deg");
+            Console.ResetColor();
 
             // Roll Visual
             Console.ForegroundColor = ConsoleColor.DarkGray;
