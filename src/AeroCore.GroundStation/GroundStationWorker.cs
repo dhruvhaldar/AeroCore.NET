@@ -98,8 +98,11 @@ namespace AeroCore.GroundStation
             Console.Write("   ");
             Console.ForegroundColor = ConsoleColor.DarkGray;
             Console.Write("[");
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.Write("◄■■+■");
+            Console.Write("   ");
+            Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write("+");
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.Write(" ");
             Console.ForegroundColor = ConsoleColor.White;
             Console.Write("|");
             Console.ForegroundColor = ConsoleColor.Green;
