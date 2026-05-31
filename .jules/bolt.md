@@ -101,3 +101,11 @@
 ## 2026-06-12 - Fast Path for String Sanitization
 **Learning:** When creating 'fast paths' in string sanitization methods that accept `ReadOnlySpan<char>` and return a `string`, returning a newly allocated string from the span (e.g. `buffer.ToString()` or `new string(span)`) when no modifications are needed still allocates a new string on the heap, negating the optimization.
 **Action:** Implement an overload that accepts `string` and returns the original unmodified string reference if no modifications are necessary, avoiding the heap allocation entirely.
+
+## 2026-05-31 - format.ToString() Allocation Avoidance
+**Learning:** In C#, `ReadOnlySpan<char>` variables do not have an implicit cast to `string`, so calling `ToString()` on them to pass to string-typed parameters (like `double.ToString(string format)`) introduces O(N) heap allocation overhead. In high-frequency UI update paths (like `GroundStationWorker`), this adds up.
+**Action:** When a method parameter receives a short literal string format but declares it as `ReadOnlySpan<char>`, if that format is ultimately passed to a method requiring a `string` (like `double.ToString()`), change the parameter type to `string` to allow zero-allocation string passing while still supporting span-compatible formatting methods like `TryFormat`.
+
+## 2026-05-31 - Console I/O Splitting
+**Learning:** In high-frequency UI updates like `GroundStationWorker.PrintTelemetry`, writing formatted strings to the console using multiple `Console.Out.Write` calls to apply different colors drastically increases system call overhead and lock contention. When the UI state implies a uniform color (e.g., during Warning/Critical alerts where dimming is disabled), splitting the output is purely wasteful.
+**Action:** Add a fast-path that checks the state and writes the entire `Span<char>` or `string` using a single `Console.Out.Write` call when color transitions within the string are unnecessary. This saves console I/O syscalls and bypasses substring allocations.

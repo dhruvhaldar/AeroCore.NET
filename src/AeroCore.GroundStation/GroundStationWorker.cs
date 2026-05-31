@@ -356,27 +356,33 @@ namespace AeroCore.GroundStation
 
             if (packet.Timestamp.TryFormat(tsBuffer, out int tsWritten, "HH:mm:ss.fff"))
             {
-                // "HH:mm:ss" is exactly 8 characters
-                Console.Out.Write(tsBuffer.Slice(0, 8));
-
-                if (!isWarn && !isCrit)
+                if (isWarn || isCrit)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    // Optimization: Fast path for alerts, avoid split syscalls
+                    Console.Out.Write(tsBuffer.Slice(0, tsWritten));
                 }
-
-                Console.Out.Write(tsBuffer.Slice(8, tsWritten - 8));
+                else
+                {
+                    // "HH:mm:ss" is exactly 8 characters
+                    Console.Out.Write(tsBuffer.Slice(0, 8));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Out.Write(tsBuffer.Slice(8, tsWritten - 8));
+                }
             }
             else
             {
                 string tsStr = packet.Timestamp.ToString("HH:mm:ss.fff");
-                Console.Out.Write(tsStr.Substring(0, 8));
-
-                if (!isWarn && !isCrit)
+                if (isWarn || isCrit)
                 {
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    // Optimization: Fast path for alerts, avoid substring allocations
+                    Console.Out.Write(tsStr);
                 }
-
-                Console.Out.Write(tsStr.Substring(8));
+                else
+                {
+                    Console.Out.Write(tsStr.Substring(0, 8));
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    Console.Out.Write(tsStr.Substring(8));
+                }
             }
 
             // Timestamp Suffix
@@ -793,7 +799,7 @@ namespace AeroCore.GroundStation
             }
         }
 
-        private void WriteFormatted(double value, int width, ReadOnlySpan<char> format, char decSep, bool isAlert = false)
+        private void WriteFormatted(double value, int width, string format, char decSep, bool isAlert = false)
         {
             // Allocate a buffer large enough for typical numbers + padding.
             // 32 chars is usually enough for double string representation.
@@ -857,7 +863,7 @@ namespace AeroCore.GroundStation
             else
             {
                 // Fallback
-                string fallbackStr = value.ToString(format.ToString());
+                string fallbackStr = value.ToString(format);
                 if (!isAlert)
                 {
                     int dotIndex = fallbackStr.IndexOf(decSep);
