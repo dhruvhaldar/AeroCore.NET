@@ -86,7 +86,16 @@ namespace AeroCore.FlightComputer.Services
                 // The IAsyncEnumerable stream inherently handles cancellation efficiently.
                 await foreach (var packet in _telemetry.StreamTelemetryAsync(ct))
                 {
-                    AnalyzeAndReact(packet);
+                    try
+                    {
+                        AnalyzeAndReact(packet);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Security Enhancement: Fail securely and maintain availability.
+                        // Prevent a single malformed packet or transient error from crashing the main control loop.
+                        _logger.LogError(ex, "FCU: Error analyzing telemetry packet.");
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -112,14 +121,31 @@ namespace AeroCore.FlightComputer.Services
             {
                 await foreach (var cmd in _commandChannel.Reader.ReadAllAsync(ct))
                 {
-                    // Simulate execution time (actuator delay) and prevent log flooding
-                    await Task.Delay(50, ct);
-                    _logCommandExecution(_logger, cmd.ActuatorId, cmd.Value, null);
+                    try
+                    {
+                        // Simulate execution time (actuator delay) and prevent log flooding
+                        await Task.Delay(50, ct);
+                        _logCommandExecution(_logger, cmd.ActuatorId, cmd.Value, null);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw; // Let outer catch handle cancellation
+                    }
+                    catch (Exception ex)
+                    {
+                        // Security Enhancement: Fail securely and maintain availability.
+                        // Prevent a single malformed command or transient logging failure from killing the entire command processor loop.
+                        _logger.LogError(ex, "FCU: Failed to process command for actuator {ActuatorId}.", cmd.ActuatorId);
+                    }
                 }
             }
             catch (OperationCanceledException)
             {
                 // Expected on shutdown
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "FCU: CRITICAL FAILURE in Command Processor.");
             }
             _logger.LogInformation("FCU: Command Processor Stopped.");
         }
