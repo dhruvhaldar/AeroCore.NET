@@ -231,24 +231,37 @@ namespace AeroCore.GroundStation
                     bool isSpinnerActive = true;
                     await foreach (var packet in _telemetryProvider.StreamTelemetryAsync(stoppingToken))
                     {
-                        // Cancel the spinner task as soon as the first packet arrives
-                        if (isSpinnerActive && !spinnerCts.IsCancellationRequested)
+                        try
                         {
-                            isSpinnerActive = false;
-                            await spinnerCts.CancelAsync();
-                            try { await spinnerTask; } catch (OperationCanceledException) { }
+                            // Cancel the spinner task as soon as the first packet arrives
+                            if (isSpinnerActive && !spinnerCts.IsCancellationRequested)
+                            {
+                                isSpinnerActive = false;
+                                await spinnerCts.CancelAsync();
+                                try { await spinnerTask; } catch (OperationCanceledException) { }
+                            }
+                            // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
+                            // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
+                            // while still providing a smooth visual update for the user.
+                            // Use Environment.TickCount64 instead of DateTime.UtcNow to accurately measure wall-clock time
+                            // while avoiding expensive system calls in the per-packet hot loop.
+                            var now = Environment.TickCount64;
+                            if ((now - _lastUiUpdate) >= 50)
+                            {
+                                // Visualize the data
+                                PrintTelemetry(packet);
+                                _lastUiUpdate = now;
+                            }
                         }
-                        // Optimization: Throttle UI updates to ~20 FPS (50ms) to prevent Console I/O from blocking the telemetry stream.
-                        // This ensures we process incoming packets as fast as possible to avoid serial buffer overflow,
-                        // while still providing a smooth visual update for the user.
-                        // Use Environment.TickCount64 instead of DateTime.UtcNow to accurately measure wall-clock time
-                        // while avoiding expensive system calls in the per-packet hot loop.
-                        var now = Environment.TickCount64;
-                        if ((now - _lastUiUpdate) >= 50)
+                        catch (OperationCanceledException)
                         {
-                            // Visualize the data
-                            PrintTelemetry(packet);
-                            _lastUiUpdate = now;
+                            throw;
+                        }
+                        catch (Exception ex)
+                        {
+                            // Security Enhancement: Fail securely and maintain availability.
+                            // Prevent a single malformed packet or transient error from crashing the UI update loop.
+                            _logger.LogError(ex, "Ground Station: Error rendering telemetry packet.");
                         }
                     }
                 }
