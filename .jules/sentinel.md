@@ -6,3 +6,8 @@
 **Vulnerability:** Unbounded `_logger.LogError` calls inside high-frequency `await foreach` stream processing loops in `FlightControlUnit.cs`.
 **Learning:** Continuous transient failures or malformed data streams could trigger continuous exception logging, rapidly exhausting disk space and CPU resources, leading to a Denial of Service.
 **Prevention:** Implement time-based rate limiting (e.g., via `Environment.TickCount64`) for error logs in hot loops, mirroring existing status logging patterns.
+
+## 2026-06-14 - [Prevent Ground Station Log Flooding DoS]
+**Vulnerability:** Unbounded `_logger.LogError` calls inside the high-frequency `await foreach` stream processing loop in `GroundStationWorker.cs`.
+**Learning:** Just like the `FlightControlUnit`, the `GroundStationWorker` consumes the telemetry stream in a fast loop. Unrestricted error logging on transient rendering failures can exhaust disk space and CPU.
+**Prevention:** Apply the same time-based rate limiting (e.g., via `Environment.TickCount64`) for error logs in all stream consumption loops, not just the core processing unit.

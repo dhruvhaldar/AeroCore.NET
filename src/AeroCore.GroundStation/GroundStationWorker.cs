@@ -22,6 +22,9 @@ namespace AeroCore.GroundStation
         private long _lastUiUpdate = 0;
         private int _lastStatusFlags = -1;
 
+        // Rate limiter for error logs to prevent DoS via log flooding
+        private long _lastErrorLog = 0;
+
         public GroundStationWorker(ITelemetryProvider telemetryProvider, ILogger<GroundStationWorker> logger)
         {
             _telemetryProvider = telemetryProvider;
@@ -261,7 +264,12 @@ namespace AeroCore.GroundStation
                         {
                             // Security Enhancement: Fail securely and maintain availability.
                             // Prevent a single malformed packet or transient error from crashing the UI update loop.
-                            _logger.LogError(ex, "Ground Station: Error rendering telemetry packet.");
+                            var now = Environment.TickCount64;
+                            if ((now - _lastErrorLog) > 1000)
+                            {
+                                _logger.LogError(ex, "Ground Station: Error rendering telemetry packet.");
+                                _lastErrorLog = now;
+                            }
                         }
                     }
                 }
