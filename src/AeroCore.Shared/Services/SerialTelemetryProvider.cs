@@ -153,7 +153,12 @@ namespace AeroCore.Shared.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error reading from stream.");
+                    var nowError = Environment.TickCount64;
+                    if ((nowError - _lastErrorLog) >= 1000)
+                    {
+                        _logger.LogError(ex, "Error reading from stream.");
+                        _lastErrorLog = nowError;
+                    }
                     await Task.Delay(1000, ct);
                     linePos = 0;
                     continue;

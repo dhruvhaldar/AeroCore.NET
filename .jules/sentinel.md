@@ -11,3 +11,8 @@
 **Vulnerability:** Unbounded `_logger.LogError` calls inside the high-frequency `await foreach` stream processing loop in `GroundStationWorker.cs`.
 **Learning:** Just like the `FlightControlUnit`, the `GroundStationWorker` consumes the telemetry stream in a fast loop. Unrestricted error logging on transient rendering failures can exhaust disk space and CPU.
 **Prevention:** Apply the same time-based rate limiting (e.g., via `Environment.TickCount64`) for error logs in all stream consumption loops, not just the core processing unit.
+
+## 2025-02-23 - [Prevent Serial Telemetry Provider Log Flooding DoS]
+**Vulnerability:** Unbounded `_logger.LogError` calls inside the high-frequency `stream.ReadAsync` catch block in `SerialTelemetryProvider.cs`.
+**Learning:** Even when reading from the underlying stream directly (instead of processing streams with `await foreach`), continuous transient hardware failures or stream read errors can trigger continuous exception logging, rapidly exhausting disk space and CPU resources, leading to a Denial of Service.
+**Prevention:** Apply the time-based rate limiting (e.g., via `Environment.TickCount64`) for error logs in any continuous data reading loop, such as stream read loops.
