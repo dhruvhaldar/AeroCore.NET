@@ -16,3 +16,8 @@
 **Vulnerability:** Unbounded `_logger.LogError` calls inside the high-frequency `stream.ReadAsync` catch block in `SerialTelemetryProvider.cs`.
 **Learning:** Even when reading from the underlying stream directly (instead of processing streams with `await foreach`), continuous transient hardware failures or stream read errors can trigger continuous exception logging, rapidly exhausting disk space and CPU resources, leading to a Denial of Service.
 **Prevention:** Apply the time-based rate limiting (e.g., via `Environment.TickCount64`) for error logs in any continuous data reading loop, such as stream read loops.
+
+## 2025-02-23 - Prevent Audit Log Evasion via Shared State Concurrency
+**Vulnerability:** A single shared `_lastErrorLog` variable was used to rate-limit error logs across two distinct, concurrent tasks (`ProcessLoopAsync` for telemetry and `ProcessCommandsAsync` for commands) in `FlightControlUnit.cs`.
+**Learning:** In a multi-threaded or concurrent async environment, sharing a single rate-limiting state variable allows a flood of errors in one system (e.g. malformed telemetry inputs) to continuously update the timestamp, thereby silently suppressing critical error logs from the other system (e.g. actuator command failures). An attacker could exploit this to mask malicious activity or hardware failure.
+**Prevention:** Always maintain independent, isolated state variables for rate-limiting operations in distinct concurrent tasks, ensuring that one noisy process cannot suppress the audit trail of another.

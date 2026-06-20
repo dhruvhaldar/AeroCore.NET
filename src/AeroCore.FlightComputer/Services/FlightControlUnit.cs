@@ -20,7 +20,8 @@ namespace AeroCore.FlightComputer.Services
         // Rate limiters for logging to prevent DoS via log flooding
         private long _lastStatusLog = 0;
         private long _lastCorrectionLog = 0;
-        private long _lastErrorLog = 0;
+        private long _lastTelemetryErrorLog = 0;
+        private long _lastCommandErrorLog = 0;
 
         private static readonly Action<ILogger, double, Exception?> _logPitchCorrection = LoggerMessage.Define<double>(
             LogLevel.Warning,
@@ -96,10 +97,10 @@ namespace AeroCore.FlightComputer.Services
                         // Security Enhancement: Fail securely and maintain availability.
                         // Prevent a single malformed packet or transient error from crashing the main control loop.
                         var now = Environment.TickCount64;
-                        if ((now - _lastErrorLog) > 1000)
+                        if ((now - _lastTelemetryErrorLog) > 1000)
                         {
                             _logger.LogError(ex, "FCU: Error analyzing telemetry packet.");
-                            _lastErrorLog = now;
+                            _lastTelemetryErrorLog = now;
                         }
                     }
                 }
@@ -142,10 +143,10 @@ namespace AeroCore.FlightComputer.Services
                         // Security Enhancement: Fail securely and maintain availability.
                         // Prevent a single malformed command or transient logging failure from killing the entire command processor loop.
                         var now = Environment.TickCount64;
-                        if ((now - _lastErrorLog) > 1000)
+                        if ((now - _lastCommandErrorLog) > 1000)
                         {
                             _logger.LogError(ex, "FCU: Failed to process command for actuator {ActuatorId}.", cmd.ActuatorId);
-                            _lastErrorLog = now;
+                            _lastCommandErrorLog = now;
                         }
                     }
                 }
