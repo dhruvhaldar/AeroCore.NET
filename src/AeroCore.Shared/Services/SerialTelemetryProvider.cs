@@ -23,7 +23,9 @@ namespace AeroCore.Shared.Services
         private int _baudRate;
 
         // Rate limiter for error logs to prevent DoS via log flooding
-        private long _lastErrorLog = 0;
+        private long _lastStreamErrorLog = 0;
+        private long _lastLengthErrorLog = 0;
+        private long _lastParseErrorLog = 0;
 
         public SerialTelemetryProvider(ILogger<SerialTelemetryProvider> logger, IConfiguration config)
         {
@@ -154,10 +156,10 @@ namespace AeroCore.Shared.Services
                 catch (Exception ex)
                 {
                     var nowError = Environment.TickCount64;
-                    if ((nowError - _lastErrorLog) >= 1000)
+                    if ((nowError - _lastStreamErrorLog) >= 1000)
                     {
                         _logger.LogError(ex, "Error reading from stream.");
-                        _lastErrorLog = nowError;
+                        _lastStreamErrorLog = nowError;
                     }
                     await Task.Delay(1000, ct);
                     linePos = 0;
@@ -274,10 +276,10 @@ namespace AeroCore.Shared.Services
                     if (totalLineBytes + lengthToCopy > lineBuffer.Length)
                     {
                         var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
-                        if ((now - _lastErrorLog) >= 1000)
+                        if ((now - _lastLengthErrorLog) >= 1000)
                         {
                             _logger.LogWarning("Telemetry line exceeded length limit of {Limit}. Resetting.", lineBuffer.Length);
-                            _lastErrorLog = now;
+                            _lastLengthErrorLog = now;
                         }
 
                         // Enter discarding state to ignore the rest of this overly long line
@@ -306,10 +308,10 @@ namespace AeroCore.Shared.Services
                     if (totalLineBytes + idx + 1 > lineBuffer.Length)
                     {
                         var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
-                        if ((now - _lastErrorLog) >= 1000)
+                        if ((now - _lastLengthErrorLog) >= 1000)
                         {
                             _logger.LogWarning("Telemetry line exceeded length limit of {Limit}. Resetting.", lineBuffer.Length);
-                            _lastErrorLog = now;
+                            _lastLengthErrorLog = now;
                         }
 
                         // We found the end of the line, so we discard only this line.
@@ -377,10 +379,10 @@ namespace AeroCore.Shared.Services
 
                                 // Security: Do not log raw content to prevent sensitive data leakage and DoS.
                                 var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
-                                if ((now - _lastErrorLog) >= 1000)
+                                if ((now - _lastParseErrorLog) >= 1000)
                                 {
                                     _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", idx);
-                                    _lastErrorLog = now;
+                                    _lastParseErrorLog = now;
                                 }
                                 requiresDelay = true;
                                 linePos = 0;
@@ -420,10 +422,10 @@ namespace AeroCore.Shared.Services
                             {
                                 // Security: Do not log raw content to prevent sensitive data leakage and DoS.
                                 var now = wallClockTicks; // Optimization: Use pre-captured timestamp to avoid syscall
-                                if ((now - _lastErrorLog) >= 1000)
+                                if ((now - _lastParseErrorLog) >= 1000)
                                 {
                                     _logger.LogWarning("Failed to parse telemetry line. (Length: {Length})", linePos);
-                                    _lastErrorLog = now;
+                                    _lastParseErrorLog = now;
                                 }
                                 requiresDelay = true;
                                 linePos = 0;
